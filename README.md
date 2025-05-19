@@ -1,35 +1,41 @@
-# sv
-
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
-
-## Creating a project
-
-If you're seeing this, you've probably already done this step. Congrats!
-
-```bash
-  # create a new project in the current directory
-  bun x sv create
-
-  # create a new project in my-app
-  bun x sv create my-app
-```
+# frontend
 
 ## Developing
 
-Once you've created a project and installed dependencies with `bun install`, start a development server:
+Once you've checked out the project and installed dependencies with `bun install`, start a development server:
 
 ```bash
-  bun --bun run dev
+bun --bun run dev
 ```
 
-## Building
+## Project Structure
 
-To create a production version of your app:
+The project follows a typical SvelteKit structure with the following main directories and files:
 
-```bash
-  bun run build
-```
+### Root Directory
+- `/src` - Main source code directory
+- `/static` - Static assets directory
+- `/messages` - Internationalization message files
+- `/.svelte-kit` - SvelteKit build output (generated)
 
-You can preview the production build with `bun run preview`.
+### Source Code (`/src`)
+- `/routes` - Application routes and pages
+- `/lib` - Shared library code
+    - `/components` - Reusable UI components from [shadcn-svelte@next](https://next.shadcn-svelte.com/)
+    - `/hooks` - Custom hooks
+    - `/icons` - Custom Icon files (default icons should be used from [Lucide](https://lucide.dev/icons/))
+    - `/server` - Server-side code
+- `app.css` - Global CSS styles
+- `app.html` - HTML template
+- `hooks.ts` - Client-side hooks
+- `hooks.server.ts` - Server-side hooks
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+### Configuration Files
+- `svelte.config.js` - SvelteKit configuration
+- `vite.config.ts` - Vite bundler configuration
+- `tsconfig.json` - TypeScript configuration
+- `package.json` - Project dependencies and scripts
+- `components.json` - Shadcn-Svelte UI components configuration
+
+### Other Files
+- `.gitignore` - Git ignore rules
