@@ -2,6 +2,8 @@
 
 ## Developing
 
+This project uses [Bun](https://bun.sh/) as its JavaScript runtime.
+
 Once you've checked out the project and installed dependencies with `bun install`, start a development server:
 
 ```bash
