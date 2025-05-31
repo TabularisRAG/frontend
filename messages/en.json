@@ -12,5 +12,8 @@
 	"groups": "Groups",
 	"profile": "Profile",
 	"settigs": "Settings",
-	"logout": "Log Out"
+	"logout": "Log Out",
+  "chat_history": "History",
+  "enter_prompt": "Ask a question ...",
+  "new_chat": "New Chat"
 }
