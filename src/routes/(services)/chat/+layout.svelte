@@ -7,13 +7,6 @@
 
 
   let { data, children } = $props();
-  const chats: any[] = [
-      {
-      title: "Home",
-      url: "#",
-      icon: CirclePlus,
-    },
-  ];
   let open = $state(true);
 </script>
 
@@ -60,7 +53,7 @@
           <Sidebar.GroupContent>
             <Sidebar.Menu class="flex flex-col">
               {#if open}
-                {#each chats as chat (chat.title)}
+                {#each data.chat_list as chat (chat.name)}
                   <Sidebar.MenuItem>
                     <Sidebar.MenuButton>
                       {#snippet child({ props })}
@@ -69,7 +62,7 @@
                           {...props}
                           class="block w-full px-4 py-2 text-sm hover:bg-gray-100 rounded"
                         >
-                          <span>{chat.title}</span>
+                          <span>{chat.name}</span>
                         </a>
                       {/snippet}
                     </Sidebar.MenuButton>
