@@ -9,6 +9,8 @@ export type ChatMessageType =
 | "ai"
 | "human";
 
+export type Message = { type: string; value: string; modelId?: string };
+
 export interface ChatMessageResponse {
   model_id?: string;
   value?: string;
@@ -28,3 +30,5 @@ export interface ChatMessageRequest {
   model_id?: string;
   stop: boolean;
 }
+
+

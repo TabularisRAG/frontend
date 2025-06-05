@@ -16,7 +16,8 @@ export const load: LayoutServerLoad = async ({ fetch }) => {
       chat_list: list.map((c) => ({
         session_id: c.session_id,
         name: c.name || "no name",
-        last_at: c.last_message_at
+        last_at: c.last_message_at,
+        url: `/chat/${c.session_id}`
       }))
     };
   } catch (e) {

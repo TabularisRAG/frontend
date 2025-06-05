@@ -47,6 +47,7 @@
 		"@node-rs/argon2": "^2.0.2",
 		"@oslojs/crypto": "^1.0.1",
 		"@oslojs/encoding": "^1.1.0",
-		"mode-watcher": "^1.0.7"
+		"mode-watcher": "^1.0.7",
+		"svelte-loading-animation": "^0.0.1"
 	}
 }
