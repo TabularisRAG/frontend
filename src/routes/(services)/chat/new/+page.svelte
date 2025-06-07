@@ -4,7 +4,7 @@
   import Send from "@lucide/svelte/icons/send-horizontal";
   import * as Card from "$lib/components/ui/card/index.js";
   import {m} from '$lib/paraglide/messages.js';
-  import { goto } from "$app/navigation";
+  import { goto, invalidate } from "$app/navigation";
   import type { Message } from "$lib/types/chat.js";
   
 
@@ -27,6 +27,7 @@
     const chat_id = data.session_id;
 
     sessionStorage.setItem("initialMessage", JSON.stringify(message));
+    await invalidate('sidebar:chatlist');
     goto(`/chat/${chat_id}`);
   }
 

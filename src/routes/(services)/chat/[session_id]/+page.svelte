@@ -10,14 +10,22 @@
   import type { ChatMessageRequest, Message } from "$lib/types/chat.js";
   import { page } from "$app/state";
   import { LoadEllipsis } from 'svelte-loading-animation';
+  import { invalidateAll } from '$app/navigation';
 
-  let scroll_container: HTMLElement | null;
+  let scroll_container: HTMLElement | null = $state(null);
   let {data} = $props();
+
+  $effect(() => {
+    if (data.messages) {
+      messages.set(data.messages);
+    }
+  });
 
   let user_input: Message = $state({
     type: 'human',
     value: '',
   });
+
   let model_id = "gpt-4-mini";
   const messages: Writable<Message[]> = writable(data.messages ?? []);
   let current_receiving_message: Message | null = $state(null);
@@ -30,28 +38,26 @@
   }
 
   onMount(() => {
-    let message = sessionStorage.getItem("initialMessage") ?? "";
-    if(message.trim() === ""){
-      return
-    }
-
-    let first_message: Message = JSON.parse(message);
-    sessionStorage.removeItem("initialMessage"); 
-
-    messages.update((msgs) => [...msgs, first_message]);
-    scrollToBottom();
     const wsUrl = `ws://localhost:8000/api/chats/${page.data.sessionId}/ws`;
     socket = new WebSocket(wsUrl);
+    scrollToBottom();
+    let message = sessionStorage.getItem("initialMessage") ?? "";
+    if(message.trim() !== ""){
+      let first_message: Message = JSON.parse(message);
+      sessionStorage.removeItem("initialMessage"); 
 
-    let chat_message_request: ChatMessageRequest = {
-      model_id: "gpt-4o-mini",
-      message: message,
-      stop: false,
-    }
-      
+      messages.update((msgs) => [...msgs, first_message]);
 
-    socket.onopen = () => {
-      socket!.send(JSON.stringify(chat_message_request));
+      let chat_message_request: ChatMessageRequest = {
+        model_id: "gpt-4o-mini",
+        message: message,
+        stop: false,
+      }
+
+
+      socket.onopen = () => {
+        socket!.send(JSON.stringify(chat_message_request));
+      }
     }
 
     socket.onmessage = (event) => {
@@ -75,7 +81,7 @@
     };
   });
 
-  function sendMessage() {
+  function sendMessage(event: Event) {
     event?.preventDefault();
     if (!user_input.value.trim()) return;
     const new_message =  {...user_input };;
@@ -86,6 +92,7 @@
       model_id: model_id,
       stop: false,
     };
+    console.log(payload);
     socket.send(JSON.stringify(payload));
     user_input.value = "";
   }
@@ -111,13 +118,14 @@
   });
 </script>
 
+{#key page.params.session_id}
 <div class="flex sticky flex-grow justify-center max-h-[calc(100vh-54px)]">
  <div bind:this={scroll_container} class="h-full w-5/6 rounded-md mt-2 overflow-y-auto">
     {#each $messages as message}
       <div class="flex {message.type === 'human' ? 'justify-end' : 'justify-start'} pb-2">
-        <Card.Root class="w-11/12 {message.type === 'human' ? 'bg-gray-100' : ''}">
+        <Card.Root class={message.type === 'human' ? 'w-11/12 bg-gray-100 dark:bg-gray-700 dark:text-white' : 'w-full dark:bg-gray-950 dark:border-gray-700'}>
           <Card.Content class="max-h-fit">
-            <p class="text-gray-800">{message.value}</p>
+            <p>{message.value}</p>
           </Card.Content>
         </Card.Root>
       </div>
@@ -148,3 +156,4 @@
     </Card.Footer>
   </Card.Root>
 </div>
+{/key}

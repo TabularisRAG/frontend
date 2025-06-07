@@ -5,8 +5,9 @@
   import CustomSidebarTrigger from "$lib/components/ui/custom_sidebar_trigger.svelte";
   import {m} from '$lib/paraglide/messages.js';
 
-
   let { data, children } = $props();
+
+  console.log(data.chat_list);
   let open = $state(true);
 </script>
 
@@ -58,7 +59,7 @@
                     <Sidebar.MenuButton>
                       {#snippet child({ props })}
                         <a
-                          href=chat.url}
+                          href={chat.url}
                           {...props}
                           class="block w-full px-4 py-2 text-sm hover:bg-gray-100 rounded"
                         >
