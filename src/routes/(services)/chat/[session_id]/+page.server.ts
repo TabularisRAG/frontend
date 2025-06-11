@@ -22,19 +22,19 @@ export const load: PageServerLoad = async ({ params, fetch, depends }) => {
     }));
 
     return {
-      sessionId: data.session_id ?? sessionId,
-      chatName: data.name ?? 'no name',
-      startedAt: data.started_at,       
-      lastMessageAt: data.last_message_at,
+      session_id: data.session_id ?? sessionId,
+      chat_name: data.name ?? 'no name',
+      started_at: data.started_at,       
+      last_message_at: data.last_message_at,
       messages,                        
     };
   } catch (e) {
     console.log("error");
     return {
-      sessionId: sessionId,
-      chatName: "anonymous",
-      startedAt: null,       
-      lastMessageAt: null,
+      session_id: sessionId,
+      chat_name: "anonymous",
+      started_at: null,       
+      last_message_at: null,
       messages: []
     };
   }

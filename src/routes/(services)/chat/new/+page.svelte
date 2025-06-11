@@ -5,29 +5,36 @@
   import * as Card from "$lib/components/ui/card/index.js";
   import {m} from '$lib/paraglide/messages.js';
   import { goto, invalidate } from "$app/navigation";
-  import type { Message } from "$lib/types/chat.js";
+  import { ChatMessageType, type ChatMessageRequest, type Message } from "$lib/types/chat.js";
   
 
   let message: Message = {
-    type: 'human',
+    type: ChatMessageType.HUMAN,
     value:'',
   };
 
   async function handleSubmit(event: Event) {
+    event.preventDefault();
     if (!message.value.trim()) return;
+  
+    let chat_message_request: ChatMessageRequest = {
+      model_id: "gpt-4o-mini",
+      message: message.value,
+      stop: false,
+    }
 
     const response = await fetch('http://localhost:8000/api/chats/new', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
-      }
+      },
+      body: JSON.stringify(chat_message_request)  
     });
 
     const data = await response.json();
     const chat_id = data.session_id;
 
     sessionStorage.setItem("initialMessage", JSON.stringify(message));
-    await invalidate('sidebar:chatlist');
     goto(`/chat/${chat_id}`);
   }
 
@@ -36,7 +43,7 @@
 <div class="flex h-full items-center justify-center w-full ">
   <Card.Root class="h-40 w-5/6">
     <Card.Content class="max-h-fit">
-      <form class="flex w-full max-h-48 items-center space-x-2" on:submit|preventDefault={handleSubmit}> 
+      <form class="flex w-full max-h-48 items-center space-x-2" onsubmit={handleSubmit}> 
         <Textarea bind:value={message.value} class="h-24 overflow-auto" placeholder={m.enter_prompt()} />
         <Button type="submit">
           <Send />

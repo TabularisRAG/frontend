@@ -4,11 +4,39 @@
   import * as Sidebar from "$lib/components/ui/sidebar/index.js";
   import CustomSidebarTrigger from "$lib/components/ui/custom_sidebar_trigger.svelte";
   import {m} from '$lib/paraglide/messages.js';
+  import { setContext, getContext } from 'svelte';
+  import { writable } from 'svelte/store';
+  import type { Chat } from '$lib/types/chat';
+  
 
   let { data, children } = $props();
-
-  console.log(data.chat_list);
   let open = $state(true);
+
+  const chat_list = writable<Chat[]>(data.chat_list);
+
+  function move_current_chat_to_front(session_id: string) {
+    console.log("sort");
+    chat_list.update(chats => {
+      if (chats[0]?.session_id === session_id) {
+        console.log("already first");
+        return chats;
+      }
+
+      const target_chat = chats.find(chat => chat.session_id === session_id);
+      if (!target_chat) {
+        console.log(session_id);
+        console.log(chats);
+        return chats;
+      }
+
+      return [
+        target_chat,
+        ...chats.filter(chat => chat.session_id !== session_id)
+      ];
+    });
+  }
+
+  setContext('chat', { chat_list, move_current_chat_to_front });
 </script>
 
 <div class="sticky top-[54px] overflow-hidden max-h-[calc(100vh-54px)] h-full">
@@ -54,7 +82,7 @@
           <Sidebar.GroupContent>
             <Sidebar.Menu class="flex flex-col">
               {#if open}
-                {#each data.chat_list as chat (chat.name)}
+                {#each $chat_list as chat}
                   <Sidebar.MenuItem>
                     <Sidebar.MenuButton>
                       {#snippet child({ props })}
@@ -75,7 +103,6 @@
         </Sidebar.Group>
       </Sidebar.Content>
     </Sidebar.Root>
-
     <main class="flex flex-col flex-1 relative">
         {@render children()}
     </main>
