@@ -170,7 +170,7 @@
 
 <div
         class={[
-    "flex min-h-[40px] w-full flex-wrap place-items-center gap-1 rounded-lg border border-input bg-background px-1 py-1 disabled:opacity-50 aria-disabled:cursor-not-allowed",
+    "flex min-h-[40px] w-full flex-wrap place-items-center gap-1 rounded-lg border border-input dark:bg-input/30 bg-transparent px-1 py-1 disabled:opacity-50 aria-disabled:cursor-not-allowed",
     className,
   ]}
         aria-disabled={disabled}
