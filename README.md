@@ -23,7 +23,7 @@ The project follows a typical SvelteKit structure with the following main direct
 ### Source Code (`/src`)
 - `/routes` - Application routes and pages
 - `/lib` - Shared library code
-    - `/components` - Reusable UI components from [shadcn-svelte@next](https://next.shadcn-svelte.com/)
+    - `/components` - Reusable UI components from [shadcn-svelte](https://shadcn-svelte.com/)
     - `/hooks` - Custom hooks
     - `/icons` - Custom Icon files (default icons should be used from [Lucide](https://lucide.dev/icons/))
     - `/server` - Server-side code
