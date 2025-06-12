@@ -89,7 +89,7 @@
                         <a
                           href={chat.url}
                           {...props}
-                          class="block w-full px-4 py-2 text-sm hover:bg-gray-100 rounded"
+                          class="block w-full px-4 py-2 text-sm dark:hover:bg-gray-600 hover:bg-gray-100 rounded"
                         >
                           <span>{chat.name}</span>
                         </a>

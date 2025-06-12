@@ -13,12 +13,12 @@
 
   let scroll_container: HTMLElement | null = $state(null);
   let {data} = $props();
-
-  $effect(() => {
-    if (data.messages) {
-      messages.set(data.messages);
-    }
-  });
+  //will be made selectable by user 
+  let model_id = "gpt-4-mini";
+  let messages: Message[] = $state(data.messages ?? []);
+  let streaming_message: Message | null = $state(null);
+  let socket: WebSocket | null = null;
+  let current_session_id = $state(page.data.session_id);
 
   const { chat_list, move_current_chat_to_front } = getContext<{
     chat_list: import('svelte/store').Writable<Chat[]>,
@@ -30,11 +30,26 @@
     value: '',
   });
 
-  //will be made selectable by user 
-  let model_id = "gpt-4-mini";
-  const messages: Writable<Message[]> = writable(data.messages ?? []);
-  let current_receiving_message: Message | null = $state(null);
-  let socket: WebSocket;
+  let display_messages = $derived(
+    streaming_message ? [...messages, streaming_message] : messages
+  );
+
+  $effect(() => {
+    if (data.messages) {
+      messages = data.messages;
+    }
+  });
+
+  $effect(() => {
+    if (current_session_id !== page.data.session_id) {
+      if (socket && socket.readyState === WebSocket.OPEN) {
+        socket.close();
+      }
+      streaming_message = null;
+      current_session_id = page.data.session_id;
+      initializeWebSocket();
+    }
+  });
 
   async function scroll_to_bottom() {
     if (!scroll_container) return;
@@ -42,16 +57,16 @@
     scroll_container.scrollTop = scroll_container.scrollHeight;
   }
 
-  onMount(() => {
+  function initializeWebSocket() {
     const wsUrl = `ws://localhost:8000/api/chats/${page.data.session_id}/ws`;
     socket = new WebSocket(wsUrl);
-    scroll_to_bottom();
+
     let message = sessionStorage.getItem("initialMessage") ?? "";
     if(message.trim() !== ""){
       let first_message: Message = JSON.parse(message);
       sessionStorage.removeItem("initialMessage"); 
 
-      messages.update((msgs) => [...msgs, first_message]);
+      messages.push(first_message);
 
       let chat_message_request: ChatMessageRequest = {
         model_id: model_id,
@@ -59,26 +74,42 @@
         stop: false,
       }
 
-
       socket.onopen = () => {
-        socket!.send(JSON.stringify(chat_message_request));
+        if (socket && socket.readyState === WebSocket.OPEN) {
+          socket.send(JSON.stringify(chat_message_request));
+        }
       }
     }
 
     socket.onmessage = async (event) => {
       try {
         const received_message: Message = JSON.parse(event.data);
-        handle_received_message(received_message);
+        if (current_session_id === page.data.session_id) {
+          handle_received_message(received_message);
+        }
       } catch (error) {
         console.error("Error while processing the received message:", error);
       }
     };
+
+    socket.onclose = () => {
+      console.log("WebSocket connection closed");
+    };
+
+    socket.onerror = (error) => {
+      console.error("WebSocket error:", error);
+    };
+  }
+
+  onMount(() => {
+    initializeWebSocket();
+    scroll_to_bottom();
   });
 
   function handle_received_message(received_message: Message ) {
     switch (received_message.type) {
       case ChatMessageType.MESSAGE_RECEIVED:
-        current_receiving_message = {
+        streaming_message= {
             type: ChatMessageType.AI,
             value: '',
           };
@@ -97,16 +128,17 @@
         break;
 
       case ChatMessageType.TOKEN_GENERATED:
-        if (current_receiving_message) {
-          current_receiving_message.value += received_message.value ?? '';
+        if (streaming_message) {
+          streaming_message.value += received_message.value ?? '';
+          scroll_to_bottom();
         }
         break;
 
       case ChatMessageType.COMPLETION_GENERATED:
-        if (current_receiving_message) {
-          messages.update((msgs) => [...msgs, current_receiving_message!]);
+        if (streaming_message) {
+          messages.push(streaming_message);
           scroll_to_bottom();
-          current_receiving_message = null;
+          streaming_message= null;
         }
         break;
 
@@ -118,15 +150,18 @@
 
   function send_message(event: Event) {
     event?.preventDefault();
-    if (!user_input.value.trim()) return;
+    if (!user_input.value.trim() || !socket || socket.readyState !== WebSocket.OPEN) return;
+    
     const new_message =  {...user_input };;
-    messages.update((msgs) => [...msgs, new_message]);
+    messages.push(new_message);
     scroll_to_bottom();
+
     const payload = {
       message: user_input.value,
       model_id: model_id,
       stop: false,
     };
+
     socket.send(JSON.stringify(payload));
     user_input.value = "";
   }
@@ -145,42 +180,49 @@
     }
   });
 
-  $effect.pre(() => {
-    $messages;
-    current_receiving_message;
-    scroll_to_bottom();
+  $effect(() => {
+    if (messages.length > 0) {
+      scroll_to_bottom();
+    }
+  });
+
+  $effect(() => {
+    if (streaming_message !== null) {
+      scroll_to_bottom();
+    }
   });
 </script>
 
 {#key page.params.session_id}
 <div class="flex sticky flex-grow justify-center max-h-[calc(100vh-54px)]">
- <div bind:this={scroll_container} class="h-full w-5/6 rounded-md mt-2 overflow-y-auto">
-    {#each $messages as message}
-      <div class="flex {message.type === ChatMessageType.HUMAN ? 'justify-end' : 'justify-start'} pb-2">
-        <Card.Root class={message.type === ChatMessageType.HUMAN ? 'w-11/12 bg-gray-100 dark:bg-primary text-black' : 'w-full dark:bg-secondary dark:border-gray-700'}>
-          <Card.Content class="max-h-fit">
-            <p>{message.value}</p>
-          </Card.Content>
-        </Card.Root>
-      </div>
-    {/each}
-    {#if current_receiving_message !== null}
-      <Card.Root class="w-24">
-        <Card.Content class="max-h-fit">
-          <div class="flex justify-center">
-            <LoadEllipsis size="24px" color="#555" />
+    <div bind:this={scroll_container} class="h-full w-full px-28 rounded-md mt-2 overflow-y-auto">
+      {#each display_messages as message}
+        {#if message.value !== ""}
+          <div class="flex {message.type === ChatMessageType.HUMAN ? 'justify-end' : 'justify-start'} pb-2">
+            <Card.Root class={message.type === ChatMessageType.HUMAN ? 'w-11/12 bg-gray-100 dark:bg-primary text-black' : 'w-full dark:bg-secondary dark:border-gray-700'}>
+              <Card.Content class="max-h-fit">
+                <p>{message.value}</p>
+              </Card.Content>
+            </Card.Root>
           </div>
-        </Card.Content>
-      </Card.Root>
-    {/if}
+        {:else}
+          <Card.Root class="w-24">
+            <Card.Content class="max-h-fit">
+              <div class="flex justify-center">
+                <LoadEllipsis size="24px" color="#555" />
+              </div>
+            </Card.Content>
+          </Card.Root>
+        {/if}
+      {/each}
     <div class="h-46"></div>
   </div>
 </div>
-<div class="sticky bottom-5 w-full flex justify-center">
-  <Card.Root class="w-5/6">
+<div class="sticky bottom-5 w-full px-28 flex justify-center">
+  <Card.Root class="w-full">
     <Card.Content class="max-h-fit">
       <form class="flex w-full max-h-48 items-center space-x-2" onsubmit={send_message}>
-        <Textarea bind:value={user_input.value} class="h-fit max-h-36 overflow-auto" placeholder={m.enter_prompt()} />
+        <Textarea bind:value={user_input.value} class="h-fit max-h-36 overflow-auto bg-white dark_bg-secondary" placeholder={m.enter_prompt()} />
         <Button type="submit">
           <Send />
         </Button>
