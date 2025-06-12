@@ -1,16 +1,92 @@
 {
-	"$schema": "https://inlang.com/schema/inlang-message-format",
-	"hello_world": "Hello, {name} from en!",
-	"language": "Language",
-	"theme": "Theme",
-	"dark": "Dark",
-	"light": "Light",
-	"system": "System",
-	"documents": "Documents",
-	"chat": "Chat",
-	"users": "Users",
-	"groups": "Groups",
-	"profile": "Profile",
-	"settigs": "Settings",
-	"logout": "Log Out"
+  "$schema": "https://inlang.com/schema/inlang-message-format",
+  "hello_world": "Hello, {name} from en!",
+  "nav": {
+    "items": {
+      "documents": "Documents",
+      "chat": "Chat",
+      "users": "Users",
+      "groups": "Groups",
+      "profile": "Profile",
+      "settings": "Settings"
+    },
+    "options": {
+      "language": "Language",
+      "theme": "Theme",
+      "dark": "Dark",
+      "light": "Light",
+      "system": "System"
+    },
+    "auth": {
+      "logout": "Log Out",
+      "login": "Log In",
+      "signin": "Sign In"
+    }
+  },
+  "pages": {
+    "documents": {
+      "title": "Title",
+      "author": "Author",
+      "uploadedAt": "Uploaded at",
+      "year": "Year",
+      "size": "Size",
+      "keywords": "Keywords",
+      "form": {
+        "create_document": "Create Document",
+        "fill_form": "Please fill out the form below to create and add a document.",
+        "file_title": "Upload File",
+        "file_description": "Select File to upload.",
+        "title_placeholder": "Enter title",
+        "title_description": "Document Title.",
+        "year_placeholder": "Enter year",
+        "year_description": "Document publishing year.",
+        "author_placeholder": "Enter author name",
+        "author_description": "Document author.",
+        "keywords_placeholder": "Enter keywords",
+        "keywords_description": "Document keywords.",
+        "file_missing": "Please select a file.",
+        "file_too_large": "The file is too large.",
+        "title_missing": "Please enter a title.",
+        "title_too_short": "Title must contain at least three characters.",
+        "year_missing": "Please enter a year.",
+        "author_missing": "Please enter an author.",
+        "keywords_missing": "Please enter at least one keyword."
+      }
+    }
+  },
+  "general": {
+    "no_results": "no results",
+    "search_placeholder": "Search...",
+    "search": "Search",
+    "sorting": "Sorting",
+    "ascending": "Ascending",
+    "descending": "Descending",
+    "submit": "Submit",
+    "none": "None",
+    "close": "Close",
+    "add": "Add",
+    "columns": "Columns",
+    "input": {
+      "file": {
+        "drag_n_drop_here": "Drag 'n' drop files here, or click to select files",
+        "count_error": "Maximum files uploaded",
+        "type_error": "File type not allowed",
+        "can_upload_count": [
+          {
+            "declarations": [
+              "input count",
+              "local countPlural = count: plural"
+            ],
+            "selectors": [
+              "countPlural"
+            ],
+            "match": {
+              "countPlural=one": "You can upload one file.",
+              "countPlural=other": "You can upload {count} files."
+            }
+          }
+        ]
+      }
+    }
+  }
 }
