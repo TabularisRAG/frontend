@@ -1,16 +1,92 @@
 {
-	"$schema": "https://inlang.com/schema/inlang-message-format",
-	"hello_world": "Hello, {name} from de!",
-	"language": "Sprache",
-	"theme": "Theme",
-	"dark": "Dunkel",
-	"light": "Hell",
-	"system": "System",
-	"documents": "Dokumente",
-	"chat": "Chat",
-	"users": "Benutzer",
-	"groups": "Gruppen",
-	"profile": "Profil",
-	"settigs": "Einstellungen",
-	"logout": "Abmelden"
+  "$schema": "https://inlang.com/schema/inlang-message-format",
+  "hello_world": "Hallo, {name} aus de!",
+  "nav": {
+    "items": {
+      "documents": "Dokumente",
+      "chat": "Chat",
+      "users": "Benutzer",
+      "groups": "Gruppen",
+      "profile": "Profil",
+      "settings": "Einstellungen"
+    },
+    "options": {
+      "language": "Sprache",
+      "theme": "Design",
+      "dark": "Dunkel",
+      "light": "Hell",
+      "system": "System"
+    },
+    "auth": {
+      "logout": "Abmelden",
+      "login": "Anmelden",
+      "signin": "Registrieren"
+    }
+  },
+  "pages": {
+    "documents": {
+      "title": "Titel",
+      "author": "Autor",
+      "uploadedAt": "Hochgeladen am",
+      "year": "Jahr",
+      "size": "Größe",
+      "keywords": "Schlagwörter",
+      "form": {
+        "create_document": "Dokument erstellen",
+        "fill_form": "Zum Erstellen eines Dokuments das Formular ausfüllen.",
+        "file_title": "Datei hochladen",
+        "file_description": "Datei zum Hochladen auswählen.",
+        "title_placeholder": "Titel eingeben",
+        "title_description": "Dokumententitel",
+        "year_placeholder": "Jahr eingeben",
+        "year_description": "Erscheinungsjahr des Dokuments",
+        "author_placeholder": "Autor eingeben",
+        "author_description": "Autor des Dokuments",
+        "keywords_placeholder": "Schlagwörter eingeben",
+        "keywords_description": "Schlagwörter des Dokuments",
+        "file_missing": "Eine Datei muss ausgewählt werden.",
+        "file_too_large": "Die Datei ist zu groß.",
+        "title_missing": "Ein Titel muss eingegeben werden.",
+        "title_too_short": "Der Titel muss mindestens drei Zeichen enthalten.",
+        "year_missing": "Ein Jahr muss eingegeben werden.",
+        "author_missing": "Ein Autor muss angegeben werden.",
+        "keywords_missing": "Mindestens ein Schlagwort muss eingegeben werden."
+      }
+    }
+  },
+  "general": {
+    "no_results": "Keine Ergebnisse",
+    "search_placeholder": "Suchen...",
+    "search": "Suchen",
+    "sorting": "Sortierung",
+    "ascending": "Aufsteigend",
+    "descending": "Absteigend",
+    "submit": "Absenden",
+    "none": "Keine",
+    "close": "Schließen",
+    "add": "Hinzufügen",
+    "columns": "Spalten",
+    "input": {
+      "file": {
+        "drag_n_drop_here": "Dateien hier ablegen oder zum Auswählen klicken",
+        "count_error": "Maximale Anzahl an Dateien erreicht",
+        "type_error": "Dateityp nicht erlaubt",
+        "can_upload_count": [
+          {
+            "declarations": [
+              "input count",
+              "local countPlural = count: plural"
+            ],
+            "selectors": [
+              "countPlural"
+            ],
+            "match": {
+              "countPlural=one": "Es kann eine Datei hochgeladen werden.",
+              "countPlural=other": "Es können {count} Dateien hochgeladen werden."
+            }
+          }
+        ]
+      }
+    }
+  }
 }
