@@ -12,28 +12,17 @@
   let { data, children } = $props();
   let open = $state(true);
 
-  const chat_list = writable<Chat[]>(data.chat_list);
+  const chat_list = $state(data.chat_list);
 
   function move_current_chat_to_front(session_id: string) {
-    console.log("sort");
-    chat_list.update(chats => {
-      if (chats[0]?.session_id === session_id) {
-        console.log("already first");
-        return chats;
+      if (chat_list[0]?.session_id === session_id) {
+        return;
       }
 
-      const target_chat = chats.find(chat => chat.session_id === session_id);
-      if (!target_chat) {
-        console.log(session_id);
-        console.log(chats);
-        return chats;
-      }
+    const idx = chat_list.findIndex(chat => chat.session_id === session_id);
+    if (idx === -1) return;
 
-      return [
-        target_chat,
-        ...chats.filter(chat => chat.session_id !== session_id)
-      ];
-    });
+    [chat_list[idx], chat_list[0]] = [chat_list[0], chat_list[idx]];
   }
 
   setContext('chat', { chat_list, move_current_chat_to_front });
@@ -82,7 +71,7 @@
           <Sidebar.GroupContent>
             <Sidebar.Menu class="flex flex-col">
               {#if open}
-                {#each $chat_list as chat}
+                {#each chat_list as chat}
                   <Sidebar.MenuItem>
                     <Sidebar.MenuButton>
                       {#snippet child({ props })}

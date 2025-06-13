@@ -8,6 +8,8 @@
   import { ChatMessageType, type ChatMessageRequest, type Message } from "$lib/types/chat.js";
   
 
+  const API_BASE_URL = 'http://localhost:8000/api';
+
   let message: Message = {
     type: ChatMessageType.HUMAN,
     value:'',
@@ -23,7 +25,7 @@
       stop: false,
     }
 
-    const response = await fetch('http://localhost:8000/api/chats/new', {
+    const response = await fetch(`${API_BASE_URL}/chats/new`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

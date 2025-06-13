@@ -13,7 +13,7 @@
 
   //will be made selectable by user 
   const MODEL_ID = "gpt-4-mini";
-  const WEB_SOCKET_URL = `ws://localhost:8000/api/chats/${page.data.session_id}/ws`;
+  const WEB_SOCKET_BASE_URL = `ws://localhost:8000/api`;
 
   let scroll_container: HTMLElement | null = $state(null);
   let {data} = $props();
@@ -23,7 +23,7 @@
   let current_session_id = $state(page.data.session_id);
 
   const { chat_list, move_current_chat_to_front } = getContext<{
-    chat_list: import('svelte/store').Writable<Chat[]>,
+    chat_list: Chat[],
     move_current_chat_to_front: (session_id: string) => void
   }>('chat');
 
@@ -60,7 +60,7 @@
   }
 
   function initializeWebSocket() {
-    socket = new WebSocket(WEB_SOCKET_URL);
+    socket = new WebSocket(`${WEB_SOCKET_BASE_URL}/chats/${page.data.session_id}/ws`);
 
     let message = sessionStorage.getItem("initialMessage") ?? "";
     if(message.trim() !== ""){
@@ -125,7 +125,7 @@
           last_message_at: new Date().toISOString(),
           url: `/chat/${data.session_id}`,
         }
-        chat_list.update(list => [new_chat, ...list]);
+        chat_list.unshift(new_chat);
         break;
 
       case ChatMessageType.TOKEN_GENERATED:

@@ -4,10 +4,11 @@ import { error } from '@sveltejs/kit';
 
 export const load: PageServerLoad = async ({ params, fetch, depends }) => {
   depends(`/chat/${params.session_id}`);
-  const sessionId = params.session_id;
+  const session_id = params.session_id;
+  const API_BASE_URL = 'http://localhost:8000/api';
 
   try {
-    const res = await fetch(`http://localhost:8000/api/chats/${sessionId}`);
+    const res = await fetch(`${API_BASE_URL}/chats/${session_id}`);
     if (!res.ok) {
       throw error(res.status, 'Chat not found');
     }
@@ -22,7 +23,7 @@ export const load: PageServerLoad = async ({ params, fetch, depends }) => {
     }));
 
     return {
-      session_id: data.session_id ?? sessionId,
+      session_id: data.session_id ?? session_id,
       chat_name: data.name ?? 'no name',
       started_at: data.started_at,       
       last_message_at: data.last_message_at,
@@ -31,7 +32,7 @@ export const load: PageServerLoad = async ({ params, fetch, depends }) => {
   } catch (e) {
     console.log("error");
     return {
-      session_id: sessionId,
+      session_id: session_id,
       chat_name: "anonymous",
       started_at: null,       
       last_message_at: null,
