@@ -12,5 +12,8 @@
 	"groups": "Gruppen",
 	"profile": "Profil",
 	"settigs": "Einstellungen",
-	"logout": "Abmelden"
+	"logout": "Abmelden",
+  "chat_history": "Chatverlauf",
+  "enter_prompt": "Stelle eine Frage ...",
+  "new_chat": "Neuer Chat"
 }
