@@ -10,6 +10,7 @@
   import { page } from "$app/state";
   import { LoadEllipsis } from 'svelte-loading-animation';
   import { getContext } from 'svelte';
+  import SvelteMarkdown from '@humanspeak/svelte-markdown'
 
   let scroll_container: HTMLElement | null = $state(null);
   let {data} = $props();
@@ -201,7 +202,7 @@
           <div class="flex {message.type === ChatMessageType.HUMAN ? 'justify-end' : 'justify-start'} pb-2">
             <Card.Root class={message.type === ChatMessageType.HUMAN ? 'w-11/12 bg-gray-100 dark:bg-primary text-black' : 'w-full dark:bg-secondary dark:border-gray-700'}>
               <Card.Content class="max-h-fit">
-                <p>{message.value}</p>
+                <SvelteMarkdown source={message.value} />
               </Card.Content>
             </Card.Root>
           </div>
