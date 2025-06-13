@@ -4,7 +4,7 @@
   import Send from "@lucide/svelte/icons/send-horizontal";
   import * as Card from "$lib/components/ui/card/index.js";
   import {m} from '$lib/paraglide/messages.js';
-  import { goto, invalidate } from "$app/navigation";
+  import { goto } from "$app/navigation";
   import { ChatMessageType, type ChatMessageRequest, type Message } from "$lib/types/chat.js";
   
 

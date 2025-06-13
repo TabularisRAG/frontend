@@ -4,7 +4,7 @@
   import * as Sidebar from "$lib/components/ui/sidebar/index.js";
   import CustomSidebarTrigger from "$lib/components/ui/custom_sidebar_trigger.svelte";
   import {m} from '$lib/paraglide/messages.js';
-  import { setContext, getContext } from 'svelte';
+  import { setContext } from 'svelte';
   import { writable } from 'svelte/store';
   import type { Chat } from '$lib/types/chat';
   

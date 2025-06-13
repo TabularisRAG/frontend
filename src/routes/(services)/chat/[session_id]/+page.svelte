@@ -5,17 +5,18 @@
   import * as Card from "$lib/components/ui/card/index.js";
   import {m} from '$lib/paraglide/messages.js';
   import { onDestroy, onMount, tick } from "svelte";
-  import { writable, type Writable } from "svelte/store";
   import { ChatMessageType, type Chat, type ChatMessageRequest, type Message } from "$lib/types/chat.js";
   import { page } from "$app/state";
   import { LoadEllipsis } from 'svelte-loading-animation';
   import { getContext } from 'svelte';
   import SvelteMarkdown from '@humanspeak/svelte-markdown'
 
+  //will be made selectable by user 
+  const MODEL_ID = "gpt-4-mini";
+  const WEB_SOCKET_URL = `ws://localhost:8000/api/chats/${page.data.session_id}/ws`;
+
   let scroll_container: HTMLElement | null = $state(null);
   let {data} = $props();
-  //will be made selectable by user 
-  let model_id = "gpt-4-mini";
   let messages: Message[] = $state(data.messages ?? []);
   let streaming_message: Message | null = $state(null);
   let socket: WebSocket | null = null;
@@ -59,8 +60,7 @@
   }
 
   function initializeWebSocket() {
-    const wsUrl = `ws://localhost:8000/api/chats/${page.data.session_id}/ws`;
-    socket = new WebSocket(wsUrl);
+    socket = new WebSocket(WEB_SOCKET_URL);
 
     let message = sessionStorage.getItem("initialMessage") ?? "";
     if(message.trim() !== ""){
@@ -70,7 +70,7 @@
       messages.push(first_message);
 
       let chat_message_request: ChatMessageRequest = {
-        model_id: model_id,
+        model_id: MODEL_ID,
         message: message,
         stop: false,
       }
@@ -159,7 +159,7 @@
 
     const payload = {
       message: user_input.value,
-      model_id: model_id,
+      model_id: MODEL_ID,
       stop: false,
     };
 
