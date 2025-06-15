@@ -24,5 +24,12 @@
 	"terms_agree": "By clicking continue, you agree to our",
 	"terms_of_service": "Terms of Service",
 	"privacy_policy": "Privacy Policy",
-	"login_now": "Login now"
+	"login_now": "Login now",
+	"create_account": "Create your account",
+	"enter_details_below": "Enter your details below to sign up",
+	"first_name": "First name",
+	"last_name": "Last name",
+	"confirm_password": "Confirm password",
+	"register": "Register",
+	"already_have_account": "Already have an account?"
 }

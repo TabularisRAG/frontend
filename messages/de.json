@@ -25,5 +25,12 @@
 	"terms_of_service": "Nutzungsbedingungen",
 	"privacy_policy": "Datenschutzrichtlinien",
 	"and": "und",
-	"login_now": "Jetzt anmelden"
+	"login_now": "Jetzt anmelden",
+	"create_account": "Erstelle dein Konto",
+	"enter_details_below": "Gib unten deine Daten ein, um dich zu registrieren",
+	"first_name": "Vorname",
+	"last_name": "Nachname",
+	"confirm_password": "Passwort bestätigen",
+	"register": "Registrieren",
+	"already_have_account": "Du hast bereits ein Konto?"
 }

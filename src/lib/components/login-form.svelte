@@ -82,7 +82,7 @@
 			</div>
 			<div class="text-center text-sm">
 			  {m.no_account()}
-			  <a href="##" class="underline underline-offset-4">
+			  <a href="/register" class="underline underline-offset-4">
 				{m.sign_up()}
 			  </a>
 			</div>
