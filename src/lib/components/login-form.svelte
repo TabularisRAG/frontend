@@ -6,11 +6,10 @@
 	import { cn } from "$lib/utils.js";
 	import type { HTMLAttributes } from "svelte/elements";
 	import { goto } from '$app/navigation';
-  	import type { ActionData } from "../../routes/login/$types";
-	import { accessToken } from '../stores/auth'
-	import { loadUserByJwt, userStore } from '../stores/user'
+	import { accessToken } from '../stores/auth';
 	import AuthenticationAPI from "../../api/authenticationAPI/AuthenticationAPI";
-  import type { User } from "../../entities/user";
+  	import type { User } from "../../entities/user";
+  	import type { ActionData } from "../../routes/demo/lucia/$types";
 
 	let { class: className, form, ...restProps }: HTMLAttributes<HTMLDivElement> & { form: ActionData } = $props();
 	
@@ -23,8 +22,6 @@
 	const authApi = new AuthenticationAPI()
 	
 	async function handleLogin() {
-		console.log("Handle Login")
-
     const user: User = {
       email,
       password
@@ -38,10 +35,8 @@
       error = null;
 	  
 	  accessToken.set(token)
-	  loadUserByJwt(token)
 
       console.log("Login successful:", $accessToken);
-	  console.log("Login successful:", $userStore);
       goto("/documents")
     }
   }
