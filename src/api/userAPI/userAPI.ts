@@ -21,8 +21,9 @@ export default class UserAPI extends APIClient {
             }
     
             const data = await response.json();
-            console.log(data)
-            return new User(data.email, data.lastname, data.firstname, data.isAdmin);
+            const loggedInUser = new User(data.email, data.last_name, data.first_name, data.is_admin);
+            console.log("Loaded user: ", loggedInUser)
+            return loggedInUser
         } catch (error) {
             console.error("Login failed:", error);
             throw new Error("Failed to load user");

@@ -10,11 +10,12 @@ userStore.subscribe(value => {
   }
 });
 
-export async function loadUserByJwt(jwt: string): Promise<void> {
+export async function loadUserWith(jwt: string): Promise<void> {
     try {
         const userApi = new UserAPI()
         const userData: User = await userApi.loadUser(jwt)
         userStore.set(userData);
+        console.log("Credentials stored for account :", userData.email);
     } catch (error) {
         console.error('Error loading user:', error);
         userStore.set(null); 
