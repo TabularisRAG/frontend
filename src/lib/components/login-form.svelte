@@ -10,6 +10,7 @@
 	import AuthenticationAPI from "../../api/authenticationAPI/AuthenticationAPI";
   	import type { User } from "../../entities/user";
   	import type { ActionData } from "../../routes/demo/lucia/$types";
+  import { m } from "$lib/paraglide/messages";
 
 	let { class: className, form, ...restProps }: HTMLAttributes<HTMLDivElement> & { form: ActionData } = $props();
 	
@@ -47,47 +48,55 @@
 
 <div class={cn("flex flex-col gap-6", className)} {...restProps}>
 	<Card.Root>
-		<Card.Header class="text-center">
-			<Card.Title class="text-xl">Welcome back</Card.Title>
-			<Card.Description>Login with your account credentials</Card.Description>
-		</Card.Header>
-		<Card.Content>
-			<form onsubmit={handleLogin}>
-				<div class="grid gap-6">
-					<div class="grid gap-6">
-						<div class="grid gap-3">
-							<Label for="email">Email</Label>
-							<Input id="email" type="email" placeholder="m@example.com" bind:value={email} required />
-						</div>
-						<div class="grid gap-3">
-							<div class="flex items-center">
-								<Label for="password">Password</Label>
-								<a
-									href="##"
-									class="ml-auto text-sm underline-offset-4 hover:underline"
-								>
-									Forgot your password?
-								</a>
-							</div>
-							<Input id="password" type="password" bind:value={password} required />
-						</div>
-						<Button type="submit" class="w-full">Login</Button>
-					</div>
-					<div class="text-center text-sm">
-						Don&apos;t have an account?
-						<a href="##" class="underline underline-offset-4"> Sign up </a>
-					</div>
+	  <Card.Header class="text-center">
+		<Card.Title class="text-xl">{m.welcome_back()}</Card.Title>
+		<Card.Description>{m.login_with_credentials()}</Card.Description>
+	  </Card.Header>
+	  <Card.Content>
+		<form onsubmit={handleLogin}>
+		  <div class="grid gap-6">
+			<div class="grid gap-6">
+			  <div class="grid gap-3">
+				<Label for="email">{m.email()}</Label>
+				<Input
+				  id="email"
+				  type="email"
+				  placeholder="m@example.com"
+				  bind:value={email}
+				  required
+				/>
+			  </div>
+			  <div class="grid gap-3">
+				<div class="flex items-center">
+				  <Label for="password">{m.password()}</Label>
+				  <a
+					href="##"
+					class="ml-auto text-sm underline-offset-4 hover:underline"
+				  >
+					{m.forgot_password()}
+				  </a>
 				</div>
-			</form>
-		</Card.Content>
+				<Input id="password" type="password" bind:value={password} required />
+			  </div>
+			  <Button type="submit" class="w-full">{m.login()}</Button>
+			</div>
+			<div class="text-center text-sm">
+			  {m.no_account()}
+			  <a href="##" class="underline underline-offset-4">
+				{m.sign_up()}
+			  </a>
+			</div>
+		  </div>
+		</form>
+	  </Card.Content>
 	</Card.Root>
 	<div
-		class="text-muted-foreground *:[a]:hover:text-primary *:[a]:underline *:[a]:underline-offset-4 text-balance text-center text-xs"
+	  class="text-muted-foreground *:[a]:hover:text-primary *:[a]:underline *:[a]:underline-offset-4 text-balance text-center text-xs"
 	>
-		By clicking continue, you agree to our <a href="##">Terms of Service</a>
-		and <a href="##">Privacy Policy</a>.
+	  {m.terms_agree()} <a href="##">{m.terms_of_service()}</a>
+	  {` ${m.and()} `}<a href="##">{m.privacy_policy()}</a>.
 	</div>
 	{#if error}
-	<p class="text-red-500 text-sm">{error}</p>
+	  <p class="text-red-500 text-sm">{error}</p>
 	{/if}
-</div>
+  </div>

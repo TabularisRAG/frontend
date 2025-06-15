@@ -31,7 +31,7 @@
 <div class="sticky top-0">
   <nav class="flex justify-between items-center mx-8 py-2 gap-8">
     <Button href="../" variant="link" class="text-2xl font-bold"
-      >TabularisRAG</Button
+      >TabulaRAG</Button
     >
     <div class="hidden md:flex justify-center items-center gap-2">
       <Button href="/documents" variant="link">{m.documents()}</Button>
@@ -237,7 +237,7 @@
     {/if}
       
     {#if $userStore == null}
-        <Button href="/login">Login now</Button>
+        <Button href="/login">{m.login_now()}</Button>
     {/if}
   </nav>
   <Separator />

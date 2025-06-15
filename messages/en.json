@@ -12,5 +12,17 @@
 	"groups": "Groups",
 	"profile": "Profile",
 	"settigs": "Settings",
-	"logout": "Log Out"
+	"logout": "Log Out",
+	"welcome_back": "Welcome back",
+	"login_with_credentials": "Login with your account credentials",
+	"email": "Email",
+	"password": "Password",
+	"forgot_password": "Forgot your password?",
+	"login": "Login",
+	"no_account": "Don't have an account?",
+	"sign_up": "Sign up",
+	"terms_agree": "By clicking continue, you agree to our",
+	"terms_of_service": "Terms of Service",
+	"privacy_policy": "Privacy Policy",
+	"login_now": "Login now"
 }

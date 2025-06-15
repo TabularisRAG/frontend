@@ -12,5 +12,18 @@
 	"groups": "Gruppen",
 	"profile": "Profil",
 	"settigs": "Einstellungen",
-	"logout": "Abmelden"
+	"logout": "Abmelden",
+	"welcome_back": "Willkommen zurück",
+	"login_with_credentials": "Melde dich mit deinen Zugangsdaten an",
+	"email": "E-Mail",
+	"password": "Passwort",
+	"forgot_password": "Passwort vergessen?",
+	"login": "Anmelden",
+	"no_account": "Noch keinen Account?",
+	"sign_up": "Registrieren",
+	"terms_agree": "Mit dem Klick auf „Weiter“ stimmst du unseren",
+	"terms_of_service": "Nutzungsbedingungen",
+	"privacy_policy": "Datenschutzrichtlinien",
+	"and": "und",
+	"login_now": "Jetzt anmelden"
 }
