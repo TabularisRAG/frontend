@@ -4,7 +4,6 @@ import APIClient from "../ApiClient";
 export default class AuthenticationAPI extends APIClient {
 
     public async login(user: User): Promise<string> {
-        console.log("API Client login")
         const params = new URLSearchParams();
         params.append("grant_type", "password");
         params.append("username", user.email);
@@ -34,6 +33,34 @@ export default class AuthenticationAPI extends APIClient {
             return "UNAUTHORIZED";
         }
     }
+
+    public async registerUser(newUser: User): Promise<void> {
+        try {
+            const response = await fetch(this.serverURL + "/auth/register", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    email: newUser.email,
+                    first_name: newUser.firstName,
+                    last_name: newUser.lastName,
+                    password: newUser.password
+                })
+            });
+    
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Registration failed! Status: ${response.status} - ${errorText}`);
+            }
+    
+            console.log("User registered successfully");
+        } catch (error) {
+            console.error("Registration failed:", error);
+            throw error;
+        }
+    }
+    
     
 
 }

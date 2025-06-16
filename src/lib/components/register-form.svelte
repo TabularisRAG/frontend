@@ -20,6 +20,24 @@
     let password = ""
     let confirmPassword = ""
 
+    const authApi = new AuthenticationAPI()
+	
+    async function handleRegister() {
+
+      console.log("Start Register")
+        const user: User = {
+          email,
+          firstName,
+          lastName,
+          password
+        };
+
+        await authApi.registerUser(user)
+
+        console.log("Register");
+        goto("/login")
+      }
+
   </script>
   
   <div class={cn("flex flex-col gap-6", className)} {...restProps}>
@@ -29,7 +47,7 @@
         <Card.Description>{m.enter_details_below()}</Card.Description>
       </Card.Header>
       <Card.Content>
-        <form>
+        <form onsubmit={handleRegister}>
           <div class="grid gap-6">
             <div class="grid gap-3">
               <Label for="firstName">{m.first_name()}</Label>
