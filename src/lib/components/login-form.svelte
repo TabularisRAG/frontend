@@ -14,8 +14,8 @@
 
 	let { class: className, form, ...restProps }: HTMLAttributes<HTMLDivElement> & { form: ActionData } = $props();
 	
-	let email = '';
-	let password = '';
+	let email = $state("");
+	let password = $state("");
 	let token: string | null = null;
 	let error: string | null = null;
 
