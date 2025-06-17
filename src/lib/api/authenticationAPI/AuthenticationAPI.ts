@@ -1,4 +1,4 @@
-import type { User } from "../../entities/user";
+import type { User } from "$lib/entities/user";
 import APIClient from "../ApiClient";
 
 export default class AuthenticationAPI extends APIClient {

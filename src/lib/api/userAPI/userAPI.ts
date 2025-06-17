@@ -1,4 +1,4 @@
-import { User } from "../../entities/user";
+import { User } from "$lib/entities/user";
 import APIClient from "../ApiClient";
 
 

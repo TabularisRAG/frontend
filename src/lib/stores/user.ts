@@ -1,6 +1,6 @@
 import { writable } from 'svelte/store';
-import type { User } from '../../entities/user';
-import UserAPI from '../../api/userAPI/userAPI';
+import type { User } from '$lib/entities/user';
+import UserAPI from '../api/userAPI/userAPI';
 
 export const userStore = writable<User | null>();
 

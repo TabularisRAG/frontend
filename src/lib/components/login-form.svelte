@@ -6,9 +6,9 @@
   import { cn } from "$lib/utils.js";
   import type { HTMLAttributes } from "svelte/elements";
   import { goto } from "$app/navigation";
-  import { accessToken } from "../stores/auth";
-  import AuthenticationAPI from "../../api/authenticationAPI/AuthenticationAPI";
-  import type { User } from "../../entities/user";
+  import { accessToken } from "$lib/stores/auth";
+  import AuthenticationAPI from "$lib/api/authenticationAPI/AuthenticationAPI";
+  import type { User } from "$lib/entities/user";
   import type { ActionData } from "../../routes/demo/lucia/$types";
   import { m } from "$lib/paraglide/messages";
   import { toast } from "svelte-sonner";
