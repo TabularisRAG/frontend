@@ -1,7 +1,7 @@
 import { sequence } from '@sveltejs/kit/hooks';
-import * as auth from '$lib/server/auth.js';
 import type { Handle } from '@sveltejs/kit';
 import { paraglideMiddleware } from '$lib/paraglide/server';
+import {AuthenticationAPI, SESSION_COOKIE_NAME} from "$lib/api/AuthenticationAPI";
 
 const handleParaglide: Handle = ({ event, resolve }) => paraglideMiddleware(event.request, ({ request, locale }) => {
 	event.request = request;
@@ -12,24 +12,15 @@ const handleParaglide: Handle = ({ event, resolve }) => paraglideMiddleware(even
 });
 
 const handleAuth: Handle = async ({ event, resolve }) => {
-	const sessionToken = event.cookies.get(auth.sessionCookieName);
+	const sessionToken = event.cookies.get(SESSION_COOKIE_NAME);
+	const authenticationAPI = new AuthenticationAPI()
 
 	if (!sessionToken) {
-		event.locals.user = null;
-		event.locals.session = null;
+		authenticationAPI.deleteSession(event)
 		return resolve(event);
 	}
 
-	const { session, user } = await auth.validateSessionToken(sessionToken);
-
-	if (session) {
-		auth.setSessionTokenCookie(event, sessionToken, session.expiresAt);
-	} else {
-		auth.deleteSessionTokenCookie(event);
-	}
-
-	event.locals.user = user;
-	event.locals.session = session;
+	await new AuthenticationAPI().validateSessionToken(sessionToken, event);
 	return resolve(event);
 };
 

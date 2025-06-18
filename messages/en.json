@@ -1,6 +1,5 @@
 {
 	"$schema": "https://inlang.com/schema/inlang-message-format",
-	"hello_world": "Hello, {name} from en!",
 	"language": "Language",
 	"theme": "Theme",
 	"dark": "Dark",
@@ -28,8 +27,21 @@
 	"create_account": "Create your account",
 	"enter_details_below": "Enter your details below to sign up",
 	"first_name": "First name",
+	"first_name_empty": "Please enter your first name.",
+	"last_name_empty": "Please enter your last name.",
 	"last_name": "Last name",
 	"confirm_password": "Confirm password",
+	"password_not_match": "The passwords do not match.",
 	"register": "Register",
-	"already_have_account": "Already have an account?"
+	"already_have_account": "Already have an account?",
+	"email_incorrect": "Please enter a valid email address.",
+	"password_empty": "Please enter your password.",
+	"password_too_short": "Your password must be at least {length} characters long.",
+	"password_too_less_numbers": "Your password must contain at least one number.",
+	"password_too_less_special_chars": "Your password must contain at least one of the following special characters: {specialChars}.",
+	"password_too_less_uppercase": "Your password must contain at least one uppercase letter.",
+	"password_too_less_lowercase": "Your password must contain at least one lowercase letter.",
+	"logout_success": "Successfully logged out.",
+	"error_occurred": "An error occurred.",
+	"and": "and"
 }

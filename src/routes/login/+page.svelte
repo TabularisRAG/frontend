@@ -1,0 +1,108 @@
+<script lang="ts">
+    import GalleryVerticalEndIcon from "@lucide/svelte/icons/gallery-vertical-end";
+    import {m} from "$lib/paraglide/messages";
+    import type {PageProps} from './$types';
+    import {onMount} from 'svelte';
+    import {toast} from "svelte-sonner";
+    import * as Card from "$lib/components/ui/card";
+    import * as Form from "$lib/components/ui/form";
+    import {Label} from "$lib/components/ui/label";
+    import {Input} from "$lib/components/ui/input";
+    import {Button} from "$lib/components/ui/button";
+    import {superForm} from "sveltekit-superforms";
+    import {zod4Client} from "sveltekit-superforms/adapters";
+    import {loginSchema} from "./schema";
+
+    let {data}: PageProps = $props();
+    onMount(() => {
+        if (data.logout && !data.error) {
+            toast.success(m.logout_success())
+        } else if (data.error) {
+            toast.error(m.error_occurred())
+        }
+    })
+
+    const form = superForm(data.form, {
+        validators: zod4Client(loginSchema)
+    })
+    const {form: formData, enhance} = form
+
+</script>
+<div class="bg-muted flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
+    <div class="flex w-full max-w-sm flex-col gap-6">
+        <a class="flex items-center gap-2 self-center font-medium" href="##">
+            <div
+                    class="bg-primary text-primary-foreground flex size-6 items-center justify-center rounded-md"
+            >
+                <GalleryVerticalEndIcon class="size-4"/>
+            </div>
+            RAG by Tabularis.ai
+        </a>
+        <div class="flex flex-col gap-6">
+            <Card.Root>
+                <Card.Header class="text-center">
+                    <Card.Title class="text-xl">{m.welcome_back()}</Card.Title>
+                    <Card.Description>{m.login_with_credentials()}</Card.Description>
+                </Card.Header>
+                <Card.Content>
+                    <form method="POST" use:enhance>
+                        <div class="grid gap-6">
+                            <div class="grid gap-6">
+                                <Form.Field {form} name="email">
+                                    <Form.Control>
+                                        {#snippet children({props})}
+                                            <Form.Label>{m.email()}</Form.Label>
+                                            <Input
+                                                    {...props}
+                                                    bind:value={$formData.email}
+                                                    placeholder="m@example.com"
+                                                    type="email"
+                                            />
+                                        {/snippet}
+                                    </Form.Control>
+                                    <Form.FieldErrors/>
+                                </Form.Field>
+                                <Form.Field {form} name="password">
+                                    <Form.Control>
+                                        {#snippet children({props})}
+                                            <div class="flex items-center">
+                                                <Form.Label>{m.password()}</Form.Label>
+                                                <a
+                                                        class="ml-auto text-sm underline-offset-4 hover:underline"
+                                                        href="##"
+                                                >
+                                                    {m.forgot_password()}
+                                                </a>
+                                            </div>
+                                            <Input
+
+                                                    {...props}
+                                                    bind:value={$formData.password}
+                                                    type="password"
+                                            />
+                                        {/snippet}
+                                    </Form.Control>
+                                    <Form.FieldErrors/>
+                                </Form.Field>
+                                <Button class="w-full" type="submit">{m.login()}</Button>
+                            </div>
+                            <div class="text-center text-sm">
+                                {m.no_account()}
+                                <a class="underline underline-offset-4" href="/register">
+                                    {m.sign_up()}
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </Card.Content>
+            </Card.Root>
+            <div
+                    class="text-muted-foreground *:[a]:hover:text-primary *:[a]:underline *:[a]:underline-offset-4 text-balance text-center text-xs"
+            >
+                {m.terms_agree()} <a href="##">{m.terms_of_service()}</a>
+                {` ${m.and()} `}<a href="##">{m.privacy_policy()}</a>.
+            </div>
+
+        </div>
+    </div>
+</div>
