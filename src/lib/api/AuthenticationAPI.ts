@@ -68,10 +68,10 @@ export class AuthenticationAPI extends BaseAPI {
             },
             body: JSON.stringify({
                 email: newUser.email,
-                firstName: newUser.firstName,
-                lastName: newUser.lastName,
-                isAdmin: newUser.isAdmin,
-                password: await this.hashPassword(newUser.password)
+                first_name: newUser.firstName,
+                last_name: newUser.lastName,
+                is_admin: newUser.isAdmin,
+                password: newUser.password
             })
         })
 
