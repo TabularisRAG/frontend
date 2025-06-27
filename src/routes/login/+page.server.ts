@@ -22,10 +22,10 @@ export const actions: Actions = {
         }
         try {
             await new AuthenticationAPI().login(form.data as unknown as LoginUser, event)
-            redirect(302, `/`)
+            redirect(302, `/documents`)
         } catch (e) {
             console.error(e)
-            redirect(302, `/login?error`)
+            redirect(302, `/documents`)
         }
     }
 }
