@@ -17,9 +17,9 @@
     
     onMount(() => {
         if (data.logout && !data.error) {
-            toast.success(m.logout_success())
+            toast.success(m.auth_logout_success())
         } else if (data.error) {
-            toast.error(m.error_occurred())
+            toast.error(m.message_error())
         }
     })
 
@@ -50,8 +50,8 @@
         <div class="flex flex-col gap-6">
             <Card.Root>
                 <Card.Header class="text-center">
-                    <Card.Title class="text-xl">{m.welcome_back()}</Card.Title>
-                    <Card.Description>{m.login_with_credentials()}</Card.Description>
+                    <Card.Title class="text-xl">{m.auth_welcome_back()}</Card.Title>
+                    <Card.Description>{m.auth_login_with_credentials()}</Card.Description>
                 </Card.Header>
                 <Card.Content>
                     <form method="POST" use:enhance>
@@ -60,7 +60,7 @@
                                 <Form.Field {form} name="email">
                                     <Form.Control>
                                         {#snippet children({props})}
-                                            <Form.Label>{m.email()}</Form.Label>
+                                            <Form.Label>{m.field_email()}</Form.Label>
                                             <Input
                                                     {...props}
                                                     bind:value={$formData.email}
@@ -75,12 +75,12 @@
                                     <Form.Control>
                                         {#snippet children({props})}
                                             <div class="flex items-center">
-                                                <Form.Label>{m.password()}</Form.Label>
+                                                <Form.Label>{m.field_password()}</Form.Label>
                                                 <a
                                                         class="ml-auto text-sm underline-offset-4 hover:underline"
                                                         href="/forget-pw"
                                                 >
-                                                    {m.forgot_password()}
+                                                    {m.auth_forgot_password()}
                                                 </a>
                                             </div>
                                             <Input
@@ -92,12 +92,12 @@
                                     </Form.Control>
                                     <Form.FieldErrors/>
                                 </Form.Field>
-                                <Button class="w-full" type="submit">{m.login()}</Button>
+                                <Button class="w-full" type="submit">{m.auth_login()}</Button>
                             </div>
                             <div class="text-center text-sm">
-                                {m.no_account()}
+                                {m.auth_no_account()}
                                 <a class="underline underline-offset-4" href="/register">
-                                    {m.sign_up()}
+                                    {m.auth_signup()}
                                 </a>
                             </div>
                         </div>
@@ -107,8 +107,8 @@
             <div
                     class="text-muted-foreground *:[a]:hover:text-primary *:[a]:underline *:[a]:underline-offset-4 text-balance text-center text-xs"
             >
-                {m.terms_agree()} <a href="##">{m.terms_of_service()}</a>
-                {` ${m.and()} `}<a href="##">{m.privacy_policy()}</a>.
+                {m.legal_terms_agree()} <a href="##">{m.legal_terms_service()}</a>
+                {` ${m.legal_and()} `}<a href="##">{m.legal_privacy()}</a>.
             </div>
         </div>
     </div>

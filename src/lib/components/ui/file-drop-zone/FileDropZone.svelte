@@ -188,7 +188,7 @@
                 <span class="font-medium text-muted-foreground">{text}</span>
                 {#if maxFiles}
                       <span class="text-sm text-muted-foreground/75">
-                          {m['general.input.file.can_upload_count']({count: maxFiles})}
+                          {m.file_upload_count({count: maxFiles})}
                       </span>
                 {/if}
             </div>

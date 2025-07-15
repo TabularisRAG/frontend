@@ -19,20 +19,20 @@
                     size="icon"
                     class="relative size-8 p-0"
             >
-                <span class="sr-only">{m['general.actions']()}</span>
+                <span class="sr-only">{m.label_actions()}</span>
                 <EllipsisIcon/>
             </Button>
         {/snippet}
     </DropdownMenu.Trigger>
     <DropdownMenu.Content>
         <DropdownMenu.Group>
-            <DropdownMenu.Label>{m['general.actions']()}</DropdownMenu.Label>
+            <DropdownMenu.Label>{m.label_actions()}</DropdownMenu.Label>
             <DropdownMenu.Separator />
             <DropdownMenu.Item>
                 {#snippet child({props})}
                     <a href="/documents/{id}" {...props}>
                         <Eye class="mr-1 text-foreground"/>
-                        {m['general.view']()}
+                        {m.action_view()}
                     </a>
                 {/snippet}
             </DropdownMenu.Item>
@@ -40,13 +40,13 @@
                 {#snippet child({props})}
                     <a href="/documents/{id}/edit" {...props}>
                         <Pencil class="mr-1 text-foreground"/>
-                        {m['general.edit']()}
+                        {m.action_edit()}
                     </a>
                 {/snippet}
             </DropdownMenu.Item>
             <DropdownMenu.Item onclick={()=> console.log("deleting " + id)}>
                 <Trash class="mr-1 text-foreground"/>
-                {m['general.delete']()}
+                {m.action_delete()}
             </DropdownMenu.Item>
         </DropdownMenu.Group>
     </DropdownMenu.Content>

@@ -53,16 +53,16 @@
     <div class="flex flex-col items-center justify-center">
         <form class="w-full md:w-96 space-y-2 p-4 lg:p-0" enctype="multipart/form-data" method="post" use:enhance>
             <h2 class="text-2xl font-semibold leading-none tracking-tight">
-                {m['pages.documents.form.create_document']()}
+                {m.doc_form_create()}
             </h2>
             <p class="text-sm text-muted-foreground">
-                {m['pages.documents.form.fill_form']()}
+                {m.doc_form_description()}
             </p>
             <div>
                 <Field {form} name="file">
                     <Control>
                         {#snippet children({props})}
-                            <Label>{m['pages.documents.form.file_title']()}</Label>
+                            <Label>{m.doc_form_file_label()}</Label>
                             <FileDropZone
                                     onUpload={onUpload_file}
                                     {onFileRejected}
@@ -77,9 +77,9 @@
                                 application/json,.json,
                                 text/markdown,.md,.markdown,"
                                     maxFiles={1}
-                                    text={m["general.input.file.drag_n_drop_here"]()}
-                                    fileCountError={m['general.input.file.count_error']()}
-                                    fileTypeError={m['general.input.file.type_error']()}
+                                    text={m.file_upload_drag()}
+                                    fileCountError={m.file_upload_max_error()}
+                                    fileTypeError={m.file_upload_type_error()}
                                     fileCount={$files_file.length}
                                     class="my-1"
                             />
@@ -87,7 +87,7 @@
                         {/snippet}
                     </Control>
                     <Description class="text-sm text-muted-foreground">
-                        {m['pages.documents.form.file_description']()}
+                        {m.doc_form_file_description()}
                     </Description>
                     <FieldErrors/>
                     <div class="flex flex-col">
@@ -129,15 +129,15 @@
                 <Field {form} name="title">
                     <Control>
                         {#snippet children({props})}
-                            <Label class='font-medium'>{m['pages.documents.title']()}</Label>
+                            <Label class='font-medium'>{m.doc_field_title()}</Label>
                             <Input
                                     {...props}
                                     type="text"
-                                    placeholder={m['pages.documents.form.title_placeholder']()}
+                                    placeholder={m.doc_form_title_placeholder()}
                                     bind:value={$formData.title}
                             />
                             <Description class="text-muted-foreground text-xs">
-                                {m['pages.documents.form.title_description']()}
+                                {m.doc_form_title_description()}
                             </Description>
                         {/snippet}
                     </Control>
@@ -148,15 +148,15 @@
                 <Field {form} name="year">
                     <Control>
                         {#snippet children({props})}
-                            <Label class='font-medium'>{m['pages.documents.year']()}</Label>
+                            <Label class='font-medium'>{m.doc_field_year()}</Label>
                             <Input
                                     {...props}
                                     type="number"
-                                    placeholder={m['pages.documents.form.year_placeholder']()}
+                                    placeholder={m.doc_form_year_placeholder()}
                                     bind:value={$formData.year}
                             />
                             <Description class="text-muted-foreground text-xs">
-                                Document publishing year.
+                                {m.doc_form_year_description()}
                             </Description>
                         {/snippet}
                     </Control>
@@ -167,15 +167,15 @@
                 <Field {form} name="author">
                     <Control>
                         {#snippet children({props})}
-                            <Label class='font-medium'>{m['pages.documents.author']()}</Label>
+                            <Label class='font-medium'>{m.doc_field_author()}</Label>
                             <Input
                                     {...props}
                                     type="text"
-                                    placeholder={m['pages.documents.form.author_placeholder']()}
+                                    placeholder={m.doc_form_author_placeholder()}
                                     bind:value={$formData.author}
                             />
                             <Description class="text-muted-foreground text-xs">
-                                Document author.
+                                {m.doc_form_author_description()}
                             </Description>
                         {/snippet}
                     </Control>
@@ -186,8 +186,8 @@
                 <Field {form} name="keywords">
                     <Control>
                         {#snippet children({props})}
-                            <Label>{m['pages.documents.keywords']()}</Label>
-                            <TagsInput bind:value={keywords_value} placeholder={m['pages.documents.form.keywords_placeholder']()}/>
+                            <Label>{m.doc_field_keywords()}</Label>
+                            <TagsInput bind:value={keywords_value} placeholder={m.doc_form_keywords_placeholder()}/>
                             {#each $formData.keywords as item, i}
                                 <input
                                         {...props}
@@ -198,13 +198,13 @@
                             {/each}
                         {/snippet}
                     </Control>
-                    <Description class="text-xs text-muted-foreground">{m['pages.documents.form.keywords_description']()}</Description
+                    <Description class="text-xs text-muted-foreground">{m.doc_form_keywords_description()}</Description
                     >
                     <FieldErrors class="text-sm text-destructive"/>
                 </Field>
             </div>
             <div class="mt-4">
-                <Button size="sm" class="w-full" type="submit">{m['general.submit']()}</Button>
+                <Button size="sm" class="w-full" type="submit">{m.action_submit()}</Button>
             </div>
         </form>
     </div>

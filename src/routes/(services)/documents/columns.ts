@@ -35,7 +35,7 @@ export const columns: ColumnDef<Doc>[] = [
         header: ({column}) =>
             renderComponent(FilteringSortingHeader, {
                 column: column,
-                title: m['pages.documents.title']()
+                title: m.doc_field_title()
             }),
         cell: ({row}) => {
             const snippet = createRawSnippet<[String]>((getTitle) => {
@@ -51,7 +51,7 @@ export const columns: ColumnDef<Doc>[] = [
         header: ({column}) =>
             renderComponent(FilteringSortingHeader, {
                 column: column,
-                title: m['pages.documents.author']()
+                title: m.doc_field_author()
             }),
         cell: ({row}) => {
             const snippet = createRawSnippet<[String]>((getAuthor) => {
@@ -68,7 +68,7 @@ export const columns: ColumnDef<Doc>[] = [
             renderComponent(FilteringSortingHeader, {
                 column: column,
                 filtering: false,
-                title: m['pages.documents.year']()
+                title: m.doc_field_year()
             }),
         cell: ({row}) => {
             const snippet = createRawSnippet<[String]>((getYear) => {
@@ -84,7 +84,7 @@ export const columns: ColumnDef<Doc>[] = [
         header: ({column}) =>
             renderComponent(FilteringSortingHeader, {
                 column: column,
-                title: m['pages.documents.keywords']()
+                title: m.doc_field_keywords()
             }),
         cell: ({row}) => {
             return renderComponent(KeywordBadges, {keywords: row.getValue<string[]>("keywords")})
@@ -99,7 +99,7 @@ export const columns: ColumnDef<Doc>[] = [
             renderComponent(FilteringSortingHeader, {
                 column: column,
                 filtering: false,
-                title: m['pages.documents.uploadedAt']()
+                title: m.doc_field_uploaded_at()
             }),
         cell: ({row}) => {
             const formatter = new Intl.DateTimeFormat(getLocale(), {
@@ -125,7 +125,7 @@ export const columns: ColumnDef<Doc>[] = [
             renderComponent(FilteringSortingHeader, {
                 column: column,
                 filtering: false,
-                title: m['pages.documents.size']()
+                title: m.doc_field_size()
             }),
         cell: ({row}) => {
             const snippet = createRawSnippet<[String]>((getSize) => {

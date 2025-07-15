@@ -74,21 +74,21 @@
     <DropdownMenu.Content align="start">
         {#if filtering}
             <DropdownMenu.Group>
-                <DropdownMenu.Label>{m["general.search"]()}</DropdownMenu.Label>
+                <DropdownMenu.Label>{m.action_search()}</DropdownMenu.Label>
                 <DropdownMenu.Separator/>
                 <DropdownMenu.Label class="flex h-9 items-center gap-2">
                     <Search class="size-4 shrink-0 opacity-50"/>
                     <input class="placeholder:text-muted-foreground outline-hidden flex h-10 w-full rounded-md bg-transparent py-3 text-sm disabled:cursor-not-allowed disabled:opacity-50"
                            onchange={(e) => {column.setFilterValue(e.currentTarget.value)}}
                            oninput={(e) => {column.setFilterValue(e.currentTarget.value)}}
-                           placeholder={m["general.search_placeholder"]()}
+                           placeholder={m.placeholder_search()}
                            type="search"
                            value={column.getFilterValue() ?? ""}
                     />
                     {#if column.getIsFiltered()}
                         <Button variant="ghost" onclick={() => column.setFilterValue("")}>
                             <X class="size-4 shrink-0 opacity-50"/>
-                            <span class="sr-only">{m["general.close"]()}</span>
+                            <span class="sr-only">{m.action_close()}</span>
                         </Button>
                     {/if}
                 </DropdownMenu.Label>
@@ -99,15 +99,15 @@
         {/if}
         {#if sorting}
             <DropdownMenu.Group>
-                <DropdownMenu.Label>{m["general.sorting"]()}</DropdownMenu.Label>
+                <DropdownMenu.Label>{m.label_sorting()}</DropdownMenu.Label>
                 <DropdownMenu.Separator/>
                 <DropdownMenu.RadioGroup bind:value={sortingState} onValueChange={() => changeSorting()}>
                     <DropdownMenu.RadioItem class="flex h-9 items-center gap-2" value="asc">
-                        <ArrowUpAZ class="size-4 shrink-0"/>{m["general.ascending"]()}</DropdownMenu.RadioItem>
+                        <ArrowUpAZ class="size-4 shrink-0"/>{m.label_ascending()}</DropdownMenu.RadioItem>
                     <DropdownMenu.RadioItem class="flex h-9 items-center gap-2" value="desc">
-                        <ArrowDownZA class="size-4 shrink-0"/>{m["general.descending"]()}</DropdownMenu.RadioItem>
+                        <ArrowDownZA class="size-4 shrink-0"/>{m.label_descending()}</DropdownMenu.RadioItem>
                     <DropdownMenu.RadioItem class="flex h-9 items-center gap-2" value="none">
-                        <ArrowUpDown class="size-4 shrink-0"/>{m["general.none"]()}</DropdownMenu.RadioItem>
+                        <ArrowUpDown class="size-4 shrink-0"/>{m.label_none()}</DropdownMenu.RadioItem>
                 </DropdownMenu.RadioGroup>
             </DropdownMenu.Group>
         {/if}

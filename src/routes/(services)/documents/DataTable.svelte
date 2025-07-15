@@ -33,12 +33,12 @@
     let rowSelection = $state<RowSelectionState>({});
 
     let columIdNameMap: { [key: string]: string } = {
-        title: m['pages.documents.title'](),
-        author: m['pages.documents.author'](),
-        year: m['pages.documents.year'](),
-        keywords: m['pages.documents.keywords'](),
-        uploadedAt: m['pages.documents.uploadedAt'](),
-        sizeInBytes: m['pages.documents.size']()
+        title: m.doc_field_title(),
+        author: m.doc_field_author(),
+        year: m.doc_field_year(),
+        keywords: m.doc_field_keywords(),
+        uploadedAt: m.doc_field_uploaded_at(),
+        sizeInBytes: m.doc_field_size()
     }
 
     const table = createSvelteTable({
@@ -120,19 +120,19 @@
             {#if table.getFilteredSelectedRowModel().rows.length > 0}
                 <Button href="/documents/access?documents={table.getFilteredSelectedRowModel().rows.map(row => row.id).join(',')}">
                     <UserLock/>
-                    {m['general.manage_access']()} ({table.getFilteredSelectedRowModel().rows.length})
+                    {m.action_manage_access()} ({table.getFilteredSelectedRowModel().rows.length})
                 </Button>
             {/if}
             <Button href="/documents/add">
                 <CirclePlus/>
-                {m['general.add']()}
+                {m.action_add()}
             </Button>
             <DropdownMenu.Root>
                 <DropdownMenu.Trigger>
                     {#snippet child({props})}
                         <Button {...props} variant="outline">
                             <Columns3/>
-                            {m['general.columns']()}
+                            {m.label_columns()}
                         </Button>
                     {/snippet}
                 </DropdownMenu.Trigger>
@@ -181,7 +181,7 @@
                 {:else}
                     <Table.Row>
                         <Table.Cell colspan={columns.length} class="h-24 text-center">
-                            {m['general.no_results']()}
+                            {m.message_no_results()}
                         </Table.Cell>
                     </Table.Row>
                 {/each}

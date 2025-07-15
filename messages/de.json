@@ -1,126 +1,120 @@
 {
   "$schema": "https://inlang.com/schema/inlang-message-format",
-  "hello_world": "Hallo, {name} aus de!",
-  "nav": {
-    "items": {
-      "documents": "Dokumente",
-      "chat": "Chat",
-      "users": "Benutzer",
-      "groups": "Gruppen",
-      "profile": "Profil",
-      "settings": "Einstellungen"
-    },
-    "options": {
-      "language": "Sprache",
-      "theme": "Design",
-      "dark": "Dunkel",
-      "light": "Hell",
-      "system": "System"
-    },
-    "auth": {
-      "logout": "Abmelden",
-      "login": "Anmelden",
-      "signin": "Registrieren"
-    }
-  },
-  "pages": {
-    "documents": {
-      "title": "Titel",
-      "author": "Autor",
-      "uploadedAt": "Hochgeladen am",
-      "year": "Jahr",
-      "size": "Größe",
-      "keywords": "Schlagwörter",
-      "form": {
-        "create_document": "Dokument erstellen",
-        "fill_form": "Zum Erstellen eines Dokuments das Formular ausfüllen.",
-        "file_title": "Datei hochladen",
-        "file_description": "Datei zum Hochladen auswählen.",
-        "title_placeholder": "Titel eingeben",
-        "title_description": "Dokumententitel",
-        "year_placeholder": "Jahr eingeben",
-        "year_description": "Erscheinungsjahr des Dokuments",
-        "author_placeholder": "Autor eingeben",
-        "author_description": "Autor des Dokuments",
-        "keywords_placeholder": "Schlagwörter eingeben",
-        "keywords_description": "Schlagwörter des Dokuments",
-        "file_missing": "Eine Datei muss ausgewählt werden.",
-        "file_too_large": "Die Datei ist zu groß.",
-        "title_missing": "Ein Titel muss eingegeben werden.",
-        "title_too_short": "Der Titel muss mindestens drei Zeichen enthalten.",
-        "year_missing": "Ein Jahr muss eingegeben werden.",
-        "author_missing": "Ein Autor muss angegeben werden.",
-        "keywords_missing": "Mindestens ein Schlagwort muss eingegeben werden."
+  "nav_documents": "Dokumente",
+  "nav_chat": "Chat",
+  "nav_users": "Benutzer",
+  "nav_groups": "Gruppen",
+  "nav_profile": "Profil",
+  "nav_settings": "Einstellungen",
+  "nav_language": "Sprache",
+  "nav_theme": "Design",
+  "nav_theme_dark": "Dunkel",
+  "nav_theme_light": "Hell",
+  "nav_theme_system": "System",
+
+  "doc_field_title": "Titel",
+  "doc_field_author": "Autor",
+  "doc_field_uploaded_at": "Hochgeladen am",
+  "doc_field_year": "Jahr",
+  "doc_field_size": "Größe",
+  "doc_field_keywords": "Schlagwörter",
+
+  "doc_form_create": "Dokument erstellen",
+  "doc_form_description": "Zum Erstellen eines Dokuments das Formular ausfüllen",
+  "doc_form_file_label": "Datei hochladen",
+  "doc_form_file_description": "Datei zum Hochladen auswählen",
+  "doc_form_title_placeholder": "Titel eingeben",
+  "doc_form_title_description": "Dokumententitel",
+  "doc_form_year_placeholder": "Jahr eingeben",
+  "doc_form_year_description": "Erscheinungsjahr des Dokuments",
+  "doc_form_author_placeholder": "Autor eingeben",
+  "doc_form_author_description": "Autor des Dokuments",
+  "doc_form_keywords_placeholder": "Schlagwörter eingeben",
+  "doc_form_keywords_description": "Schlagwörter des Dokuments",
+
+  "doc_validation_file_missing": "Eine Datei muss ausgewählt werden",
+  "doc_validation_file_too_large": "Die Datei ist zu groß",
+  "doc_validation_title_missing": "Ein Titel muss eingegeben werden",
+  "doc_validation_title_too_short": "Der Titel muss mindestens drei Zeichen enthalten",
+  "doc_validation_year_missing": "Ein Jahr muss eingegeben werden",
+  "doc_validation_author_missing": "Ein Autor muss angegeben werden",
+  "doc_validation_keywords_missing": "Mindestens ein Schlagwort muss eingegeben werden",
+
+  "auth_login": "Anmelden",
+  "auth_register": "Registrieren",
+  "auth_logout": "Abmelden",
+  "auth_signin": "Registrieren",
+  "auth_signup": "Registrieren",
+  "auth_logout_success": "Erfolgreich abgemeldet",
+  "auth_welcome_back": "Willkommen zurück",
+  "auth_login_with_credentials": "Melden Sie sich mit Ihren Zugangsdaten an",
+  "auth_create_account": "Konto erstellen",
+  "auth_enter_details": "Geben Sie Ihre Daten unten ein, um sich zu registrieren",
+  "auth_no_account": "Noch kein Konto?",
+  "auth_have_account": "Bereits ein Konto?",
+  "auth_forgot_password": "Passwort vergessen?",
+
+  "field_email": "E-Mail",
+  "field_password": "Passwort",
+  "field_confirm_password": "Passwort bestätigen",
+  "field_first_name": "Vorname",
+  "field_last_name": "Nachname",
+
+  "validation_email_incorrect": "Bitte geben Sie eine gültige E-Mail-Adresse ein",
+  "validation_password_empty": "Bitte geben Sie Ihr Passwort ein",
+  "validation_password_not_match": "Die Passwörter stimmen nicht überein",
+  "validation_first_name_empty": "Bitte geben Sie Ihren Vornamen ein",
+  "validation_last_name_empty": "Bitte geben Sie Ihren Nachnamen ein",
+  "validation_password_too_short": "Ihr Passwort muss mindestens {length} Zeichen lang sein",
+  "validation_password_special_chars": "Ihr Passwort muss mindestens eines der folgenden Sonderzeichen enthalten: {specialChars}",
+  "validation_password_numbers": "Ihr Passwort muss mindestens eine Zahl enthalten",
+  "validation_password_uppercase": "Ihr Passwort muss mindestens einen Großbuchstaben enthalten",
+  "validation_password_lowercase": "Ihr Passwort muss mindestens einen Kleinbuchstaben enthalten",
+
+  "action_submit": "Absenden",
+  "action_close": "Schließen",
+  "action_add": "Hinzufügen",
+  "action_view": "Ansehen",
+  "action_edit": "Bearbeiten",
+  "action_delete": "Löschen",
+  "action_manage_access": "Zugriff verwalten",
+  "action_search": "Suchen",
+
+  "label_actions": "Aktionen",
+  "label_columns": "Spalten",
+  "label_none": "Keine",
+  "label_sorting": "Sortierung",
+  "label_ascending": "Aufsteigend",
+  "label_descending": "Absteigend",
+
+  "placeholder_search": "Suchen...",
+
+  "message_no_results": "Keine Ergebnisse",
+  "message_error": "Ein Fehler ist aufgetreten",
+
+  "file_upload_drag": "Dateien hier ablegen oder zum Auswählen klicken",
+  "file_upload_max_error": "Maximale Anzahl an Dateien erreicht",
+  "file_upload_type_error": "Dateityp nicht erlaubt",
+  "file_upload_count": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "Es kann eine Datei hochgeladen werden",
+        "countPlural=other": "Es können {count} Dateien hochgeladen werden"
       }
     }
-  },
-  "general": {
-    "no_results": "Keine Ergebnisse",
-    "search_placeholder": "Suchen...",
-    "search": "Suchen",
-    "sorting": "Sortierung",
-    "ascending": "Aufsteigend",
-    "descending": "Absteigend",
-    "submit": "Absenden",
-    "none": "Keine",
-    "close": "Schließen",
-    "add": "Hinzufügen",
-    "columns": "Spalten",
-    "input": {
-      "file": {
-        "drag_n_drop_here": "Dateien hier ablegen oder zum Auswählen klicken",
-        "count_error": "Maximale Anzahl an Dateien erreicht",
-        "type_error": "Dateityp nicht erlaubt",
-        "can_upload_count": [
-          {
-            "declarations": [
-              "input count",
-              "local countPlural = count: plural"
-            ],
-            "selectors": [
-              "countPlural"
-            ],
-            "match": {
-              "countPlural=one": "Es kann eine Datei hochgeladen werden.",
-              "countPlural=other": "Es können {count} Dateien hochgeladen werden."
-            }
-          }
-        ]
-      }
-    }
-  },
-  "welcome_back": "Willkommen zurück",
-  "login_with_credentials": "Melden Sie sich mit Ihren Zugangsdaten an",
-  "email": "E-Mail",
-  "password": "Passwort",
-  "forgot_password": "Passwort vergessen?",
-  "login": "Anmelden",
-  "no_account": "Noch kein Konto?",
-  "sign_up": "Registrieren",
-  "terms_agree": "Durch Klicken auf Weiter stimmen Sie unseren",
-  "terms_of_service": "Nutzungsbedingungen",
-  "privacy_policy": "Datenschutzrichtlinien",
-  "login_now": "Jetzt anmelden",
-  "create_account": "Konto erstellen",
-  "enter_details_below": "Geben Sie Ihre Daten unten ein, um sich zu registrieren",
-  "first_name": "Vorname",
-  "first_name_empty": "Bitte geben Sie Ihren Vornamen ein.",
-  "last_name_empty": "Bitte geben Sie Ihren Nachnamen ein.",
-  "last_name": "Nachname",
-  "confirm_password": "Passwort bestätigen",
-  "password_not_match": "Die Passwörter stimmen nicht überein.",
-  "register": "Registrieren",
-  "already_have_account": "Bereits ein Konto?",
-  "email_incorrect": "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
-  "password_empty": "Bitte geben Sie Ihr Passwort ein.",
-  "password_too_short": "Ihr Passwort muss mindestens {length} Zeichen lang sein.",
-  "password_too_less_numbers": "Ihr Passwort muss mindestens eine Zahl enthalten.",
-  "password_too_less_special_chars": "Ihr Passwort muss mindestens eines der folgenden Sonderzeichen enthalten: {specialChars}.",
-  "password_too_less_uppercase": "Ihr Passwort muss mindestens einen Großbuchstaben enthalten.",
-  "password_too_less_lowercase": "Ihr Passwort muss mindestens einen Kleinbuchstaben enthalten.",
-  "logout_success": "Erfolgreich abgemeldet.",
-  "error_occurred": "Ein Fehler ist aufgetreten.",
-  "and": "und",
+  ],
+
+  "legal_terms_agree": "Durch Klicken auf Weiter stimmen Sie unseren",
+  "legal_terms_service": "Nutzungsbedingungen",
+  "legal_privacy": "Datenschutzrichtlinien",
+  "legal_and": "und",
 
   "create_new_group": "Neue Gruppe erstellen",
   "usergroups": "Nutzergruppen",
