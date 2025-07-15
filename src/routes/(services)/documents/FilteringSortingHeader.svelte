@@ -103,11 +103,11 @@
                 <DropdownMenu.Separator/>
                 <DropdownMenu.RadioGroup bind:value={sortingState} onValueChange={() => changeSorting()}>
                     <DropdownMenu.RadioItem class="flex h-9 items-center gap-2" value="asc">
-                        <ArrowUpAZ class="size-4 shrink-0"/>{m["general.table.ascending"]()}</DropdownMenu.RadioItem>
+                        <ArrowUpAZ class="size-4 shrink-0"/>{m["general.ascending"]()}</DropdownMenu.RadioItem>
                     <DropdownMenu.RadioItem class="flex h-9 items-center gap-2" value="desc">
-                        <ArrowDownZA class="size-4 shrink-0"/>{m["general.table.descending"]()}</DropdownMenu.RadioItem>
+                        <ArrowDownZA class="size-4 shrink-0"/>{m["general.descending"]()}</DropdownMenu.RadioItem>
                     <DropdownMenu.RadioItem class="flex h-9 items-center gap-2" value="none">
-                        <ArrowUpDown class="size-4 shrink-0"/>{m["general.table.none"]()}</DropdownMenu.RadioItem>
+                        <ArrowUpDown class="size-4 shrink-0"/>{m["general.none"]()}</DropdownMenu.RadioItem>
                 </DropdownMenu.RadioGroup>
             </DropdownMenu.Group>
         {/if}

@@ -65,6 +65,11 @@
     "none": "None",
     "close": "Close",
     "add": "Add",
+    "view": "View",
+    "edit": "Edit",
+    "delete": "Delete",
+    "manage_access": "Manage Access",
+    "actions": "Actions",
     "columns": "Columns",
     "input": {
       "file": {

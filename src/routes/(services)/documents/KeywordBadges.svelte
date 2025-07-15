@@ -10,7 +10,7 @@
         <Tooltip.Provider>
             <Tooltip.Root>
                 <Tooltip.Trigger>
-                  <Badge variant="secondary" class="max-w-30 truncate block">
+                  <Badge variant="secondary" class="max-w-28 truncate block">
                       {keyword}
                  </Badge>
                  </Tooltip.Trigger>

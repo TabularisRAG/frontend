@@ -1,10 +1,10 @@
 <script generics="TData, TValue" lang="ts">
-    import {m} from '$lib/paraglide/messages.js';
+    import {m} from '$lib/paraglide/messages';
     import {
         type ColumnDef,
         type ColumnFiltersState,
         getCoreRowModel, getFilteredRowModel,
-        getSortedRowModel,
+        getSortedRowModel, type RowSelectionState,
         type SortingState, type VisibilityState
     } from "@tanstack/table-core";
     import {
@@ -17,6 +17,7 @@
     import {Button} from "$lib/components/ui/button";
     import CirclePlus from "@lucide/svelte/icons/circle-plus";
     import Columns3 from "@lucide/svelte/icons/columns-3";
+    import UserLock from "@lucide/svelte/icons/user-lock";
     import ScreenSize from "$lib/components/ScreenSize.svelte";
     import {onMount} from "svelte";
 
@@ -29,6 +30,7 @@
     let sorting = $state<SortingState>([]);
     let columnFilters = $state<ColumnFiltersState>([])
     let columnVisibility = $state<VisibilityState>({});
+    let rowSelection = $state<RowSelectionState>({});
 
     let columIdNameMap: { [key: string]: string } = {
         title: m['pages.documents.title'](),
@@ -44,6 +46,7 @@
             return data;
         },
         columns,
+        getRowId: row => row.id,
         getCoreRowModel: getCoreRowModel(),
         getSortedRowModel: getSortedRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
@@ -68,6 +71,13 @@
                 columnVisibility = updater;
             }
         },
+        onRowSelectionChange: (updater) => {
+            if (typeof updater === "function") {
+                rowSelection = updater(rowSelection);
+            } else {
+                rowSelection = updater;
+            }
+        },
         state: {
             get sorting() {
                 return sorting;
@@ -78,32 +88,41 @@
             get columnVisibility() {
                 return columnVisibility;
             },
+            get rowSelection() {
+                return rowSelection;
+            },
         }
     });
 
-    let isSm = $state(false);
     let isMd = $state(false);
+    let isLg = $state(false);
 
     onMount(() => {
         table.getAllColumns().forEach((col) => {
-            if (!isSm && col.id === "keywords" && col.getIsVisible()) {
+            if (!isMd && col.id === "keywords" && col.getIsVisible()) {
                 col.toggleVisibility(false);
-            } else if (isSm && col.id === "keywords" && !col.getIsVisible()) {
+            } else if (isMd && col.id === "keywords" && !col.getIsVisible()) {
                 col.toggleVisibility(true);
             }
-            if (!isMd && (col.id === "sizeInBytes" || col.id === "uploadedAt") && col.getIsVisible()) {
+            if (!isLg && (col.id === "sizeInBytes" || col.id === "uploadedAt") && col.getIsVisible()) {
                 col.toggleVisibility(false);
-            } else if (isMd && (col.id === "uploadedAt" || col.id === "sizeInBytes") && !col.getIsVisible()) {
+            } else if (isLg && (col.id === "uploadedAt" || col.id === "sizeInBytes") && !col.getIsVisible()) {
                 col.toggleVisibility(true);
             }
         })
     })
 
 </script>
-<ScreenSize bind:isMd bind:isSm/>
+<ScreenSize bind:isMd bind:isLg/>
 <div class="flex flex-col gap-4">
     <div class="flex flex-row justify-end">
         <div class="flex flex-row gap-4">
+            {#if table.getFilteredSelectedRowModel().rows.length > 0}
+                <Button href="/documents/access?documents={table.getFilteredSelectedRowModel().rows.map(row => row.id).join(',')}">
+                    <UserLock/>
+                    {m['general.manage_access']()} ({table.getFilteredSelectedRowModel().rows.length})
+                </Button>
+            {/if}
             <Button href="/documents/add">
                 <CirclePlus/>
                 {m['general.add']()}
@@ -152,9 +171,7 @@
             </Table.Header>
             <Table.Body>
                 {#each table.getRowModel().rows as row (row.id)}
-                    <Table.Row class="hover:cursor-pointer"
-                               data-state={row.getIsSelected() && "selected"}
-                               onclick={() => goto(`/documents/${row.original.id}`)}>
+                    <Table.Row data-state={row.getIsSelected() && "selected"}>
                         {#each row.getVisibleCells() as cell (cell.id)}
                             <Table.Cell>
                                 <FlexRender content={cell.column.columnDef.cell} context={cell.getContext()}/>
