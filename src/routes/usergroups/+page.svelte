@@ -20,24 +20,36 @@
     import { Separator } from "$lib/components/ui/separator";
 
     import { superForm } from "sveltekit-superforms";
-    import { zod4Client } from "sveltekit-superforms/adapters";
+    import type { SuperValidated } from "sveltekit-superforms";
     import { createGroupSchema } from "./schema";
+    import type { CreateGroupSchema } from "./schema";
 
     import { UserGroup } from "$lib/entities/groups";
     import UserGroupAPI from "$lib/api/usergroupAPI/usergroupAPI";
     import { goto } from "$app/navigation";
+    import { invalidateAll } from "$app/navigation";
 
-    let { data }: PageProps = $props();
+    let { data }: { data: { usergroups: UserGroup[], success: boolean, form: SuperValidated<CreateGroupSchema> } } = $props();
     let isCreateDialogOpen = $state(false);
 
     let userGroups = $state(data.usergroups);
 
-    type CreateGroupInput = z.infer<typeof createGroupSchema>;
-
-    const form = superForm<CreateGroupInput>(createGroupSchema, {
-        adapter: zod4Client(),
-        dataType: "json", 
+    // Initialize superForm with the form data from the server
+    const form = superForm(data.form, {
+        resetForm: true,
+        onUpdated: ({ form }) => {
+            if (form.valid) {
+                toast.success("Gruppe erfolgreich erstellt");
+                isCreateDialogOpen = false;
+                invalidateAll();
+            }
+        },
+        onError: ({ result }) => {
+            toast.error("Fehler beim Erstellen der Gruppe");
+        }
     });
+
+    const { form: formData, enhance: formEnhance, submitting } = form;
 
     onMount(() => {
         if (data.success) {
@@ -55,26 +67,7 @@
     function formatDate(dateString: string) {
         return new Date(dateString).toLocaleDateString('de-DE');
     }
-
-    async function onClickCreateGroup() {
-        try {
-            const response = await new UserGroupAPI().createUserGroup({ name: "Test new group" });
-
-
-            toast.success("Gruppe erfolgreich erstellt");
-
-            // Gruppenliste aktualisieren
-            userGroups = await new UserGroupAPI().getUserGroups()
-
-            // Dialog schließen
-            isCreateDialogOpen = false;
-        } catch (error) {
-            console.error(error);
-            toast.error("Ein unerwarteter Fehler ist aufgetreten");
-        }
-    }
 </script>
-
 
 <div class="bg-muted/30 min-h-svh p-6">
     <div class="mx-auto max-w-6xl">
@@ -180,29 +173,36 @@
                     </Dialog.Description>
                 </Dialog.Header>
         
-                <form use:form use:enhance>
+                <form method="POST" action="?/createGroup" use:formEnhance>
                     <div class="grid gap-4 py-4">
                         <Form.Field {form} name="name">
                             <Form.Control>
-                                {#snippet children({props})}
-                                    <Form.Label>Gruppenname</Form.Label>
-                                    <Input
-                                        {...props}
-                                        placeholder="z.B. Entwickler Team"
-                                    />
-                                {/snippet}
+                                <Form.Label>Gruppenname</Form.Label>
+                                <Input
+                                    bind:value={$formData.name}
+                                    placeholder="z.B. Entwickler Team"
+                                />
                             </Form.Control>
                             <Form.FieldErrors />
                         </Form.Field>
                     </div>
-        
+                
                     <Dialog.Footer>
-                        <Button type="button" variant="outline" on:click={() => isCreateDialogOpen = false}>
+                        <Button 
+                            type="button" 
+                            variant="outline" 
+                            onclick={() => isCreateDialogOpen = false}
+                            disabled={$submitting}
+                        >
                             Abbrechen
                         </Button>
-                        <Button type="submit" class="gap-2">
+                        <Button 
+                            type="submit" 
+                            class="gap-2"
+                            disabled={$submitting}
+                        >
                             <Plus class="size-4" />
-                            Gruppe erstellen
+                            {$submitting ? 'Wird erstellt...' : 'Gruppe erstellen'}
                         </Button>
                     </Dialog.Footer>
                 </form>

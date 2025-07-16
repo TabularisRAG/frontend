@@ -34,6 +34,6 @@ export class User implements BaseUser {
     ) {}
 
     public getFullName(): string {
-        return `${this.firstName} ${this.lastName}`;
+        return `${this.first_name} ${this.last_name}`;
     }
 }
