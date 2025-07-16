@@ -1,7 +1,7 @@
 import type { UserGroup } from "$lib/entities/groups";
 import APIClient from "../ApiClient";
 
-const jwt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImpvaG4yLnNtaXRoQGV4YW1wbGUuY29tIiwiZXhwIjoxNzUyNjgwMDQ0fQ.so5eZ71A79MhPAdJunrsWbA2XiJkbbOl3x1VUjUqyzg"
+const jwt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImpvaG4yLnNtaXRoQGV4YW1wbGUuY29tIiwiZXhwIjoxNzUyNjgwODAxfQ.i7TXIkPmPw5LJxZqnj0RlDQGGHg0LzlNSGIVCfUCLEk"
 export default class UserGroupAPI extends APIClient {
 
     public async createUserGroup(user_group : any) {

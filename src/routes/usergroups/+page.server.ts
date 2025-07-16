@@ -3,23 +3,20 @@ import type { LayoutServerLoad } from './$types';
 import { error, fail, redirect } from '@sveltejs/kit';
 
 import type {Actions, PageServerLoad} from "./$types";
-import { z } from 'zod';
 import { superValidate } from "sveltekit-superforms";
-import { zod } from "sveltekit-superforms/adapters";
+import { zod4 } from 'sveltekit-superforms/adapters';
 import { createGroupSchema } from './schema';
 import UserGroupAPI from '$lib/api/usergroupAPI/usergroupAPI';
 
 export const load: PageServerLoad = async ({ fetch, depends }) => {
-  // Initialize the form for creating new groups first
-  const form = await superValidate(zod(createGroupSchema));
 
   try {
     const list: UserGroup[] = await new UserGroupAPI().getUserGroups();
-
+    console.log(list)
     return {
       usergroups: list,
       success: true,
-      form
+      form: await superValidate(zod4(createGroupSchema))
     };
   } catch (e) {
     console.error("Error while loading usergroup data:", e);
@@ -27,15 +24,15 @@ export const load: PageServerLoad = async ({ fetch, depends }) => {
     return { 
       usergroups: [], 
       success: false, 
-      form 
+      form: await superValidate(zod4(createGroupSchema)) 
     };
   }
 };
 
 export const actions: Actions = {
-  createGroup: async ({ request }) => {
+  default: async (request) => {
       console.log("Creating group");
-      const form = await superValidate(request, zod(createGroupSchema));
+      const form = await superValidate(request, zod4(createGroupSchema))
       console.log("Form data:", form.data);
       
       // Validate the form data

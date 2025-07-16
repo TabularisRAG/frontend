@@ -22,35 +22,26 @@
     import { superForm } from "sveltekit-superforms";
     import type { SuperValidated } from "sveltekit-superforms";
     import { createGroupSchema } from "./schema";
-    import type { CreateGroupSchema } from "./schema";
 
     import { UserGroup } from "$lib/entities/groups";
     import UserGroupAPI from "$lib/api/usergroupAPI/usergroupAPI";
     import { goto } from "$app/navigation";
     import { invalidateAll } from "$app/navigation";
+    import { zod4Client } from "sveltekit-superforms/adapters";
 
-    let { data }: { data: { usergroups: UserGroup[], success: boolean, form: SuperValidated<CreateGroupSchema> } } = $props();
+    let {data}: PageProps = $props();
     let isCreateDialogOpen = $state(false);
-
     let userGroups = $state(data.usergroups);
 
-    // Initialize superForm with the form data from the server
+    console.log(data)
+
+
     const form = superForm(data.form, {
-        resetForm: true,
-        onUpdated: ({ form }) => {
-            if (form.valid) {
-                toast.success("Gruppe erfolgreich erstellt");
-                isCreateDialogOpen = false;
-                invalidateAll();
-            }
-        },
-        onError: ({ result }) => {
-            toast.error("Fehler beim Erstellen der Gruppe");
-        }
+        validators: zod4Client(createGroupSchema)
     });
 
-    const { form: formData, enhance: formEnhance, submitting } = form;
-
+    const {form: formData, enhance, submitting} = form
+    
     onMount(() => {
         if (data.success) {
             toast.success("Gruppen erfolgreich geladen");
@@ -173,15 +164,18 @@
                     </Dialog.Description>
                 </Dialog.Header>
         
-                <form method="POST" action="?/createGroup" use:formEnhance>
+                <form method="POST" use:enhance>
                     <div class="grid gap-4 py-4">
                         <Form.Field {form} name="name">
                             <Form.Control>
-                                <Form.Label>Gruppenname</Form.Label>
-                                <Input
-                                    bind:value={$formData.name}
-                                    placeholder="z.B. Entwickler Team"
-                                />
+                                {#snippet children({props})}
+                                    <Form.Label>Gruppenname</Form.Label>
+                                        <Input
+                                            {...props}
+                                            bind:value={$formData.name}
+                                            placeholder="z.B. Entwickler Team"
+                                        />
+                                {/snippet}
                             </Form.Control>
                             <Form.FieldErrors />
                         </Form.Field>
