@@ -1,12 +1,13 @@
 import type { PageServerLoad, Actions } from './$types';
 import { superValidate } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod, zod4 } from 'sveltekit-superforms/adapters';
 import { addMemberSchema } from './schema';
 import { fail, error } from '@sveltejs/kit';
 import UserGroupAPI from '$lib/api/usergroupAPI/usergroupAPI';
 import type { UserGroup } from '$lib/entities/groups';
 import { AuthenticationAPI } from '$lib/api/AuthenticationAPI';
 import type { User } from '$lib/entities/user';
+import UserAPI from '$lib/api/userAPI/userAPI';
 
 export const load: PageServerLoad = async ({ params, locals, url }) => {
     const groupId = params.group_id;
@@ -19,10 +20,13 @@ export const load: PageServerLoad = async ({ params, locals, url }) => {
     let current_user = locals.user
     current_user = { id : "bd38a05b-d454-4764-bd31-6c97e96b2ee5"} as User
    
+    const allUsers = await new UserAPI().getAllUsers()
 
     return {
         group : usergroup,
+        allUsers : allUsers,
         current_user : current_user,
+        add_member_form: await superValidate(zod4(addMemberSchema)),
         success: true
     }
 };
@@ -30,7 +34,7 @@ export const load: PageServerLoad = async ({ params, locals, url }) => {
 export const actions: Actions = {
     addMember: async ({ request, params, locals }) => {
         const groupId = params.group_id;
-        const form = await superValidate(request, zod(addMemberSchema));
+        const form = await superValidate(request, zod4(addMemberSchema));
         
         if (!form.valid) {
             return fail(400, { form });

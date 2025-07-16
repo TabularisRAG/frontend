@@ -20,6 +20,7 @@
     import { zod4Client } from "sveltekit-superforms/adapters";
     import { addMemberSchema, type AddMemberSchema } from "./schema";
     import type { User } from "$lib/entities/user";
+    import * as Select from "$lib/components/ui/select";
 
     let { data }: PageProps = $props();
 
@@ -28,6 +29,11 @@
 
     let memberToRemove: User | null = $state(null);
     let searchQuery = $state('');
+
+    const form = superForm(data.add_member_form, {
+        validators: zod4Client(addMemberSchema)
+    })
+    const {form: formData, enhance} = form
 
     function getFullName(user : User) {
         return user.first_name + " " + user.last_name
@@ -69,6 +75,20 @@
 
     function checkCurrentUserIsLeader() {
        return groupDetails.users.find(elem => elem.id == current_user!!.id)!!.is_leader
+    }
+
+
+    function leaveGroup() {
+        
+    }
+
+
+    function removeMember(): any {
+        throw new Error("Function not implemented.");
+    }
+
+    function changeRole(leader : boolean) {
+
     }
 </script>
 
@@ -164,7 +184,7 @@
                                     <Avatar class="size-12">
                                         <AvatarImage alt={getFullName(member)} />
                                         <AvatarFallback class="bg-primary/10 text-primary">
-                                           Test Aavatar
+                                           { getInitials(member.first_name + " " + member.last_name) }
                                         </AvatarFallback>
                                     </Avatar>
                                     <div>
@@ -176,7 +196,7 @@
                                                     Admin
                                                 </Badge>
                                             {/if}
-                                            {#if true}
+                                            {#if member.id == current_user.id}
                                                 <Badge variant="outline">Sie</Badge>
                                             {/if}
                                         </div>
@@ -186,7 +206,7 @@
                                         </div>
                                         <div class="flex items-center gap-2 text-xs text-muted-foreground mt-1">
                                             <Calendar class="size-3" />
-                                            Beigetreten am 01.01.2025
+                                            Beigetreten am { formatDate(member.joined_at) }
                                         </div>
                                     </div>
                                 </div>
@@ -244,31 +264,34 @@
                     </Dialog.Description>
                 </Dialog.Header>
                 
-                <form method="POST" action="?/addMember" use:enhance>
-                    <div class="grid gap-4 py-4">
-                        <Form.Field name="email" let:attrs>
-                            <Form.Label>E-Mail-Adresse</Form.Label>
-                            <Form.Control>
-                                <Input
-                                    {...attrs}
-                                    placeholder="nutzer@example.com"
-                                    type="email"
-                                />
-                            </Form.Control>
-                            <Form.FieldErrors />
-                        </Form.Field>
-                    </div>
-                    
-                    <Dialog.Footer>
-                        <Button type="button" variant="outline" onclick={() => isAddMemberDialogOpen = false}>
-                            Abbrechen
-                        </Button>
-                        <Button type="submit" class="gap-2">
-                            <UserPlus class="size-4" />
-                            Mitglied hinzufügen
-                        </Button>
-                    </Dialog.Footer>
-                </form>
+                <form method="POST" class="w-2/3 space-y-6" use:enhance>
+                    <Form.Field {form} name="email">
+                      <Form.Control>
+                        {#snippet children({ props })}
+                          <Form.Label>Email</Form.Label>
+                          <Select.Root
+                            type="single"
+                            bind:value={$formData.email}
+                            name={props.name}
+                          >
+                            <Select.Trigger {...props}>
+                              {$formData.email
+                                ? $formData.email
+                                : "Select a verified email to display"}
+                            </Select.Trigger>
+                            <Select.Content>
+                                {#each data.allUsers as user}
+                                <Select.Item value={user} label={user.first_name + " " + user.last_name} />
+                              {/each}
+                            </Select.Content>
+                          </Select.Root>
+                        {/snippet}
+                      </Form.Control>
+                      
+                      <Form.FieldErrors />
+                    </Form.Field>
+                    <Form.Button>Submit</Form.Button>
+                  </form>
             </Dialog.Content>
         </Dialog.Root>
 
@@ -284,7 +307,7 @@
                 </AlertDialog.Header>
                 <AlertDialog.Footer>
                     <AlertDialog.Cancel>Abbrechen</AlertDialog.Cancel>
-                    <AlertDialog.Action onclick={() => {}} class="bg-destructive hover:bg-destructive/90">
+                    <AlertDialog.Action onclick={() => {leaveGroup()}} class="bg-destructive hover:bg-destructive/90">
                         Gruppe verlassen
                     </AlertDialog.Action>
                 </AlertDialog.Footer>
@@ -304,7 +327,7 @@
                 <AlertDialog.Footer>
                     <AlertDialog.Cancel>Abbrechen</AlertDialog.Cancel>
                     <AlertDialog.Action 
-                        onclick={() => memberToRemove && {}} 
+                        onclick={() => removeMember()}
                         class="bg-destructive hover:bg-destructive/90"
                     >
                         Mitglied entfernen

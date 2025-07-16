@@ -31,5 +31,30 @@ export default class UserAPI extends APIClient {
 
     }
 
+    public async getAllUsers() {
+
+        try {
+            const response = await fetch(this.serverURL + "/user/all", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                }
+            });
+    
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+    
+            const data : User[] = await response.json();
+            return data
+           
+        } catch (error) {
+            console.error("Login failed:", error);
+            throw new Error("Failed to load user");
+        }
+
+    }
+
+
 
 }
