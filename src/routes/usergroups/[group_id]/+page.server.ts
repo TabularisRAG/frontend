@@ -4,6 +4,9 @@ import { zod } from 'sveltekit-superforms/adapters';
 import { addMemberSchema } from './schema';
 import { fail, error } from '@sveltejs/kit';
 import UserGroupAPI from '$lib/api/usergroupAPI/usergroupAPI';
+import type { UserGroup } from '$lib/entities/groups';
+import { AuthenticationAPI } from '$lib/api/AuthenticationAPI';
+import type { User } from '$lib/entities/user';
 
 export const load: PageServerLoad = async ({ params, locals, url }) => {
     const groupId = params.group_id;
@@ -12,10 +15,15 @@ export const load: PageServerLoad = async ({ params, locals, url }) => {
         throw error(404, 'Gruppe nicht gefunden');
     }
     
-    const usergroup = new UserGroupAPI().getUserGroup(groupId)
+    const usergroup = await new UserGroupAPI().getUserGroup(groupId)
+    let current_user = locals.user
+    current_user = { id : "bd38a05b-d454-4764-bd31-6c97e96b2ee5"} as User
+   
 
     return {
-        group : usergroup
+        group : usergroup,
+        current_user : current_user,
+        success: true
     }
 };
 

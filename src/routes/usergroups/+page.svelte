@@ -1,14 +1,15 @@
 <script lang="ts">
-    //import { Users, Plus, Crown, ChevronRight, Settings } from "lucide-svelte";
-    import Users from "@lucide/svelte/icons/users"
-    import Plus from "@lucide/svelte/icons/circle-plus"
-    import Crown from "@lucide/svelte/icons/circle-plus"
-    import ChevronRight from "@lucide/svelte/icons/circle-plus"
-    import Settings from "@lucide/svelte/icons/circle-plus"
+    import Users from "@lucide/svelte/icons/users";
+    import Plus from "@lucide/svelte/icons/plus";
+    import Crown from "@lucide/svelte/icons/crown";
+    import ChevronRight from "@lucide/svelte/icons/chevron-right";
+    import Settings from "@lucide/svelte/icons/settings";
+
     import { m } from "$lib/paraglide/messages";
     import type { PageProps } from './$types';
     import { onMount } from 'svelte';
     import { toast } from "svelte-sonner";
+
     import * as Card from "$lib/components/ui/card";
     import * as Form from "$lib/components/ui/form";
     import * as Dialog from "$lib/components/ui/dialog";
@@ -17,19 +18,27 @@
     import { Button } from "$lib/components/ui/button";
     import { Badge } from "$lib/components/ui/badge";
     import { Separator } from "$lib/components/ui/separator";
+
     import { superForm } from "sveltekit-superforms";
     import { zod4Client } from "sveltekit-superforms/adapters";
     import { createGroupSchema } from "./schema";
-    import type { UserGroup } from "$lib/entities/groups";
 
+    import { UserGroup } from "$lib/entities/groups";
+    import UserGroupAPI from "$lib/api/usergroupAPI/usergroupAPI";
+    import { goto } from "$app/navigation";
 
     let { data }: PageProps = $props();
     let isCreateDialogOpen = $state(false);
-    let selectedGroup: UserGroup | null = $state(null);
 
-    // Beispieldaten - normalerweise aus data.groups
-    let userGroups = $state(data.usergroups)
-   
+    let userGroups = $state(data.usergroups);
+
+    type CreateGroupInput = z.infer<typeof createGroupSchema>;
+
+    const form = superForm<CreateGroupInput>(createGroupSchema, {
+        adapter: zod4Client(),
+        dataType: "json", 
+    });
+
     onMount(() => {
         if (data.success) {
             toast.success("Gruppen erfolgreich geladen");
@@ -38,37 +47,8 @@
         }
     });
 
-    // Fallback-Objekt falls data.form nicht existiert
-    const formDefaults = {
-        name: '',
-        description: ''
-    };
-
-    const form = superForm(data.form || formDefaults, {
-        validators: zod4Client(createGroupSchema),
-        onUpdated: ({ form }) => {
-            if (form.valid) {
-                // Neue Gruppe zur Liste hinzufügen
-                const newGroup: UserGroup = {
-                    id: Date.now().toString(),
-                    name: form.data.name,
-                    description: form.data.description || '',
-                    memberCount: 1,
-                    isAdmin: true,
-                    createdAt: new Date().toISOString().split('T')[0]
-                };
-                userGroups = [...userGroups, newGroup];
-                isCreateDialogOpen = false;
-                toast.success(`Gruppe "${newGroup.name}" erfolgreich erstellt`);
-            }
-        }
-    });
-
-    const { form: formData, enhance: formEnhance } = form;
-
     function handleGroupClick(group: UserGroup) {
-        selectedGroup = group;
-        // Hier würde normalerweise eine Navigation erfolgen
+        goto(`/usergroups/${group.id}`);
         toast.info(`Navigiere zu Gruppe: ${group.name}`);
     }
 
@@ -76,8 +56,25 @@
         return new Date(dateString).toLocaleDateString('de-DE');
     }
 
+    async function onClickCreateGroup() {
+        try {
+            const response = await new UserGroupAPI().createUserGroup({ name: "Test new group" });
 
+
+            toast.success("Gruppe erfolgreich erstellt");
+
+            // Gruppenliste aktualisieren
+            userGroups = await new UserGroupAPI().getUserGroups()
+
+            // Dialog schließen
+            isCreateDialogOpen = false;
+        } catch (error) {
+            console.error(error);
+            toast.error("Ein unerwarteter Fehler ist aufgetreten");
+        }
+    }
 </script>
+
 
 <div class="bg-muted/30 min-h-svh p-6">
     <div class="mx-auto max-w-6xl">
@@ -182,8 +179,8 @@
                         Erstellen Sie eine neue Nutzergruppe. Sie werden automatisch als Administrator hinzugefügt.
                     </Dialog.Description>
                 </Dialog.Header>
-                
-                <form method="POST" use:enhance={formEnhance}>
+        
+                <form use:form use:enhance>
                     <div class="grid gap-4 py-4">
                         <Form.Field {form} name="name">
                             <Form.Control>
@@ -191,18 +188,16 @@
                                     <Form.Label>Gruppenname</Form.Label>
                                     <Input
                                         {...props}
-                                        bind:value={$formData.name}
                                         placeholder="z.B. Entwickler Team"
                                     />
                                 {/snippet}
                             </Form.Control>
                             <Form.FieldErrors />
                         </Form.Field>
-
                     </div>
-                    
+        
                     <Dialog.Footer>
-                        <Button type="button" variant="outline" onclick={() => isCreateDialogOpen = false}>
+                        <Button type="button" variant="outline" on:click={() => isCreateDialogOpen = false}>
                             Abbrechen
                         </Button>
                         <Button type="submit" class="gap-2">
@@ -213,5 +208,6 @@
                 </form>
             </Dialog.Content>
         </Dialog.Root>
+        
     </div>
 </div>

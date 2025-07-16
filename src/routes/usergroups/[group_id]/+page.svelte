@@ -18,185 +18,46 @@
     import { Separator } from "$lib/components/ui/separator";
     import { superForm } from "sveltekit-superforms";
     import { zod4Client } from "sveltekit-superforms/adapters";
-    import { addMemberSchema } from "./schema";
-
-    // Typen für Gruppenmitglieder
-    interface GroupMember {
-        id: string;
-        name: string;
-        email: string;
-        isAdmin: boolean;
-        joinedAt: string;
-        avatar?: string;
-        isCurrentUser: boolean;
-    }
-
-    interface GroupDetails {
-        id: string;
-        name: string;
-        description?: string;
-        createdAt: string;
-        createdBy: string;
-        memberCount: number;
-        members: GroupMember[];
-    }
+    import { addMemberSchema, type AddMemberSchema } from "./schema";
+    import type { User } from "$lib/entities/user";
 
     let { data }: PageProps = $props();
+
     let isAddMemberDialogOpen = $state(false);
     let isLeaveGroupDialogOpen = $state(false);
-    let memberToRemove: GroupMember | null = $state(null);
+
+    let memberToRemove: User | null = $state(null);
     let searchQuery = $state('');
 
-    // Fallback falls data nicht die erwartete Struktur hat
-    $effect(() => {
-        if (!data) {
-            data = { 
-                form: null, 
-                success: false, 
-                error: false,
-                group: null
-            };
-        }
-    });
+    function getFullName(user : User) {
+        return user.first_name + " " + user.last_name
+    }
 
-    // Beispieldaten für eine Gruppe - normalerweise aus data.group
-    let groupDetails: GroupDetails = $state({
-        id: "1",
-        name: "Entwickler Team",
-        description: "Hauptentwicklungsgruppe für das RAG-System",
-        createdAt: "2024-01-15",
-        createdBy: "Max Mustermann",
-        memberCount: 8,
-        members: [
-            {
-                id: "user1",
-                name: "Max Mustermann",
-                email: "max@example.com",
-                isAdmin: true,
-                joinedAt: "2024-01-15",
-                isCurrentUser: true
-            },
-            {
-                id: "user2", 
-                name: "Anna Schmidt",
-                email: "anna@example.com",
-                isAdmin: true,
-                joinedAt: "2024-01-16",
-                isCurrentUser: false
-            },
-            {
-                id: "user3",
-                name: "Tom Weber",
-                email: "tom@example.com",
-                isAdmin: false,
-                joinedAt: "2024-01-20",
-                isCurrentUser: false
-            },
-            {
-                id: "user4",
-                name: "Lisa König",
-                email: "lisa@example.com",
-                isAdmin: false,
-                joinedAt: "2024-01-22",
-                isCurrentUser: false
-            },
-            {
-                id: "user5",
-                name: "Stefan Müller",
-                email: "stefan@example.com",
-                isAdmin: false,
-                joinedAt: "2024-02-01",
-                isCurrentUser: false
-            }
-        ]
-    });
+    let groupDetails = data.group
+    let current_user = data.current_user
+    console.log(data)
+
+    let is_leader = checkCurrentUserIsLeader()
 
     // Aktueller Nutzer
-    const currentUser = $derived(groupDetails.members.find(m => m.isCurrentUser));
-    const isCurrentUserAdmin = $derived(currentUser?.isAdmin ?? false);
+    const isCurrentUserAdmin = $derived(current_user?.isAdmin ?? false);
 
     // Gefilterte Mitglieder basierend auf Suchbegriff
-    const filteredMembers = $derived(groupDetails.members.filter(member =>
-        member.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    const filteredMembers = $derived(groupDetails.users.filter(member =>
+        getFullName(member).toLowerCase().includes(searchQuery.toLowerCase()) ||
         member.email.toLowerCase().includes(searchQuery.toLowerCase())
     ));
 
-    const formDefaults = {
-        email: ''
-    };
-
-    const form = superForm(data.form || formDefaults, {
-        validators: zod4Client(addMemberSchema),
-        onUpdated: ({ form }) => {
-            if (form.valid) {
-                // Neues Mitglied zur Liste hinzufügen
-                const newMember: GroupMember = {
-                    id: Date.now().toString(),
-                    name: form.data.email.split('@')[0],
-                    email: form.data.email,
-                    isAdmin: false,
-                    joinedAt: new Date().toISOString().split('T')[0],
-                    isCurrentUser: false
-                };
-                groupDetails.members = [...groupDetails.members, newMember];
-                groupDetails.memberCount++;
-                isAddMemberDialogOpen = false;
-                toast.success(`${newMember.name} wurde zur Gruppe hinzugefügt`);
-            }
-        }
-    });
-
-    const { form: formData, enhance } = form;
 
     onMount(() => {
         if (data.success) {
             toast.success("Gruppe erfolgreich geladen");
-        } else if (data.error) {
+        } else {
             toast.error("Fehler beim Laden der Gruppe");
         }
     });
 
-    function handleLeaveGroup() {
-        if (currentUser) {
-            groupDetails.members = groupDetails.members.filter(m => m.id !== currentUser.id);
-            groupDetails.memberCount--;
-            toast.success("Sie haben die Gruppe verlassen");
-            goto('/groups');
-        }
-    }
 
-    function handleRemoveMember(member: GroupMember) {
-        if (member.id === currentUser?.id) {
-            toast.error("Sie können sich nicht selbst entfernen");
-            return;
-        }
-        
-        groupDetails.members = groupDetails.members.filter(m => m.id !== member.id);
-        groupDetails.memberCount--;
-        memberToRemove = null;
-        toast.success(`${member.name} wurde aus der Gruppe entfernt`);
-    }
-
-    function handleMakeAdmin(member: GroupMember) {
-        const memberIndex = groupDetails.members.findIndex(m => m.id === member.id);
-        if (memberIndex !== -1) {
-            groupDetails.members[memberIndex].isAdmin = true;
-            toast.success(`${member.name} ist jetzt Administrator`);
-        }
-    }
-
-    function handleRemoveAdmin(member: GroupMember) {
-        if (member.id === currentUser?.id) {
-            toast.error("Sie können sich nicht selbst die Admin-Rechte entziehen");
-            return;
-        }
-        
-        const memberIndex = groupDetails.members.findIndex(m => m.id === member.id);
-        if (memberIndex !== -1) {
-            groupDetails.members[memberIndex].isAdmin = false;
-            toast.success(`${member.name} ist kein Administrator mehr`);
-        }
-    }
 
     function formatDate(dateString: string) {
         return new Date(dateString).toLocaleDateString('de-DE');
@@ -204,6 +65,10 @@
 
     function getInitials(name: string) {
         return name.split(' ').map(n => n[0]).join('').toUpperCase();
+    }
+
+    function checkCurrentUserIsLeader() {
+       return groupDetails.users.find(elem => elem.id == current_user!!.id)!!.is_leader
     }
 </script>
 
@@ -225,21 +90,18 @@
                     </div>
                     <div>
                         <h1 class="text-3xl font-bold">{groupDetails.name}</h1>
-                        {#if groupDetails.description}
-                            <p class="text-muted-foreground text-lg">{groupDetails.description}</p>
-                        {/if}
                         <div class="mt-2 flex items-center gap-4 text-sm text-muted-foreground">
-                            <span>{groupDetails.memberCount} Mitglieder</span>
+                            <span>{groupDetails.user_count} Mitglieder</span>
                             <Separator orientation="vertical" class="h-4" />
-                            <span>Erstellt am {formatDate(groupDetails.createdAt)}</span>
+                            <span>Erstellt am {formatDate(groupDetails.created_at)}</span>
                             <Separator orientation="vertical" class="h-4" />
-                            <span>von {groupDetails.createdBy}</span>
+                            <span>von {"Test name erstellt"}</span>
                         </div>
                     </div>
                 </div>
                 
                 <div class="flex items-center gap-2">
-                    {#if isCurrentUserAdmin}
+                    {#if isCurrentUserAdmin || is_leader}
                         <Button onclick={() => isAddMemberDialogOpen = true} class="gap-2">
                             <UserPlus class="size-4" />
                             Mitglied hinzufügen
@@ -253,7 +115,7 @@
                             </div>
                         </DropdownMenu.Trigger>
                         <DropdownMenu.Content align="end">
-                            {#if isCurrentUserAdmin}
+                            {#if isCurrentUserAdmin || is_leader}
                                 <DropdownMenu.Item class="gap-2">
                                     <Settings class="size-4" />
                                     Gruppe bearbeiten
@@ -279,7 +141,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <Card.Title>Mitglieder</Card.Title>
-                        <Card.Description>Alle {groupDetails.memberCount} Mitglieder der Gruppe</Card.Description>
+                        <Card.Description>Alle {groupDetails.user_count} Mitglieder der Gruppe</Card.Description>
                     </div>
                     <div class="flex items-center gap-2">
                         <div class="relative">
@@ -300,21 +162,21 @@
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center gap-4">
                                     <Avatar class="size-12">
-                                        <AvatarImage src={member.avatar} alt={member.name} />
+                                        <AvatarImage alt={getFullName(member)} />
                                         <AvatarFallback class="bg-primary/10 text-primary">
-                                            {getInitials(member.name)}
+                                           Test Aavatar
                                         </AvatarFallback>
                                     </Avatar>
                                     <div>
                                         <div class="flex items-center gap-2">
-                                            <h3 class="font-semibold">{member.name}</h3>
+                                            <h3 class="font-semibold">{getFullName(member)}</h3>
                                             {#if member.isAdmin}
                                                 <Badge variant="secondary" class="gap-1">
                                                     <Crown class="size-3" />
                                                     Admin
                                                 </Badge>
                                             {/if}
-                                            {#if member.isCurrentUser}
+                                            {#if true}
                                                 <Badge variant="outline">Sie</Badge>
                                             {/if}
                                         </div>
@@ -324,12 +186,12 @@
                                         </div>
                                         <div class="flex items-center gap-2 text-xs text-muted-foreground mt-1">
                                             <Calendar class="size-3" />
-                                            Beigetreten am {formatDate(member.joinedAt)}
+                                            Beigetreten am 01.01.2025
                                         </div>
                                     </div>
                                 </div>
                                 
-                                {#if isCurrentUserAdmin && !member.isCurrentUser}
+                                {#if isCurrentUserAdmin || is_leader}
                                     <DropdownMenu.Root>
                                         <DropdownMenu.Trigger asChild>
                                             <Button variant="ghost" size="icon">
@@ -337,10 +199,10 @@
                                             </Button>
                                     </DropdownMenu.Trigger>
                                         <DropdownMenu.Content align="end">
-                                            {#if member.isAdmin}
+                                            {#if is_leader}
                                                 <DropdownMenu.Item 
                                                     class="gap-2"
-                                                    onclick={() => handleRemoveAdmin(member)}
+                                                    onclick={() => {}}
                                                 >
                                                     <UserMinus class="size-4" />
                                                     Admin-Rechte entziehen
@@ -348,7 +210,7 @@
                                             {:else}
                                                 <DropdownMenu.Item 
                                                     class="gap-2"
-                                                    onclick={() => handleMakeAdmin(member)}
+                                                    onclick={() => {}}
                                                 >
                                                     <Crown class="size-4" />
                                                     Zum Admin machen
@@ -384,12 +246,11 @@
                 
                 <form method="POST" action="?/addMember" use:enhance>
                     <div class="grid gap-4 py-4">
-                        <Form.Field {form} name="email" let:attrs>
+                        <Form.Field name="email" let:attrs>
                             <Form.Label>E-Mail-Adresse</Form.Label>
                             <Form.Control>
                                 <Input
                                     {...attrs}
-                                    bind:value={$formData.email}
                                     placeholder="nutzer@example.com"
                                     type="email"
                                 />
@@ -423,7 +284,7 @@
                 </AlertDialog.Header>
                 <AlertDialog.Footer>
                     <AlertDialog.Cancel>Abbrechen</AlertDialog.Cancel>
-                    <AlertDialog.Action onclick={handleLeaveGroup} class="bg-destructive hover:bg-destructive/90">
+                    <AlertDialog.Action onclick={() => {}} class="bg-destructive hover:bg-destructive/90">
                         Gruppe verlassen
                     </AlertDialog.Action>
                 </AlertDialog.Footer>
@@ -436,14 +297,14 @@
                 <AlertDialog.Header>
                     <AlertDialog.Title>Mitglied entfernen</AlertDialog.Title>
                     <AlertDialog.Description>
-                        Sind Sie sicher, dass Sie {memberToRemove?.name} aus der Gruppe "{groupDetails.name}" entfernen möchten? 
+                        Sind Sie sicher, dass Sie {getFullName(memberToRemove!!)} aus der Gruppe "{groupDetails.name}" entfernen möchten? 
                         Diese Aktion kann nicht rückgängig gemacht werden.
                     </AlertDialog.Description>
                 </AlertDialog.Header>
                 <AlertDialog.Footer>
                     <AlertDialog.Cancel>Abbrechen</AlertDialog.Cancel>
                     <AlertDialog.Action 
-                        onclick={() => memberToRemove && handleRemoveMember(memberToRemove)} 
+                        onclick={() => memberToRemove && {}} 
                         class="bg-destructive hover:bg-destructive/90"
                     >
                         Mitglied entfernen

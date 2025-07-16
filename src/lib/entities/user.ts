@@ -27,9 +27,10 @@ export class User implements BaseUser {
     constructor(
         readonly id: string,
         readonly email: string,
-        readonly lastName: string,
-        readonly firstName: string,
-        readonly isAdmin: boolean = false
+        readonly last_name: string,
+        readonly first_name: string,
+        readonly isAdmin: boolean = false,
+        readonly is_leader: string
     ) {}
 
     public getFullName(): string {
