@@ -8,6 +8,7 @@
     import { Badge } from "$lib/components/ui/badge";
     import { Avatar, AvatarFallback, AvatarImage } from "$lib/components/ui/avatar";
     import * as Tabs from "$lib/components/ui/tabs";
+    import * as Select from "$lib/components/ui/select";
     import { toast } from "svelte-sonner";
     import UserIcon from "@lucide/svelte/icons/user";
     import Mail from "@lucide/svelte/icons/mail";
@@ -20,6 +21,10 @@
     import Activity from "@lucide/svelte/icons/activity";
     import FileText from "@lucide/svelte/icons/file-text";
     import MessageSquare from "@lucide/svelte/icons/message-square";
+    import Settings from "@lucide/svelte/icons/settings";
+    import Cpu from "@lucide/svelte/icons/cpu";
+    import BarChart from "@lucide/svelte/icons/bar-chart";
+    import Zap from "@lucide/svelte/icons/zap";
     import type { PageData } from './$types';
 
     let { data }: { data: PageData } = $props();
@@ -31,6 +36,37 @@
     let profileData = $state({
         documentsCount: data.documentsCount || 0,
         chatCount: data.chatCount || 0
+    });
+
+    // Admin LLM settings
+    let adminSettings = $state({
+        currentLLM: data.currentLLM || 'gpt-4',
+        availableLLMs: data.availableLLMs || [
+            { value: 'gpt-4', label: 'GPT-4' },
+            { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo' },
+            { value: 'claude-3-sonnet', label: 'Claude 3 Sonnet' },
+            { value: 'claude-3-haiku', label: 'Claude 3 Haiku' },
+            { value: 'gemini-pro', label: 'Gemini Pro' }
+        ]
+    });
+
+    // LLM Usage Statistics
+    let llmUsage = $state({
+        totalTokens: data.totalTokens || 0,
+        totalCost: data.totalCost || 0,
+        monthlyUsage: data.monthlyUsage || [
+            { month: 'Januar', tokens: 45000, cost: 12.50 },
+            { month: 'Februar', tokens: 52000, cost: 14.30 },
+            { month: 'März', tokens: 48000, cost: 13.20 },
+            { month: 'April', tokens: 61000, cost: 16.80 },
+            { month: 'Mai', tokens: 55000, cost: 15.10 },
+            { month: 'Juni', tokens: 67000, cost: 18.40 }
+        ],
+        modelUsage: data.modelUsage || [
+            { model: 'GPT-4', tokens: 150000, cost: 45.00, percentage: 55 },
+            { model: 'GPT-3.5 Turbo', tokens: 200000, cost: 20.00, percentage: 30 },
+            { model: 'Claude 3 Sonnet', tokens: 80000, cost: 24.00, percentage: 15 }
+        ]
     });
 
     let isEditing = $state(false);
@@ -66,12 +102,9 @@
 
     async function saveProfile() {
         if (!user) return;
-        // Hier würde die API-Anfrage zum Speichern stehen
+        // API call to save profile
         try {
             // await updateProfile(editForm);
-            // user.first_name = editForm.first_name; // User wird über das Layout verwaltet
-            // user.last_name = editForm.last_name;
-            // user.email = editForm.email;
             isEditing = false;
             toast.success(m.profile_updated_successfully());
         } catch (error) {
@@ -98,6 +131,16 @@
         }
     }
 
+    async function changeLLM(newLLM: string) {
+        try {
+            // await updateLLMSetting(newLLM);
+            adminSettings.currentLLM = newLLM;
+            toast.success(`LLM erfolgreich auf ${newLLM} geändert`);
+        } catch (error) {
+            toast.error('Fehler beim Ändern des LLM');
+        }
+    }
+
     function getInitials(firstName: string, lastName: string) {
         return (firstName[0] + lastName[0]).toUpperCase();
     }
@@ -112,6 +155,17 @@
             month: 'long',
             day: 'numeric'
         });
+    }
+
+    function formatCurrency(amount: number) {
+        return new Intl.NumberFormat('de-DE', {
+            style: 'currency',
+            currency: 'EUR'
+        }).format(amount);
+    }
+
+    function formatNumber(num: number) {
+        return new Intl.NumberFormat('de-DE').format(num);
     }
 </script>
 
@@ -245,10 +299,16 @@
         {#if user}
             <div class="lg:col-span-3">
                 <Tabs.Root value="account" class="w-full">
-                    <Tabs.List class="grid w-full grid-cols-3">
+                    <Tabs.List class="grid w-full {user.is_admin ? 'grid-cols-4' : 'grid-cols-3'}">
                         <Tabs.Trigger value="account">{m.account()}</Tabs.Trigger>
                         <Tabs.Trigger value="security">{m.security()}</Tabs.Trigger>
                         <Tabs.Trigger value="preferences">{m.preferences()}</Tabs.Trigger>
+                        {#if user.is_admin}
+                            <Tabs.Trigger value="admin">
+                                <Settings class="w-4 h-4 mr-2" />
+                                Admin
+                            </Tabs.Trigger>
+                        {/if}
                     </Tabs.List>
                     
                     <Tabs.Content value="account" class="space-y-4">
@@ -350,6 +410,123 @@
                             </CardContent>
                         </Card>
                     </Tabs.Content>
+
+                    {#if user.is_admin}
+                        <Tabs.Content value="admin" class="space-y-4">
+                            <!-- LLM Configuration -->
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle class="flex items-center gap-2">
+                                        <Cpu class="w-5 h-5" />
+                                        LLM Konfiguration
+                                    </CardTitle>
+                                    <CardDescription>
+                                        Wählen Sie das Standard-LLM für das System aus
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent class="space-y-4">
+                                    <div class="space-y-2">
+                                        <Label for="llm-select">Aktuelles LLM</Label>
+                                        <Select.Root bind:value={adminSettings.currentLLM}>
+                                            <Select.Trigger class="w-full">
+                                                <span class="text-sm">
+                                                    {adminSettings.availableLLMs.find(llm => llm.value === adminSettings.currentLLM)?.label || 'LLM auswählen'}
+                                                </span>
+                                            </Select.Trigger>
+                                            <Select.Content>
+                                                {#each adminSettings.availableLLMs as llm}
+                                                    <Select.Item 
+                                                        value={llm.value} 
+                                                        onclick={() => changeLLM(llm.value)}
+                                                    >
+                                                        {llm.label}
+                                                    </Select.Item>
+                                                {/each}
+                                            </Select.Content>
+                                        </Select.Root>
+                                    </div>
+                                    <div class="p-3 bg-muted rounded-md">
+                                        <div class="flex items-center gap-2 text-sm">
+                                            <Zap class="w-4 h-4" />
+                                            <span class="font-medium">Aktuell aktiv:</span>
+                                            <Badge variant="secondary">{adminSettings.currentLLM}</Badge>
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+
+                            <!-- LLM Usage Statistics -->
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle class="flex items-center gap-2">
+                                        <BarChart class="w-5 h-5" />
+                                        LLM Usage Statistiken
+                                    </CardTitle>
+                                    <CardDescription>
+                                        Übersicht über die Nutzung und Kosten verschiedener LLM-Modelle
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent class="space-y-6">
+                                    <!-- Overall Stats -->
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div class="p-4 bg-blue-50 rounded-lg">
+                                            <div class="text-2xl font-bold text-blue-600">
+                                                {formatNumber(llmUsage.totalTokens)}
+                                            </div>
+                                            <div class="text-sm text-blue-600">Tokens gesamt</div>
+                                        </div>
+                                        <div class="p-4 bg-green-50 rounded-lg">
+                                            <div class="text-2xl font-bold text-green-600">
+                                                {formatCurrency(llmUsage.totalCost)}
+                                            </div>
+                                            <div class="text-sm text-green-600">Kosten gesamt</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Model Usage Breakdown -->
+                                    <div>
+                                        <h4 class="font-medium mb-3">Nutzung nach Modell</h4>
+                                        <div class="space-y-3">
+                                            {#each llmUsage.modelUsage as model}
+                                                <div class="flex items-center justify-between p-3 border rounded-lg">
+                                                    <div class="flex-1">
+                                                        <div class="font-medium">{model.model}</div>
+                                                        <div class="text-sm text-muted-foreground">
+                                                            {formatNumber(model.tokens)} Tokens
+                                                        </div>
+                                                    </div>
+                                                    <div class="text-right">
+                                                        <div class="font-medium">{formatCurrency(model.cost)}</div>
+                                                        <div class="text-sm text-muted-foreground">
+                                                            {model.percentage}% der Nutzung
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            {/each}
+                                        </div>
+                                    </div>
+
+                                    <!-- Monthly Usage -->
+                                    <div>
+                                        <h4 class="font-medium mb-3">Monatliche Nutzung</h4>
+                                        <div class="space-y-2">
+                                            {#each llmUsage.monthlyUsage as month}
+                                                <div class="flex items-center justify-between p-2 rounded">
+                                                    <span class="text-sm">{month.month}</span>
+                                                    <div class="text-right">
+                                                        <div class="text-sm font-medium">{formatCurrency(month.cost)}</div>
+                                                        <div class="text-xs text-muted-foreground">
+                                                            {formatNumber(month.tokens)} Tokens
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            {/each}
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </Tabs.Content>
+                    {/if}
                 </Tabs.Root>
             </div>
         {/if}
