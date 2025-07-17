@@ -12,7 +12,7 @@ import { getCurrentUserAndSessionOrRedirct } from '$lib/auth/getUserOrRedirect';
 
 export const load: PageServerLoad = async ({ fetch, depends }) => {
 
-  const {user, jwt } = getCurrentUserAndSessionOrRedirct()
+  const {user, jwt} = getCurrentUserAndSessionOrRedirct()
 
   try {
     const list: UserGroup[] = await new UserGroupAPI().getUserGroups(jwt);
@@ -34,33 +34,18 @@ export const load: PageServerLoad = async ({ fetch, depends }) => {
 
 export const actions: Actions = {
   default: async (request) => {
-    const {locals} = getRequestEvent();
-
-    const jwt = locals.session?.token
-
-    if (!locals.user || !jwt)
-        redirect(302, "/login")
+    const {user, jwt} = getCurrentUserAndSessionOrRedirct()
 
       const form = await superValidate(request, zod4(createGroupSchema))
-      console.log("Form data:", form.data);
       
-      // Validate the form data
       if (!form.valid) {
           console.log("Form validation failed:", form.errors);
           return fail(400, { form });
       }
 
       try {
-          // Create the group using the API
-          const userGroupAPI = new UserGroupAPI();
-          const result = await userGroupAPI.createUserGroup({ 
-              name: form.data.name,
-          } as UserGroup, jwt);
-          
-          console.log("Group created successfully:", result);
-          
-          // Return success with the form
-          return { form };
+          await new UserGroupAPI().createUserGroup({ name: form.data.name} as UserGroup, jwt);
+          throw redirect(303, '?success=1');
           
       } catch (e) {
           console.error("Error creating user group:", e);

@@ -1,4 +1,6 @@
 <script lang="ts">
+    import {Search } from "lucide-svelte";
+
     import Users from "@lucide/svelte/icons/users";
     import Plus from "@lucide/svelte/icons/plus";
     import {m} from "$lib/paraglide/messages";
@@ -22,9 +24,14 @@
 
     let {data}: PageProps = $props();
     let isCreateDialogOpen = $state(false);
+
     let userGroups = $state(data.usergroups);
 
-    console.log(data)
+    const filteredUserGroups = $derived(userGroups.filter(group =>
+        group.name.toLowerCase().includes(searchQuery.toLowerCase())
+    ));
+
+    let searchQuery = $state('');
 
 
     const form = superForm(data.form, {
@@ -51,10 +58,10 @@
     }
 </script>
 
-<div class="bg-muted/30 min-h-svh p-6">
-    <div class="mx-auto max-w-6xl">
+<div class="bg-muted/30 h-screen overflow-hidden p-6">
+    <div class="mx-auto max-w-6xl h-full flex flex-col">
         <!-- Header -->
-        <div class="mb-8">
+        <div class="mb-8 flex-shrink-0">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
                     <div class="bg-primary text-primary-foreground flex size-10 items-center justify-center rounded-lg">
@@ -73,7 +80,7 @@
         </div>
 
         <!-- Statistiken -->
-        <div class="mb-8 grid gap-4 md:grid-cols-3">
+        <div class="mb-8 grid gap-4 md:grid-cols-3 flex-shrink-0">
             <Card.Root>
                 <Card.Header class="pb-3">
                     <Card.Title class="text-sm font-medium">{m.all_groups()}</Card.Title>
@@ -106,14 +113,30 @@
         </div>
 
         <!-- Gruppen Liste -->
-        <Card.Root>
-            <Card.Header>
-                <Card.Title>{m.my_groups()}</Card.Title>
-                <Card.Description>{m.all_groups_youre_assigned_to()}</Card.Description>
+        <Card.Root class="flex-1 flex flex-col min-h-0">
+            <Card.Header class="flex-shrink-0">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <Card.Title>{m.my_groups()}</Card.Title>
+                        <Card.Description>{m.all_groups_youre_assigned_to()}</Card.Description>
+        
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="relative">
+                            <Search class="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                            <Input 
+                                placeholder="Gruppe suchen..." 
+                                bind:value={searchQuery}
+                                class="pl-9 w-64"
+                            />
+                        </div>
+                    </div>
+                </div>
+
             </Card.Header>
-            <Card.Content class="p-0">
-                <div class="divide-y">
-                    {#each userGroups as group, index}
+            <Card.Content class="p-0 flex-1 overflow-hidden">
+                <div class="divide-y h-full overflow-y-auto">
+                    {#each filteredUserGroups as group, index}
                         <!-- svelte-ignore a11y_click_events_have_key_events -->
                         <div
                             class="hover:bg-muted/50 cursor-pointer p-6 transition-colors"
