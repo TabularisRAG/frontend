@@ -54,7 +54,6 @@ export default class AuthenticationAPI extends APIClient {
                 throw new Error(`Registration failed! Status: ${response.status} - ${errorText}`);
             }
     
-            console.log("User registered successfully");
         } catch (error) {
             console.error("Registration failed:", error);
             throw error;

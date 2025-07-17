@@ -5,29 +5,21 @@
   import CustomSidebarTrigger from "$lib/components/ui/custom_sidebar_trigger.svelte";
   import {m} from '$lib/paraglide/messages.js';
   import { setContext } from 'svelte';
-  import { writable } from 'svelte/store';
   import type { Chat } from '$lib/types/chat';
-  
 
   let { data, children } = $props();
   let open = $state(true);
-
   const chat_list = $state(data.chat_list);
-
   function move_current_chat_to_front(session_id: string) {
       if (chat_list[0]?.session_id === session_id) {
         return;
       }
-
     const idx = chat_list.findIndex(chat => chat.session_id === session_id);
     if (idx === -1) return;
-
     [chat_list[idx], chat_list[0]] = [chat_list[0], chat_list[idx]];
   }
-
   setContext('chat', { chat_list, move_current_chat_to_front });
 </script>
-
 <div class="sticky top-[54px] overflow-hidden max-h-[calc(100vh-54px)] h-full">
   <Sidebar.Provider bind:open>
     <Sidebar.Root collapsible="icon" class="sticky h-full left-0 max-h-[calc(100vh-54px)]">
@@ -95,6 +87,5 @@
     <main class="flex flex-col flex-1 relative">
         {@render children()}
     </main>
-
   </Sidebar.Provider>
 </div>

@@ -1,3 +1,5 @@
+import type { UUID } from "crypto";
+
 export enum ChatMessageType {
   UPDATE_CHATNAME = "update_chatname",
   STOPPED = "stopped",
@@ -17,13 +19,13 @@ export type Message = {
 };
 
 export interface ChatMessageResponse {
-  model_id?: string;
+  model_id?: UUID;
   value?: string;
   type?: ChatMessageType;
 }
 
 export interface ChatDataResponse {
-  session_id?: string;
+  session_id?: UUID;
   name?: string;
   started_at?: string; 
   last_message_at?: string; 
@@ -32,12 +34,12 @@ export interface ChatDataResponse {
 
 export interface ChatMessageRequest {
   message?: string;
-  model_id?: string;
+  model_id?: UUID;
   stop: boolean;
 }
 
 export type Chat = {
-  session_id: string;
+  session_id: UUID;
   name: string;
   last_message_at: string;
   started_at: string;

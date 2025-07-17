@@ -12,11 +12,6 @@
 	"profile": "Profile",
 	"settigs": "Settings",
 	"logout": "Log Out",
-<<<<<<< HEAD
-  "chat_history": "History",
-  "enter_prompt": "Ask a question ...",
-  "new_chat": "New Chat"
-=======
 	"welcome_back": "Welcome back",
 	"login_with_credentials": "Login with your account credentials",
 	"email": "Email",
@@ -48,6 +43,8 @@
 	"password_too_less_lowercase": "Your password must contain at least one lowercase letter.",
 	"logout_success": "Successfully logged out.",
 	"error_occurred": "An error occurred.",
-	"and": "and"
->>>>>>> de40d179b6a365e1a8f93b6590206fac8e04a575
+	"and": "and",
+  "chat_history": "Chatverlauf",
+  "enter_prompt": "Stelle eine Frage ...",
+  "new_chat": "Neuer Chat"
 }

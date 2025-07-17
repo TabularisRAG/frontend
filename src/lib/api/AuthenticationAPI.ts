@@ -24,8 +24,6 @@ export class AuthenticationAPI extends BaseAPI {
     
         const json = await response.json();
     
-        console.log("This is the response:", json);
-    
         const { session, user } = json as { session: Session, user: User };
     
         if (!session || !user) {
@@ -36,7 +34,6 @@ export class AuthenticationAPI extends BaseAPI {
     }
 
     public async validateSessionToken(token: string, event: RequestEvent) {
-        console.log("VALIDATE TOKEN ", token)
         const response = await fetch(this.serverURL + "/auth/validate", {
             method: "POST",
             headers: {
