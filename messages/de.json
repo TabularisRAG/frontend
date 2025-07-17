@@ -43,5 +43,23 @@
     "password_too_less_lowercase": "Ihr Passwort muss mindestens einen Kleinbuchstaben enthalten.",
     "logout_success": "Erfolgreich abgemeldet.",
     "error_occurred": "Ein Fehler ist aufgetreten.",
-    "and": "und"
+    "and": "und",
+
+
+
+    "create_new_group" : "Neue Gruppe erstellen",
+    "usergroups" : "Nutzergruppen",
+    "all_groups" : "Alle Gruppen",
+    "active_memberships" : "Aktive Mitgliedschaften",
+    "leader_permissions" : "Leader Rechte",
+    "groups_with_leader_permission" : "Gruppen mit Leader-Rechten",
+    "all_members" : "Gesamt Mitglieder",
+    "over_all_groups" : "Über alle Gruppen",
+    "my_groups" : "Meine Gruppen",
+    "all_groups_youre_assigned_to" : "Alle Gruppen, denen Sie angehören",
+    "memberships" : "Mitgliedschaften",
+    "created_at" : "Erstellt an",
+    "manage_your_memberships": "Verwalten Sie Ihre Gruppenmitgliedschaften"
+
+
 }

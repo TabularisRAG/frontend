@@ -1,15 +1,15 @@
 import type { UserGroup } from "$lib/entities/groups";
 import APIClient from "../ApiClient";
 
-const jwt = "inserr jwt here - todo: remove this"
+const jwt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImpvaG4yLnNtaXRoQGV4YW1wbGUuY29tIiwiZXhwIjoxNzUyNzQ0MDcwfQ.wwprdMMf1YL1lNwww1av_qVT9AOG3mnRA6UfsHR9oQE"
 export default class UserGroupAPI extends APIClient {
 
-    public async createUserGroup(user_group : any) {
+    public async createUserGroup(user_group : any, jwt : string) {
         const jwtToken = jwt
         const result = await fetch(this.serverURL + "/api/groups/new", {
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer ${jwtToken}`, // Include JWT here
+                "Authorization": `Bearer ${jwt}`,
             },
             method: "POST",
             body: JSON.stringify(user_group),
@@ -18,12 +18,12 @@ export default class UserGroupAPI extends APIClient {
         return result; 
     }
 
-    public async getUserGroups() {
+    public async getUserGroups(jwt : string) {
         const jwtToken = jwt
         const result = await fetch(this.serverURL + "/api/groups", {
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer ${jwtToken}`, // Include JWT here
+                "Authorization": `Bearer ${jwt}`, // Include JWT here
             },
             method: "GET",
         });
@@ -33,12 +33,11 @@ export default class UserGroupAPI extends APIClient {
     }
     
 
-    public async getUserGroup(id : string) {
-        const jwtToken = jwt
+    public async getUserGroup(id : string, jwt : string) {
         const result = await fetch(this.serverURL + "/api/groups/" + id, {
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer ${jwtToken}`, // Include JWT here
+                "Authorization": `Bearer ${jwt}`,
             },
             method: "GET",
         });

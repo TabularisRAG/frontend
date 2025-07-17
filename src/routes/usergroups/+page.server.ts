@@ -7,23 +7,26 @@ import { superValidate } from "sveltekit-superforms";
 import { zod4 } from 'sveltekit-superforms/adapters';
 import { createGroupSchema } from './schema';
 import UserGroupAPI from '$lib/api/usergroupAPI/usergroupAPI';
+import { getRequestEvent } from '$app/server';
+import { getCurrentUserAndSessionOrRedirct } from '$lib/auth/getUserOrRedirect';
 
 export const load: PageServerLoad = async ({ fetch, depends }) => {
 
+  const {user, jwt } = getCurrentUserAndSessionOrRedirct()
+
   try {
-    const list: UserGroup[] = await new UserGroupAPI().getUserGroups();
-    console.log(list)
+    const list: UserGroup[] = await new UserGroupAPI().getUserGroups(jwt);
     return {
       usergroups: list,
       success: true,
+      error : null,
       form: await superValidate(zod4(createGroupSchema))
     };
-  } catch (e) {
-    console.error("Error while loading usergroup data:", e);
-    
+  } catch (e) {    
     return { 
       usergroups: [], 
-      success: false, 
+      success: false,
+      error: e, 
       form: await superValidate(zod4(createGroupSchema)) 
     };
   }
@@ -31,7 +34,13 @@ export const load: PageServerLoad = async ({ fetch, depends }) => {
 
 export const actions: Actions = {
   default: async (request) => {
-      console.log("Creating group");
+    const {locals} = getRequestEvent();
+
+    const jwt = locals.session?.token
+
+    if (!locals.user || !jwt)
+        redirect(302, "/login")
+
       const form = await superValidate(request, zod4(createGroupSchema))
       console.log("Form data:", form.data);
       
@@ -45,8 +54,8 @@ export const actions: Actions = {
           // Create the group using the API
           const userGroupAPI = new UserGroupAPI();
           const result = await userGroupAPI.createUserGroup({ 
-              name: form.data.name 
-          } as UserGroup);
+              name: form.data.name,
+          } as UserGroup, jwt);
           
           console.log("Group created successfully:", result);
           
@@ -56,7 +65,6 @@ export const actions: Actions = {
       } catch (e) {
           console.error("Error creating user group:", e);
           
-          // Set form-level error
           form.errors._errors = ["Fehler beim Erstellen der Gruppe. Bitte versuchen Sie es erneut."];
           
           return fail(500, { form });
