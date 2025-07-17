@@ -20,7 +20,7 @@
     import { createGroupSchema } from "./schema";
 
     import { UserGroup } from "$lib/entities/groups";
-    import { goto } from "$app/navigation";
+    import { goto, invalidate } from "$app/navigation";
     import { zod4Client } from "sveltekit-superforms/adapters";
     import * as AlertDialog from "$lib/components/ui/alert-dialog";
 
@@ -44,6 +44,7 @@
     });
 
     const {form: formData, enhance, submitting} = form
+
     
     onMount(() => {
         if (data.success) {
@@ -68,8 +69,7 @@
         return new Date(dateString).toLocaleDateString('de-DE');
     }
 </script>
-
-<div class="bg-background text-foreground h-screen overflow-hidden p-6">
+<div class="sticky top-[54px] overflow-hidden max-h-[calc(100vh-54px)] h-full p-6">
     <div class="mx-auto max-w-6xl h-full flex flex-col">
         <!-- Header -->
         <div class="mb-8 flex-shrink-0">
@@ -197,7 +197,15 @@
                     </Dialog.Description>
                 </Dialog.Header>
         
-                <form method="POST" action="?/createGroup">
+                <form method="POST" action="?/createGroup"
+                use:enhance={() => {
+                    sending = true;
+                    return ({ update }) => {
+                        // Set invalidateAll to false if you don't want to reload page data when submitting
+                        update({ invalidateAll: true }).finally(async () => { 
+                            sending = false;
+                        });
+                    }}}>
                     <div class="grid gap-4 py-4">
                         <Form.Field {form} name="name">
                             <Form.Control>

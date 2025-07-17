@@ -53,13 +53,21 @@
     "active_memberships" : "Aktive Mitgliedschaften",
     "leader_permissions" : "Leader Rechte",
     "groups_with_leader_permission" : "Gruppen mit Leader-Rechten",
-    "all_members" : "Gesamt Mitglieder",
     "over_all_groups" : "Über alle Gruppen",
     "my_groups" : "Meine Gruppen",
     "all_groups_youre_assigned_to" : "Alle Gruppen, denen Sie angehören",
     "memberships" : "Mitgliedschaften",
     "created_at" : "Erstellt an",
-    "manage_your_memberships": "Verwalten Sie Ihre Gruppenmitgliedschaften"
+    "manage_your_memberships": "Verwalten Sie Ihre Gruppenmitgliedschaften",
+	"create_new_user_group_you_will_be_added_as_leader" : "Erstellen Sie eine neue Nutzergruppe. Sie werden automatisch als Leader hinzugefügt.",
+	"group_name" : "Gruppenname",
+	"abort" : "Abbrechen",
+	"example_group_name_developer_team" : "z.B. Entwicklerteam",
+	"is_creating" : "Wird erstellt...",
+	"create_group" : "Gruppe erstellen",
+	"leave_group" : "Gruppe verlassen",
+	"all_documents": "Alle Dokumente",
+	"are_you_sure_you_want_to_live_the_group": "Bist Sie sicher, dass Sie die Gruppe verlassen möchten ?"
 
 
 }
