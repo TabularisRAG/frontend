@@ -20,16 +20,20 @@
     import { createGroupSchema } from "./schema";
 
     import { UserGroup } from "$lib/entities/groups";
-    import { goto, invalidate } from "$app/navigation";
+    import { goto, invalidate, invalidateAll } from "$app/navigation";
     import { zod4Client } from "sveltekit-superforms/adapters";
     import * as AlertDialog from "$lib/components/ui/alert-dialog";
+    import type { ActionResult } from "@sveltejs/kit";
+    import { applyAction, deserialize } from "$app/forms";
 
     let {data}: PageProps = $props();
     let isCreateDialogOpen = $state(false);
     let isLeaveGroupDialogOpen = $state(false);
 
+    console.log(data)
     let userGroups = $state(data.usergroups);
     let groupToLeave : UserGroup | null = $state(null);
+    let isLeavingGroup = $state(false);
     
     let searchQuery = $state('');
 
@@ -37,10 +41,29 @@
         group.name.toLowerCase().includes(searchQuery.toLowerCase())
     ));
 
-
-
     const form = superForm(data.form, {
-        validators: zod4Client(createGroupSchema)
+        validators: zod4Client(createGroupSchema),
+        onResult: async ({ result }) => {
+            if (result.type === 'success') {
+                // Close dialog
+                isCreateDialogOpen = false;
+                
+                // Show success toast
+                toast.success("Gruppe erfolgreich erstellt!");
+                
+                // Invalidate and reload data
+                await invalidateAll();
+                
+                // Update local state with fresh data
+                userGroups = data.usergroups;
+            } else if (result.type === 'failure') {
+                // Show error toast
+                toast.error("Fehler beim Erstellen der Gruppe");
+            }
+        },
+        onError: () => {
+            toast.error("Ein unerwarteter Fehler ist aufgetreten");
+        }
     });
 
     const {form: formData, enhance, submitting} = form
@@ -55,21 +78,45 @@
     });
 
     function handleGroupClick(group: UserGroup) {
-       // goto(`/usergroups/${group.id}`);
         toast.info(`Navigiere zu Gruppe: ${group.name}`);
-    }
-
-    function handleLeaveGroup(event: Event, group: UserGroup) {
-        event.stopPropagation();
-        
-       
     }
 
     function formatDate(dateString: string) {
         return new Date(dateString).toLocaleDateString('de-DE');
     }
+
+    // Enhanced leave group handler with proper form submission
+    async function handleLeaveGroup(event: SubmitEvent) {
+        event.preventDefault();
+        const formData = new FormData(event.target as HTMLFormElement);
+        
+        isLeavingGroup = true;
+        
+        try {
+            const response = await fetch('?/leaveGroup', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const result: ActionResult = deserialize(await response.text());
+            
+            if (result.type === 'success') {
+                toast.success("Gruppe erfolgreich verlassen!");
+                groupToLeave = null;
+                await invalidateAll();
+                userGroups = data.usergroups;
+            } else {
+                toast.error("Fehler beim Verlassen der Gruppe");
+            }
+        } catch (error) {
+            toast.error("Ein unerwarteter Fehler ist aufgetreten");
+        } finally {
+            isLeavingGroup = false;
+        }
+    }
 </script>
-<div class="sticky top-[54px] overflow-hidden max-h-[calc(100vh-54px)] h-full p-6">
+
+<div class="sticky top-[54px] overflow-hidden max-h-[calc(100vh-54px)] h-screen p-6">
     <div class="mx-auto max-w-6xl h-full flex flex-col">
         <!-- Header -->
         <div class="mb-8 flex-shrink-0">
@@ -197,15 +244,7 @@
                     </Dialog.Description>
                 </Dialog.Header>
         
-                <form method="POST" action="?/createGroup"
-                use:enhance={() => {
-                    sending = true;
-                    return ({ update }) => {
-                        // Set invalidateAll to false if you don't want to reload page data when submitting
-                        update({ invalidateAll: true }).finally(async () => { 
-                            sending = false;
-                        });
-                    }}}>
+                <form method="POST" action="?/createGroup" use:enhance>
                     <div class="grid gap-4 py-4">
                         <Form.Field {form} name="name">
                             <Form.Control>
@@ -236,14 +275,19 @@
                             class="gap-2"
                             disabled={$submitting}
                         >
-                            <Plus class="size-4" />
-                            {$submitting ? m.is_creating(): m.create_group()}
+                            {#if $submitting}
+                                <!-- Loading spinner -->
+                                <div class="size-4 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
+                                {m.is_creating()}
+                            {:else}
+                                <Plus class="size-4" />
+                                {m.create_group()}
+                            {/if}
                         </Button>
                     </Dialog.Footer>
                 </form>
             </Dialog.Content>
         </Dialog.Root>
-
 
         <!-- Gruppe verlassen Dialog -->
         <AlertDialog.Root open={groupToLeave !== null} onOpenChange={(open) => !open && (groupToLeave = null)}>
@@ -255,18 +299,26 @@
                     </AlertDialog.Description>
                 </AlertDialog.Header>
         
-                <form method="POST" action="?/leaveGroup">
+                <form method="POST" action="?/leaveGroup" onsubmit={handleLeaveGroup}>
                     <input type="hidden" name="groupId" value={groupToLeave?.id} />
         
                     <AlertDialog.Footer>
-                        <AlertDialog.Cancel type="button">
+                        <AlertDialog.Cancel type="button" disabled={isLeavingGroup}>
                             {m.abort()}
                         </AlertDialog.Cancel>
                         <Button 
                             type="submit"
                             class="bg-destructive hover:bg-destructive/90"
+                            disabled={isLeavingGroup}
                         >
-                        {m.leave_group()}
+                            {#if isLeavingGroup}
+                                <!-- Loading spinner -->
+                                <div class="size-4 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
+                                Verlasse Gruppe...
+                            {:else}
+                                <LogOut class="size-4" />
+                                {m.leave_group()}
+                            {/if}
                         </Button>
                     </AlertDialog.Footer>
                 </form>

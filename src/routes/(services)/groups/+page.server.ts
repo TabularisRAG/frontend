@@ -11,7 +11,11 @@ import { getCurrentUserAndSessionOrRedirct } from '$lib/auth/getUserOrRedirect';
 import type { GetAllUserGroupsResponse } from '$lib/api/usergroupAPI/response/GetAllUserGroupsResponse';
 
 export const load: PageServerLoad = async ({ fetch, depends }) => {
+  // Add dependency tracking for proper invalidation
+  depends('app:usergroups');
+  
   const {user, jwt} = getCurrentUserAndSessionOrRedirct()
+  console.log("Loading usergroups...")
 
   try {
     const response: GetAllUserGroupsResponse = await new UserGroupAPI().getUserGroups(jwt);
@@ -46,7 +50,12 @@ export const actions: Actions = {
 
       try {
           await new UserGroupAPI().createUserGroup({ name: form.data.name} as UserGroup, jwt);
-          //throw redirect(303, '?success=1');
+          
+          // Return success with form data
+          return {
+              success: true,
+              form
+          };
           
       } catch (e) {
           console.error("Error creating user group:", e);
@@ -54,6 +63,7 @@ export const actions: Actions = {
           return fail(500, { form });
       }
   },
+  
   leaveGroup: async ({ request, locals }) => {
     const {user, jwt} = getCurrentUserAndSessionOrRedirct()
 
@@ -61,12 +71,24 @@ export const actions: Actions = {
     const groupId = formData.get("groupId");
     console.log("Leave group ID:", groupId);
 
-    const usergroup = await new UserGroupAPI().getUserGroup(groupId as string, jwt);
+    try {
+        const usergroup = await new UserGroupAPI().getUserGroup(groupId as string, jwt);
 
-    if(usergroup.user_count == 1) {
-      await new UserGroupAPI().deleteUserGroup(groupId as string, jwt)
-    }else {
-      await new UserGroupAPI().unassignFromUserGroup(groupId as string, jwt)
+        if(usergroup.user_count == 1) {
+            await new UserGroupAPI().deleteUserGroup(groupId as string, jwt)
+        } else {
+            await new UserGroupAPI().unassignFromUserGroup(groupId as string, jwt)
+        }
+        
+        return {
+            success: true
+        };
+        
+    } catch (e) {
+        console.error("Error leaving group:", e);
+        return fail(500, { 
+            error: "Fehler beim Verlassen der Gruppe. Bitte versuchen Sie es erneut." 
+        });
     }
-}
+  }
 };
