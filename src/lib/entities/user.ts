@@ -30,8 +30,6 @@ export class User implements BaseUser {
         readonly last_name: string,
         readonly first_name: string,
         readonly isAdmin: boolean = false,
-        readonly is_leader: string,
-        readonly joined_at: string
     ) {}
 
     public getFullName(): string {
