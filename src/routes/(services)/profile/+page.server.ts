@@ -2,6 +2,7 @@ import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals }) => {
     const user = locals.user;
+    const jwt = locals.session?.token;
     
     if (!user) {
         return {
@@ -12,6 +13,7 @@ export const load: PageServerLoad = async ({ locals }) => {
     }
     
     return {
+        jwt,
         user,
         documentsCount: 0,
         chatCount: 0,

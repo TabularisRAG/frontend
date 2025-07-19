@@ -4,11 +4,13 @@
     import { Input } from "$lib/components/ui/input";
     import { Label } from "$lib/components/ui/label";
     import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "$lib/components/ui/card";
+    import AddModelDialog from './AddModelDialog.svelte';
     import { Separator } from "$lib/components/ui/separator";
     import { Badge } from "$lib/components/ui/badge";
     import { Avatar, AvatarFallback, AvatarImage } from "$lib/components/ui/avatar";
     import * as Tabs from "$lib/components/ui/tabs";
     import * as Select from "$lib/components/ui/select";
+    import * as Dialog from "$lib/components/ui/dialog";
     import { toast } from "svelte-sonner";
     import UserIcon from "@lucide/svelte/icons/user";
     import Mail from "@lucide/svelte/icons/mail";
@@ -25,12 +27,15 @@
     import Cpu from "@lucide/svelte/icons/cpu";
     import BarChart from "@lucide/svelte/icons/bar-chart";
     import Zap from "@lucide/svelte/icons/zap";
+    import Plus from "@lucide/svelte/icons/plus";
+    import Trash2 from "@lucide/svelte/icons/trash-2";
     import type { PageData } from './$types';
 
     let { data }: { data: PageData } = $props();
     
     // User data from layout - updated structure
     const user = data.user;
+    const jwt = data.jwt;
     
     // Additional profile data that might come from a specific profile API
     let profileData = $state({
@@ -42,13 +47,45 @@
     let adminSettings = $state({
         currentLLM: data.currentLLM || 'gpt-4',
         availableLLMs: data.availableLLMs || [
-            { value: 'gpt-4', label: 'GPT-4' },
-            { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo' },
-            { value: 'claude-3-sonnet', label: 'Claude 3 Sonnet' },
-            { value: 'claude-3-haiku', label: 'Claude 3 Haiku' },
-            { value: 'gemini-pro', label: 'Gemini Pro' }
+            { value: 'gpt-4', label: 'GPT-4', provider: 'OPENAI' },
+            { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo', provider: 'OPENAI' },
+            { value: 'claude-3-sonnet', label: 'Claude 3 Sonnet', provider: 'ANTHROPIC' },
+            { value: 'claude-3-haiku', label: 'Claude 3 Haiku', provider: 'ANTHROPIC' },
+            { value: 'gemini-pro', label: 'Gemini Pro', provider: 'GOOGLE' }
         ]
     });
+
+    // Model management
+
+    // Entferne das doppelte Dialog-System und verwende nur:
+    let showAddModelDialog = $state(false);
+    
+    // Event handler
+    function handleModelAdded(event) {
+        const createdModel = event.detail;
+        
+        // Aktualisiere die verfügbaren LLMs
+        adminSettings.availableLLMs = [
+            ...adminSettings.availableLLMs,
+            {
+                value: createdModel.model_name,
+                label: createdModel.model_name, // oder createdModel.display_name falls verfügbar
+                provider: createdModel.provider
+            }
+        ];
+        
+        toast.success('Modell erfolgreich hinzugefügt');
+    }
+    
+    function openAddModelDialog() {
+        showAddModelDialog = true;
+    }
+
+    const availableProviders = [
+        { value: 'OPENAI', label: 'OpenAI' },
+        { value: 'ANTHROPIC', label: 'Anthropic' },
+        { value: 'GOOGLE', label: 'Google' }
+    ];
 
     // LLM Usage Statistics
     let llmUsage = $state({
@@ -138,6 +175,37 @@
             toast.success(`LLM erfolgreich auf ${newLLM} geändert`);
         } catch (error) {
             toast.error('Fehler beim Ändern des LLM');
+        }
+    }
+
+    async function deleteModel(modelValue: string) {
+        if (!confirm('Sind Sie sicher, dass Sie dieses Modell löschen möchten?')) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/admin/models/${modelValue}`, {
+                method: 'DELETE'
+            });
+
+            if (!response.ok) {
+                throw new Error('Fehler beim Löschen des Modells');
+            }
+
+            // Remove from available LLMs list
+            adminSettings.availableLLMs = adminSettings.availableLLMs.filter(
+                llm => llm.value !== modelValue
+            );
+
+            // If deleted model was the current one, switch to first available
+            if (adminSettings.currentLLM === modelValue && adminSettings.availableLLMs.length > 0) {
+                adminSettings.currentLLM = adminSettings.availableLLMs[0].value;
+            }
+
+            toast.success('Modell erfolgreich gelöscht');
+        } catch (error) {
+            toast.error('Fehler beim Löschen des Modells');
+            console.error('Error deleting model:', error);
         }
     }
 
@@ -413,20 +481,28 @@
 
                     {#if user.is_admin}
                         <Tabs.Content value="admin" class="space-y-4">
-                            <!-- LLM Configuration -->
+                            <!-- Model Management -->
                             <Card>
                                 <CardHeader>
-                                    <CardTitle class="flex items-center gap-2">
-                                        <Cpu class="w-5 h-5" />
-                                        LLM Konfiguration
-                                    </CardTitle>
-                                    <CardDescription>
-                                        Wählen Sie das Standard-LLM für das System aus
-                                    </CardDescription>
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <CardTitle class="flex items-center gap-2">
+                                                <Cpu class="w-5 h-5" />
+                                                Model Management
+                                            </CardTitle>
+                                            <CardDescription>
+                                                Verwalten Sie verfügbare LLM-Modelle im System
+                                            </CardDescription>
+                                        </div>
+                                        <Button onclick={openAddModelDialog} size="sm">
+                                            <Plus class="w-4 h-4 mr-2" />
+                                            Modell hinzufügen
+                                        </Button>
+                                    </div>
                                 </CardHeader>
                                 <CardContent class="space-y-4">
                                     <div class="space-y-2">
-                                        <Label for="llm-select">Aktuelles LLM</Label>
+                                        <Label for="llm-select">Aktuelles Standard-LLM</Label>
                                         <Select.Root bind:value={adminSettings.currentLLM}>
                                             <Select.Trigger class="w-full">
                                                 <span class="text-sm">
@@ -445,11 +521,43 @@
                                             </Select.Content>
                                         </Select.Root>
                                     </div>
+                                    
                                     <div class="p-3 bg-muted rounded-md">
                                         <div class="flex items-center gap-2 text-sm">
                                             <Zap class="w-4 h-4" />
                                             <span class="font-medium">Aktuell aktiv:</span>
                                             <Badge variant="secondary">{adminSettings.currentLLM}</Badge>
+                                        </div>
+                                    </div>
+
+                                    <!-- Available Models List -->
+                                    <div>
+                                        <Label class="text-sm font-medium mb-3 block">Verfügbare Modelle</Label>
+                                        <div class="space-y-2 max-h-60 overflow-y-auto">
+                                            {#each adminSettings.availableLLMs as llm}
+                                                <div class="flex items-center justify-between p-3 border rounded-lg">
+                                                    <div class="flex items-center gap-3">
+                                                        <Badge variant="outline" class="text-xs">
+                                                            {llm.provider}
+                                                        </Badge>
+                                                        <div>
+                                                            <div class="font-medium text-sm">{llm.label}</div>
+                                                            <div class="text-xs text-muted-foreground">{llm.value}</div>
+                                                        </div>
+                                                        {#if llm.value === adminSettings.currentLLM}
+                                                            <Badge variant="secondary" class="text-xs">Standard</Badge>
+                                                        {/if}
+                                                    </div>
+                                                    <Button 
+                                                        variant="ghost" 
+                                                        size="sm"
+                                                        onclick={() => deleteModel(llm.value)}
+                                                        class="text-destructive hover:text-destructive"
+                                                    >
+                                                        <Trash2 class="w-4 h-4" />
+                                                    </Button>
+                                                </div>
+                                            {/each}
                                         </div>
                                     </div>
                                 </CardContent>
@@ -532,3 +640,10 @@
         {/if}
     </div>
 </main>
+
+<AddModelDialog
+    bind:showAddModelDialog
+    {availableProviders}
+    on:modelAdded={handleModelAdded}
+    jwt=jwt
+/>
