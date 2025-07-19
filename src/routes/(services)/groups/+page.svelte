@@ -68,7 +68,6 @@
 
     function handleGroupClick(group: UserGroup) {
         goto("./groups/" + group.id)
-        toast.info(`Navigiere zu Gruppe: ${group.name}`);
     }
 
     function handleClickLeaveGroup(group: UserGroup, event : Event) {
@@ -82,7 +81,7 @@
 
     async function handleLeaveGroup(event: SubmitEvent) {
         event.preventDefault()
-        
+
         const formData = new FormData(event.target as HTMLFormElement);
         
         isLeavingGroup = true;
