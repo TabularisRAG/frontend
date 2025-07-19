@@ -646,4 +646,8 @@
     {availableProviders}
     on:modelAdded={handleModelAdded}
     jwt=jwt
+<<<<<<< HEAD
 />
+=======
+/>
+>>>>>>> 186d0d7 (added backend interaction to create model to use)
