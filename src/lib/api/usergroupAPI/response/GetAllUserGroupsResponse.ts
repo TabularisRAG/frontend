@@ -20,9 +20,19 @@ export class UserGroupDTO {
         ) {}
 }
 
+export class UserDTO {
+    constructor(
+        readonly id: string,
+        readonly email: string,
+        readonly last_name: string,
+        readonly first_name: string,
+        readonly isAdmin: boolean = false
+    ) {}
+}
+
 export class AssignmentDTO {
     constructor(
-            readonly user : User,
+            readonly user : UserDTO,
             readonly is_leader: string,
             readonly joined_at: string 
         ) {}

@@ -27,12 +27,12 @@ export class User implements BaseUser {
     constructor(
         readonly id: string,
         readonly email: string,
-        readonly last_name: string,
-        readonly first_name: string,
+        readonly lastName: string,
+        readonly firstName: string,
         readonly isAdmin: boolean = false,
     ) {}
 
     public getFullName(): string {
-        return `${this.first_name} ${this.last_name}`;
+        return `${this.firstName} ${this.lastName}`;
     }
 }

@@ -1,5 +1,6 @@
 import { User } from "$lib/entities/user";
 import APIClient from "../ApiClient";
+import type { UserDTO } from "./response/UserDTO";
 
 
 export default class UserAPI extends APIClient {
@@ -45,7 +46,7 @@ export default class UserAPI extends APIClient {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
     
-            const data : User[] = await response.json();
+            const data : UserDTO[] = await response.json();
             return data
            
         } catch (error) {
@@ -54,7 +55,4 @@ export default class UserAPI extends APIClient {
         }
 
     }
-
-
-
 }
