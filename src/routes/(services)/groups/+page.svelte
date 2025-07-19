@@ -27,17 +27,15 @@
     import { applyAction, deserialize } from "$app/forms";
 
     let {data}: PageProps = $props();
-    let isCreateDialogOpen = $state(false);
-    let isLeaveGroupDialogOpen = $state(false);
 
-    console.log(data)
-    let userGroups = $state(data.usergroups);
+    let isCreateDialogOpen = $state(false);
     let groupToLeave : UserGroup | null = $state(null);
+
     let isLeavingGroup = $state(false);
     
     let searchQuery = $state('');
 
-    const filteredUserGroups = $derived(userGroups.filter(group =>
+    const filteredUserGroups = $derived(data.usergroups.filter(group =>
         group.name.toLowerCase().includes(searchQuery.toLowerCase())
     ));
 
@@ -45,24 +43,17 @@
         validators: zod4Client(createGroupSchema),
         onResult: async ({ result }) => {
             if (result.type === 'success') {
-                // Close dialog
-                isCreateDialogOpen = false;
+                isCreateDialogOpen = false;                
+                toast.success(m.group_created_successfully());
                 
-                // Show success toast
-                toast.success("Gruppe erfolgreich erstellt!");
-                
-                // Invalidate and reload data
                 await invalidateAll();
                 
-                // Update local state with fresh data
-                userGroups = data.usergroups;
             } else if (result.type === 'failure') {
-                // Show error toast
-                toast.error("Fehler beim Erstellen der Gruppe");
+                toast.error(m.error_while_creating_group());
             }
         },
         onError: () => {
-            toast.error("Ein unerwarteter Fehler ist aufgetreten");
+            toast.error(m.error_while_creating_group());
         }
     });
 
@@ -70,24 +61,28 @@
 
     
     onMount(() => {
-        if (data.success) {
-            toast.success("Gruppen erfolgreich geladen");
-        } else {
-            toast.error("Fehler beim Laden der Gruppen");
+        if (!data.success) {
+            toast.error(m.error_while_loading_groups());
         }
     });
 
     function handleGroupClick(group: UserGroup) {
+        goto("./groups/" + group.id)
         toast.info(`Navigiere zu Gruppe: ${group.name}`);
     }
 
-    function formatDate(dateString: string) {
-        return new Date(dateString).toLocaleDateString('de-DE');
+    function handleClickLeaveGroup(group: UserGroup, event : Event) {
+        event.stopPropagation()
+        groupToLeave = group
     }
 
-    // Enhanced leave group handler with proper form submission
+    function formatDate(dateString: string) {
+        return new Date(dateString).toLocaleDateString();
+    }
+
     async function handleLeaveGroup(event: SubmitEvent) {
-        event.preventDefault();
+        event.preventDefault()
+        
         const formData = new FormData(event.target as HTMLFormElement);
         
         isLeavingGroup = true;
@@ -101,15 +96,14 @@
             const result: ActionResult = deserialize(await response.text());
             
             if (result.type === 'success') {
-                toast.success("Gruppe erfolgreich verlassen!");
+                toast.success(m.group_left_successfully());
                 groupToLeave = null;
                 await invalidateAll();
-                userGroups = data.usergroups;
             } else {
-                toast.error("Fehler beim Verlassen der Gruppe");
+                toast.error(m.error_while_leaving_group());
             }
         } catch (error) {
-            toast.error("Ein unerwarteter Fehler ist aufgetreten");
+            toast.error(m.error_while_leaving_group());
         } finally {
             isLeavingGroup = false;
         }
@@ -130,21 +124,21 @@
                         <p class="text-muted-foreground text-sm">{m.manage_your_memberships()}</p>
                     </div>
                 </div>
-                <Button onclick={() => isCreateDialogOpen = true} class="gap-2">
+                <Button onclick={() => isCreateDialogOpen = true} class="gap-2 cursor-pointer">
                     <Plus class="size-4" />
                     {m.create_new_group()}
                 </Button>
             </div>
         </div>
 
-        <!-- Statistiken -->
+        <!-- Statistics -->
         <div class="mb-8 grid gap-4 md:grid-cols-3 flex-shrink-0">
             <Card.Root>
                 <Card.Header class="pb-3">
                     <Card.Title class="text-sm font-medium">{m.all_groups()}</Card.Title>
                 </Card.Header>
                 <Card.Content>
-                    <div class="text-2xl font-bold">{userGroups.length}</div>
+                    <div class="text-2xl font-bold">{data.usergroups.length}</div>
                     <p class="text-muted-foreground text-xs">{m.active_memberships()}</p>
                 </Card.Content>
             </Card.Root>
@@ -154,7 +148,7 @@
                     <Card.Title class="text-sm font-medium">{m.leader_permissions()}</Card.Title>
                 </Card.Header>
                 <Card.Content>
-                    <div class="text-2xl font-bold">{userGroups.filter(g => g.current_user_is_leader).length}</div>
+                    <div class="text-2xl font-bold">{data.usergroups.filter(g => g.current_user_is_leader).length}</div>
                     <p class="text-muted-foreground text-xs">{m.groups_with_leader_permission()}</p>
                 </Card.Content>
             </Card.Root>
@@ -183,7 +177,7 @@
                         <div class="relative">
                             <Search class="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                             <Input 
-                                placeholder="Gruppe suchen..." 
+                                placeholder={m.search_group()} 
                                 bind:value={searchQuery}
                                 class="pl-9 w-64"
                             />
@@ -219,10 +213,7 @@
                                     </div>
                                 </div>
                                 <div class="flex items-center gap-2">
-                                        <Button onclick={() => {
-                                            groupToLeave = userGroups.find((each) => each.id == group.id)!!
-                                            isLeaveGroupDialogOpen = true;
-                                        }}>
+                                        <Button onclick={(event) => handleClickLeaveGroup(group, event)} class="cursor-pointer">
                                             <LogOut class="size-4" />
                                             {m.leave_group()}
                                         </Button>
@@ -234,7 +225,7 @@
             </Card.Content>
         </Card.Root>
 
-        <!-- Neue Gruppe Dialog -->
+        <!-- New group dialog -->
         <Dialog.Root bind:open={isCreateDialogOpen}>
             <Dialog.Content class="sm:max-w-md">
                 <Dialog.Header>
@@ -267,16 +258,16 @@
                             variant="outline" 
                             onclick={() => isCreateDialogOpen = false}
                             disabled={$submitting}
+                            class="cursor-pointer disabled:cursor-not-allowed"
                         >
                             {m.abort()}
                         </Button>
                         <Button 
                             type="submit" 
-                            class="gap-2"
+                            class="gap-2 cursor-pointer disabled:cursor-not-allowed"
                             disabled={$submitting}
                         >
                             {#if $submitting}
-                                <!-- Loading spinner -->
                                 <div class="size-4 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
                                 {m.is_creating()}
                             {:else}
@@ -289,7 +280,7 @@
             </Dialog.Content>
         </Dialog.Root>
 
-        <!-- Gruppe verlassen Dialog -->
+        <!-- Leave group dialog-->
         <AlertDialog.Root open={groupToLeave !== null} onOpenChange={(open) => !open && (groupToLeave = null)}>
             <AlertDialog.Content>
                 <AlertDialog.Header>
@@ -303,18 +294,21 @@
                     <input type="hidden" name="groupId" value={groupToLeave?.id} />
         
                     <AlertDialog.Footer>
-                        <AlertDialog.Cancel type="button" disabled={isLeavingGroup}>
+                        <AlertDialog.Cancel 
+                            type="button" 
+                            disabled={isLeavingGroup}
+                            class="cursor-pointer disabled:cursor-not-allowed"
+                        >
                             {m.abort()}
                         </AlertDialog.Cancel>
                         <Button 
                             type="submit"
-                            class="bg-destructive hover:bg-destructive/90"
+                            class="bg-destructive hover:bg-destructive/90 cursor-pointer disabled:cursor-not-allowed"
                             disabled={isLeavingGroup}
                         >
                             {#if isLeavingGroup}
-                                <!-- Loading spinner -->
                                 <div class="size-4 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
-                                Verlasse Gruppe...
+                                {m.leaving_group()}
                             {:else}
                                 <LogOut class="size-4" />
                                 {m.leave_group()}

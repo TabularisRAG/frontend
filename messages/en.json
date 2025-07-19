@@ -65,5 +65,12 @@
 	"create_group" : "Create group",
 	"leave_group" : "Leave group",
 	"all_documents": "All documents",
-	"are_you_sure_you_want_to_live_the_group": "Are you sure you want to leave the group?"
+	"are_you_sure_you_want_to_live_the_group": "Are you sure you want to leave the group?",
+	"error_while_creating_group" : "Error while creating group",
+	"search_group": "Search group...",
+	"leaving_group" : "Leaving group...",
+	"group_left_successfully" : "Group left successfully",
+	"error_while_leaving_group" : "Error while leaving the group",
+	"error_while_loading_groups" : "Error while loading the groups",
+	"group_created_successfully" : "Group successfully created"
 }
