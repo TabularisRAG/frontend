@@ -5,19 +5,18 @@ export class GetAllUserGroupsResponse {
     constructor(
         readonly groups : UserGroup[],
         readonly number_of_unique_documents : Number
-
     ){}
 }
 
 export class UserGroupDTO {
     constructor(
-            readonly id: string,
-            readonly name: string,
-            readonly current_user_is_leader : boolean,
-            readonly created_at : string,
-            readonly user_count : number,
-            readonly assignments : AssignmentDTO[] = []
-        ) {}
+        readonly id: string,
+        readonly name: string,
+        readonly current_user_is_leader : boolean,
+        readonly created_at : string,
+        readonly user_count : number,
+        readonly assignments : AssignmentDTO[] = []
+    ) {}
 }
 
 export class UserDTO {
@@ -26,14 +25,22 @@ export class UserDTO {
         readonly email: string,
         readonly last_name: string,
         readonly first_name: string,
-        readonly isAdmin: boolean = false
+        readonly is_admin: boolean = false
     ) {}
 }
 
 export class AssignmentDTO {
     constructor(
-            readonly user : UserDTO,
-            readonly is_leader: string,
-            readonly joined_at: string 
-        ) {}
+        readonly user : UserDTO,
+        readonly is_leader: boolean | string, // Can be boolean or string
+        readonly joined_at: string 
+    ) {}
+}
+
+export class CreateUserGroupDTO {
+    constructor(
+        readonly id: string, 
+        readonly name: string,
+        readonly created_at: string
+    ) {}
 }

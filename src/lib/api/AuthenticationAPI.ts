@@ -2,6 +2,7 @@ import {BaseAPI} from "./BaseAPI";
 import type {RequestEvent} from "@sveltejs/kit";
 import type {Session} from "$lib/entities/session";
 import {LoginUser, RegistrationUser, User} from "$lib/entities/user";
+import type { UserDTO } from "./userAPI/response/UserDTO";
 
 export const SESSION_COOKIE_NAME = "auth-session";
 
@@ -26,12 +27,11 @@ export class AuthenticationAPI extends BaseAPI {
     
         console.log("This is the response:", json);
     
-        const { session, user } = json as { session: Session, user: User };
+        const { session, user } = json as { session: Session, user: UserDTO };
     
         if (!session || !user) {
             throw new Error(`Login failed - no session or user returned`);
         }
-    
         this.setSessionAndUser(session, user, event);
     }
 
@@ -55,7 +55,7 @@ export class AuthenticationAPI extends BaseAPI {
             return;
         }
     
-        const { session, user } = JSON.parse(responseBody) as { session: Session | null, user: User | null };
+        const { session, user } = JSON.parse(responseBody) as { session: Session | null, user: UserDTO | null };
     
         if (!session || !user) {
             this.deleteSession(event);
@@ -99,7 +99,7 @@ export class AuthenticationAPI extends BaseAPI {
     }
 
 
-    public setSessionAndUser(session: Session, user: User, event: RequestEvent) {
+    public setSessionAndUser(session: Session, user: UserDTO, event: RequestEvent) {
         event.cookies.set(SESSION_COOKIE_NAME, session.token, {
             path: "/",
             expires: session.expiresAt

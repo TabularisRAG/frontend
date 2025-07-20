@@ -4,6 +4,6 @@ export class UserDTO {
         readonly email: string,
         readonly last_name: string,
         readonly first_name: string,
-        readonly isAdmin: boolean = false
+        readonly is_admin: boolean = false
     ) {}
 }

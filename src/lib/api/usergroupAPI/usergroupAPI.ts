@@ -1,12 +1,10 @@
 import type { UserGroup } from "$lib/entities/groups";
 import APIClient from "../ApiClient";
-import type { GetAllUserGroupsResponse } from "./response/GetAllUserGroupsResponse";
+import type { GetAllUserGroupsResponse, UserGroupDTO, UserDTO, AssignmentDTO, CreateUserGroupDTO } from "./response/GetAllUserGroupsResponse";
 
-const jwt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImpvaG4yLnNtaXRoQGV4YW1wbGUuY29tIiwiZXhwIjoxNzUyNzQ0MDcwfQ.wwprdMMf1YL1lNwww1av_qVT9AOG3mnRA6UfsHR9oQE"
 export default class UserGroupAPI extends APIClient {
 
     public async createUserGroup(user_group : any, jwt : string) {
-        const jwtToken = jwt
         const result = await fetch(this.serverURL + "/api/groups/new", {
             headers: {
                 "Content-Type": "application/json",
@@ -20,11 +18,10 @@ export default class UserGroupAPI extends APIClient {
     }
 
     public async getUserGroups(jwt : string) {
-        const jwtToken = jwt
         const result = await fetch(this.serverURL + "/api/groups", {
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer ${jwt}`, // Include JWT here
+                "Authorization": `Bearer ${jwt}`,
             },
             method: "GET",
         });
@@ -32,9 +29,8 @@ export default class UserGroupAPI extends APIClient {
         const response :  GetAllUserGroupsResponse = await result.json();
         return response; 
     }
-    
 
-    public async getUserGroup(id : string, jwt : string) {
+    public async getUserGroup(id: string, jwt: string): Promise<UserGroupDTO> {
         const result = await fetch(this.serverURL + "/api/groups/" + id, {
             headers: {
                 "Content-Type": "application/json",
@@ -42,41 +38,112 @@ export default class UserGroupAPI extends APIClient {
             },
             method: "GET",
         });
-    
-        const usergroup :  UserGroup = await result.json();
 
-        console.log(usergroup)
-        return usergroup; 
+        if (!result.ok) {
+            const errorData = await result.json();
+            throw new Error(errorData.detail || `Error loading group: ${result.statusText}`);
+        }
+
+        const groupData: UserGroupDTO = await result.json();
+        return groupData;
     }
 
-    public async deleteUserGroup(id : string, jwt : string) {
-        const result = await fetch(this.serverURL + "/api/groups/" + id + "/delete", {
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${jwt}`,
-            },
-            method: "DELETE",
-        });
-    
-        const parsed_result = await result.json();
-
-        console.log(parsed_result)
-        return parsed_result; 
-    }
-
-    public async unassignFromUserGroup(id : string, jwt : string) {
-        const result = await fetch(this.serverURL + "/api/groups/" + id + "/unassign", {
+    public async addMemberToGroup(groupId: string, userId: string, assignAsLeader: boolean, jwt: string): Promise<Response> {
+        const result = await fetch(`${this.serverURL}/api/groups/${groupId}/assign`, {
             headers: {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${jwt}`,
             },
             method: "POST",
-            body: JSON.stringify({"user_id" : id})
+            body: JSON.stringify({
+                user_id: userId,
+                assign_as_leader: assignAsLeader
+            }),
         });
-    
-        const parsed_result = await result.json();
 
-        console.log(parsed_result)
-        return parsed_result; 
+        if (!result.ok) {
+            const errorData = await result.json();
+            throw new Error(errorData.detail || `Error adding member: ${result.statusText}`);
+        }
+
+        return result;
+    }
+
+    public async removeMemberFromGroup(groupId: string, userId: string, jwt: string): Promise<Response> {
+        const result = await fetch(`${this.serverURL}/api/groups/${groupId}/unassign`, {
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${jwt}`,
+            },
+            method: "POST",
+            body: JSON.stringify({
+                user_id: userId
+            }),
+        });
+
+        if (!result.ok) {
+            const errorData = await result.json();
+            throw new Error(errorData.detail || `Error removing member: ${result.statusText}`);
+        }
+
+        return result;
+    }
+
+    public async updateMemberLeaderStatus(groupId: string, userId: string, makeLeader: boolean, jwt: string): Promise<Response> {
+        const result = await fetch(`${this.serverURL}/api/groups/${groupId}/change_user_role`, {
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${jwt}`,
+            },
+            method: "POST",
+            body: JSON.stringify({
+                user_id: userId,
+                assign_as_leader: makeLeader
+            }),
+        });
+
+        if (!result.ok) {
+            const errorData = await result.json();
+            throw new Error(errorData.detail || `Error changing user role: ${result.statusText}`);
+        }
+
+        return result;
+    }
+
+    public async updateGroupName(groupId: string, newName: string, jwt: string): Promise<CreateUserGroupDTO> {
+        const result = await fetch(`${this.serverURL}/api/groups/${groupId}/rename`, {
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${jwt}`,
+            },
+            method: "POST",
+            body: JSON.stringify({
+                name: newName
+            }),
+        });
+
+        if (!result.ok) {
+            const errorData = await result.json();
+            throw new Error(errorData.detail || `Error renaming group: ${result.statusText}`);
+        }
+
+        const responseData: CreateUserGroupDTO = await result.json();
+        return responseData;
+    }
+
+    public async deleteGroup(groupId: string, jwt: string): Promise<Response> {
+        const result = await fetch(`${this.serverURL}/api/groups/${groupId}/delete`, {
+            headers: {
+                "Authorization": `Bearer ${jwt}`,
+            },
+            method: "DELETE",
+        });
+
+        if (!result.ok) {
+            const errorData = await result.json();
+            throw new Error(errorData.detail || `Error deleting group: ${result.statusText}`);
+        }
+
+        return result;
     }
 }

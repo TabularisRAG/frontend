@@ -66,9 +66,9 @@ export const actions: Actions = {
         const usergroup = await new UserGroupAPI().getUserGroup(groupId as string, jwt);
 
         if(usergroup.user_count == 1) {
-            await new UserGroupAPI().deleteUserGroup(groupId as string, jwt)
+            await new UserGroupAPI().deleteGroup(groupId as string, jwt)
         } else {
-            await new UserGroupAPI().unassignFromUserGroup(groupId as string, jwt)
+            await new UserGroupAPI().removeMemberFromGroup(groupId as string, user.id, jwt)
         }
         
         return {
