@@ -332,28 +332,46 @@ async function leaveGroup() {
 }
 
 async function changeRole(member: UserDTO, makeLeader: boolean) {
-  const form = document.createElement('form');
-  form.method = 'POST';
-  form.action = '?/toggleLeader';
+  togglingLeader = true; // Loading state sofort setzen
   
-  const memberIdInput = document.createElement('input');
-  memberIdInput.type = 'hidden';
-  memberIdInput.name = 'memberId';
-  memberIdInput.value = member.id;
-  form.appendChild(memberIdInput);
-  
-  const makeLeaderInput = document.createElement('input');
-  makeLeaderInput.type = 'hidden';
-  makeLeaderInput.name = 'makeLeader';
-  makeLeaderInput.value = String(makeLeader);
-  form.appendChild(makeLeaderInput);
-  
-  document.body.appendChild(form);
-  
-  const enhancedSubmit = enhance(form, toggleLeaderAction);
-  form.requestSubmit();
-  
-  document.body.removeChild(form);
+  try {
+    const formData = new FormData();
+    formData.append('memberId', member.id);
+    formData.append('makeLeader', String(makeLeader));
+
+    const response = await fetch('?/toggleLeader', {
+      method: 'POST',
+      body: formData
+    });
+
+    const result = await response.json();
+    
+    if (response.ok) {
+      toast.success(makeLeader ? 'Member promoted to leader' : 'Leader role revoked');
+      
+      // State sofort aktualisieren
+      const updatedAssignments = groupDetails.assignments.map(assignment => {
+        if (assignment.user.id === member.id) {
+          return {
+            ...assignment,
+            is_leader: makeLeader
+          };
+        }
+        return assignment;
+      });
+      
+      groupDetails = {
+        ...groupDetails,
+        assignments: updatedAssignments
+      };
+    } else {
+      toast.error(result?.error || 'Failed to change member role');
+    }
+  } catch (error) {
+    toast.error('Failed to change member role');
+  } finally {
+    togglingLeader = false;
+  }
 }
 
 async function deleteGroup() {
@@ -420,8 +438,6 @@ $effect(() => {
               <span>{groupDetails.user_count} {m.members()}</span>
               <Separator orientation="vertical" class="h-4 hidden sm:block" />
               <span>{m.created_on()} {formatDate(groupDetails.created_at)}</span>
-              <Separator orientation="vertical" class="h-4 hidden sm:block" />
-              <span>{m.created_by()} {"Admin"}</span>
             </div>
           </div>
         </div>
