@@ -1,4 +1,3 @@
-import type { UserGroup } from '$lib/entities/groups';
 import { fail } from '@sveltejs/kit';
 
 import type {Actions, PageServerLoad} from "./$types";
