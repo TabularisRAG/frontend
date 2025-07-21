@@ -6,14 +6,12 @@ import {LoginUser, RegistrationUser, User} from "$lib/entities/user";
 export const SESSION_COOKIE_NAME = "auth-session";
 
 export class AuthenticationAPI extends BaseAPI {
-
     public async login(loginUser: LoginUser, event: RequestEvent) {
         const params = new URLSearchParams({
             grant_type: 'password',
-            username: loginUser.email,  
-            password: loginUser.password, 
+            username: loginUser.email,
+            password: loginUser.password,
         });
-        
         const response: Response = await fetch(this.serverURL + "/auth/token", {
             method: "POST",
             headers: {
@@ -21,17 +19,12 @@ export class AuthenticationAPI extends BaseAPI {
             },
             body: params
         });
-    
         const json = await response.json();
-    
         console.log("This is the response:", json);
-    
         const { session, user } = json as { session: Session, user: User };
-    
         if (!session || !user) {
             throw new Error(`Login failed - no session or user returned`);
         }
-    
         this.setSessionAndUser(session, user, event);
     }
 
@@ -46,32 +39,24 @@ export class AuthenticationAPI extends BaseAPI {
                 token: token
             })
         })
-    
         const responseBody = await response.text();
-    
         if (!response.ok) {
             console.error(`Validation failed! Status: ${response.status} - ${responseBody}`);
             this.deleteSession(event);
             return;
         }
-    
         const { session, user } = JSON.parse(responseBody) as { session: Session | null, user: User | null };
-    
         if (!session || !user) {
             this.deleteSession(event);
         } else {
             this.setSessionAndUser(session, user, event);
         }
-            
     }
-    
 
     public async registerUser(newUser: RegistrationUser) {
-
         if (!newUser.password) {
             throw new Error("Password is required");
         }
-
         const response = await fetch(this.serverURL + "/auth/register", {
             method: "POST",
             headers: {
@@ -85,10 +70,45 @@ export class AuthenticationAPI extends BaseAPI {
                 password: newUser.password
             })
         })
-
         if (!response.ok) {
             throw new Error(`Registration failed! Status: ${response.status} - ${await response.text()}`);
         }
+    }
+
+    public async resetPassword(userEmail: string, newPassword: string) {
+        if (!userEmail || !newPassword) {
+            throw new Error("Email and new password are required");
+        }
+
+        const response = await fetch(this.serverURL + "/auth/reset-password", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                user_email: userEmail,
+                new_password: newPassword
+            })
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            
+            // Handle specific error cases based on your Python API
+            if (response.status === 404) {
+                throw new Error("User not found");
+            } else if (response.status === 403) {
+                throw new Error("Default admin password cannot be reset");
+            } else {
+                throw new Error(`Password reset failed: ${errorText}`);
+            }
+        }
+
+        const result = await response.json();
+        return result as {
+            message: string;
+            requires_reactivation: boolean;
+        };
     }
 
     public async logout(event: RequestEvent) {
@@ -97,7 +117,6 @@ export class AuthenticationAPI extends BaseAPI {
         }
         this.deleteSession(event);
     }
-
 
     public setSessionAndUser(session: Session, user: User, event: RequestEvent) {
         event.cookies.set(SESSION_COOKIE_NAME, session.token, {

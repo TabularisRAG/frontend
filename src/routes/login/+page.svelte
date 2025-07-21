@@ -69,7 +69,7 @@
                                                 <Form.Label>{m.password()}</Form.Label>
                                                 <a
                                                         class="ml-auto text-sm underline-offset-4 hover:underline"
-                                                        href="##"
+                                                        href="/forget-pw"
                                                 >
                                                     {m.forgot_password()}
                                                 </a>
