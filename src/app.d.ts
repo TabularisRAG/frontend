@@ -1,7 +1,6 @@
 // for information about these interfaces
-import type {Session} from "$lib/entities/session";
-import type { UserDTO } from "$lib/api/userAPI/response/UserDTO";
 import type { User } from "$lib/entities/user";
+import type {Session} from "$lib/entities/session";
 
 declare global {
 	namespace App {
