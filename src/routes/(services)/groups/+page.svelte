@@ -18,7 +18,6 @@
     import { superForm } from "sveltekit-superforms";
     import { createGroupSchema } from "./schema";
 
-    import { UserGroup } from "$lib/entities/groups";
     import { goto, invalidateAll } from "$app/navigation";
     import { zod4Client } from "sveltekit-superforms/adapters";
     import * as AlertDialog from "$lib/components/ui/alert-dialog";

@@ -7,13 +7,13 @@ import { zod4 } from 'sveltekit-superforms/adapters';
 import {m} from "$lib/paraglide/messages";
 import UserGroupAPI from '$lib/api/usergroupAPI/usergroupAPI';
 import { getCurrentUserAndSessionOrRedirct } from '$lib/auth/getUserOrRedirect';
-import type { GetAllUserGroupsResponse } from '$lib/api/usergroupAPI/response/GetAllUserGroupsResponse';
+import type { GetAllUserGroupsResponse, UserGroupDTO } from '$lib/api/usergroupAPI/response/GetAllUserGroupsResponse';
 import { createGroupSchema } from './schema';
 
 export const load: PageServerLoad = async ({ fetch, depends }) => {  
   depends('app:groups');
   const {user, jwt} = getCurrentUserAndSessionOrRedirct()
-  console.log(user)
+
   try {
     const response: GetAllUserGroupsResponse = await new UserGroupAPI().getUserGroups(jwt);
     console.log(response)
@@ -46,7 +46,7 @@ export const actions: Actions = {
       }
 
       try {
-          await new UserGroupAPI().createUserGroup({ name: form.data.name} as UserGroup, jwt);
+          await new UserGroupAPI().createUserGroup({ name: form.data.name} as UserGroupDTO, jwt);
           
           return {
               success: true,

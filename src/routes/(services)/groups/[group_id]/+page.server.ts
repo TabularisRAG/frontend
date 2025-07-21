@@ -1,17 +1,12 @@
 // +page.server.ts
 import type { PageServerLoad, Actions } from './$types';
 import { superValidate } from 'sveltekit-superforms';
-import { zod, zod4 } from 'sveltekit-superforms/adapters';
+import { zod4 } from 'sveltekit-superforms/adapters';
 import { addMemberSchema, changeGroupNameSchema } from './schema';
 import { fail, error, redirect } from '@sveltejs/kit';
 import UserGroupAPI from '$lib/api/usergroupAPI/usergroupAPI';
-import type { UserGroup } from '$lib/entities/groups';
-import type { User } from '$lib/entities/user';
 import UserAPI from '$lib/api/userAPI/userAPI';
-import { getRequestEvent } from '$app/server';
-import { AuthenticationAPI } from '$lib/api/AuthenticationAPI';
-import type { UserDTO } from '$lib/api/userAPI/response/UserDTO';
-import type { UserGroupDTO } from '$lib/api/usergroupAPI/response/GetAllUserGroupsResponse';
+import type { User } from '$lib/entities/user';
 
 // Helper to get current user and JWT
 function getCurrentUserAndJwt(locals: App.Locals) {
@@ -24,7 +19,7 @@ function getCurrentUserAndJwt(locals: App.Locals) {
 }
 
 // Helper to check if current user is admin of the group or global admin
-async function checkUserPermissions(groupId: string, currentUser: UserDTO, jwt: string): Promise<{ isAdmin: boolean, isLeader: boolean }> {
+async function checkUserPermissions(groupId: string, currentUser: User, jwt: string): Promise<{ isAdmin: boolean, isLeader: boolean }> {
     const userGroupAPI = new UserGroupAPI();
     const group = await userGroupAPI.getUserGroup(groupId, jwt);
     const isLeader = group.assignments?.some(ua => ua.user.id === currentUser.id && ua.is_leader) || false;
