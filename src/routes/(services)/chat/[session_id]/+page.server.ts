@@ -10,8 +10,7 @@ export const load: PageServerLoad = async ({ params, fetch, depends, cookies }) 
   const token = cookies.get('auth-session');
 
   try {
-    const chat_API = new ChatAPI();
-    const data = await chat_API.get_chat_by_id(session_id, token);
+    const data = await new ChatAPI().get_chat_by_id(session_id, token);
 
     const messages: { type: string; value: string; modelId?: UUID}[] =
     (data.messages ?? []).map((msg: ChatMessageResponse) => ({

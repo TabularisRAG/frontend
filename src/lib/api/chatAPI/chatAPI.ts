@@ -1,4 +1,5 @@
 import type { Chat, ChatDataResponse, ChatMessageRequest, Message } from "$lib/types/chat";
+import type { UUID } from "crypto";
 import APIClient from "../ApiClient";
 import { error } from '@sveltejs/kit';
 
@@ -49,7 +50,7 @@ export default class ChatAPI extends APIClient {
     }
   }
 
-  public async get_chat_by_id(session_id: string, token: string | undefined): Promise<ChatDataResponse> {
+  public async get_chat_by_id(session_id: UUID, token: string | undefined): Promise<ChatDataResponse> {
     try {
       const res = await fetch(`${this.serverURL}/api/chats/${session_id}`, {
         headers: {
@@ -64,6 +65,49 @@ export default class ChatAPI extends APIClient {
 
       const data: ChatDataResponse = await res.json();
       return data;
+
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  public async delete_chat(session_id: UUID, token: string) {
+    try {
+      const res = await fetch(`${this.serverURL}/api/chats/${session_id}/delete`, {
+        method: 'DELETE',
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
+      });
+
+      if (!res.ok) {
+        throw error(res.status, 'Error while deleting');
+      }
+
+      return res
+
+    } catch (err) {
+      throw err;
+    }
+
+  }
+
+  public async rename_chat(session_id: UUID, new_name: string, token: string) {
+    try {
+      const res = await fetch(`${this.serverURL}/api/chats/${session_id}/set_name/${new_name}`, {
+        method: 'PATCH',
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+      });
+
+      if (!res.ok) {
+        throw error(res.status, 'Chat could not be renamed');
+      }
+
+      return res
 
     } catch (err) {
       throw err;

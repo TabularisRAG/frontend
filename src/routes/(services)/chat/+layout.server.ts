@@ -8,8 +8,7 @@ export const load: LayoutServerLoad = async ({ fetch, depends, cookies}) => {
 
   const token = cookies.get('auth-session');
   try {
-    const chat_API = new ChatAPI();
-    const list = await chat_API.get_all_user_chats(token);
+    const list = await new ChatAPI().get_all_user_chats(token);
 
     const sorted_list = list
     .map((c) => ({
@@ -26,9 +25,13 @@ export const load: LayoutServerLoad = async ({ fetch, depends, cookies}) => {
     });
     return {
       chat_list: sorted_list,
+      token: token
     };
   } catch (e) {
     console.error("Sidebar: error while loading data: ", e);
-    return { chat_list: [] };
+    return {
+      chat_list: [],
+      token: token
+    };
   }
 };

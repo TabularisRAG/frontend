@@ -3,6 +3,8 @@
   import {Button} from "$lib/components/ui/button/index";
   import { createEventDispatcher, getContext } from 'svelte';
   import LoaderCircle from "@lucide/svelte/icons/loader-circle";
+  import BookMark from "@lucide/svelte/icons/book-marked";
+  import {m} from '$lib/paraglide/messages.js';
 
   let {href, text} =  $props();
   const token = getContext<() => string>('token');
@@ -25,8 +27,6 @@
     citationError      = '';
     citationContent    = '';
 
-    console.log(token);
-
     try {
       const res = await fetch(`http://localhost:8000/api/documents/chunks/${id}`, {
         headers: {
@@ -46,21 +46,20 @@
 
 </script>
 
-<button
-  type="button"
-  class="underline text-blue-600 hover:text-blue-800"
-  style="display: inline-block; background: none; border: none; padding: 0; margin: 0; font: inherit; cursor: pointer;"
+<Button 
+  variant="link" 
+  class="p-0 h-4 w-3 font-normal text-primary hover:text-gray-500 cursor-pointer"
   onclick={handleClick}
 >
-  {text}
-</button>
+  <BookMark /> 
+</Button>
 
 <Dialog bind:open={citationDialogOpen}>
   <DialogContent class="max-w-2xl max-h-[80vh]">
     <DialogHeader>
-      <DialogTitle>Quellennachweis</DialogTitle>
+      <DialogTitle>{m.source_reference()}</DialogTitle>
       <DialogDescription>
-        Vollständiger Text der referenzierten Quelle
+        {m.full_text_from_source()}
       </DialogDescription>
     </DialogHeader>
 
@@ -84,14 +83,14 @@
 
     <DialogFooter>
       <Button variant="outline" onclick={() => citationDialogOpen = false}>
-        Schließen
+        {m.close()}
       </Button>
       {#if citationContent && !citationLoading}
         <Button 
           variant="secondary"
           onclick={() => navigator.clipboard.writeText(citationContent)}
         >
-          Text kopieren
+          {m.copy()}
         </Button>
       {/if}
     </DialogFooter>

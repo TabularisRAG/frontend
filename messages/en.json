@@ -44,7 +44,15 @@
 	"logout_success": "Successfully logged out.",
 	"error_occurred": "An error occurred.",
 	"and": "and",
-  "chat_history": "Chatverlauf",
-  "enter_prompt": "Stelle eine Frage ...",
-  "new_chat": "Neuer Chat"
+  "chat_history": "History",
+  "enter_prompt": "Ask a question ...",
+  "new_chat": "New chat",
+  "source_reference": "Source reference",
+  "full_text_from_source": "Complete text from source",
+  "close": "Close",
+  "copy": "Copy",
+  "rename": "Rename",
+  "delete": "Delete",
+  "confirm": "Bestätigen",
+  "cancel": "widerrufen"
 }

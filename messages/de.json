@@ -46,5 +46,13 @@
   "and": "und",
   "chat_history": "Chatverlauf",
   "enter_prompt": "Stelle eine Frage ...",
-  "new_chat": "Neuer Chat"
+  "new_chat": "Neuer Chat",
+  "source_reference": "Quellennachweis",
+  "full_text_from_source": "Vollständiger Text der referenzierten Quelle",
+  "close": "Schließen",
+  "copy": "Kopieren",
+  "rename": "Umbenennen",
+  "delete": "Löschen",
+  "confirm": "Bestätigen",
+  "cancel": "widerrufen"
 }

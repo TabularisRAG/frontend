@@ -10,12 +10,8 @@
   import { LoadEllipsis } from 'svelte-loading-animation';
   import { getContext } from 'svelte';
   import SvelteMarkdown from '@humanspeak/svelte-markdown'
-  import { marked } from 'marked';
-  import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "$lib/components/ui/dialog/index.js";
-  import LoaderCircle from "@lucide/svelte/icons/loader-circle";
-    import CitationButton from "$lib/components/ui/CitationButton.svelte";
+  import CitationButton from "./CitationButton.svelte";
 
-  //will be made selectable by user 
   const MODEL_ID = "22dd6109-e513-465a-9593-506e7d97e77e";
   const WEB_SOCKET_BASE_URL = `ws://localhost:8000/api`;
 
@@ -25,7 +21,7 @@
   let streaming_message: Message | null = $state(null);
   let socket: WebSocket | null = null;
   let current_session_id = $state(page.data.session_id);
-  setContext('token', () => data?.token ?? '');
+  setContext('token', data.token ?? '');
 
   const { chat_list, move_current_chat_to_front } = getContext<{
     chat_list: Chat[],
@@ -187,23 +183,6 @@
     }
   });
 
-
-//   const renderer = new marked.Renderer();
-//
-//   renderer.link = (href: string, title: string, text: string) => {
-//     const escapedHref = href?.replace(/"/g, '&quot;') ?? '';
-//     const escapedText = text?.replace(/</g, '&lt;').replace(/>/g, '&gt;') ?? '';
-//
-//     return `
-// <CitationButton 
-// href="${escapedHref}" 
-// text="${escapedText}" 
-// token="${data.token}" 
-// />
-// `.trim();
-//   };
-
-
   $effect(() => {
     if (messages.length > 0) {
       scroll_to_bottom();
@@ -218,7 +197,7 @@
 </script>
 
 {#key page.params.session_id}
-<div class="flex sticky flex-grow justify-center max-h-[calc(100vh-54px)]">
+  <div class="flex sticky flex-grow justify-center max-h-[calc(100vh-54px)]">
     <div bind:this={scroll_container} class="h-full w-full px-28 rounded-md mt-2 overflow-y-auto">
       {#each display_messages as message}
         {#if message.value !== ""}
@@ -242,10 +221,10 @@
           </Card.Root>
         {/if}
       {/each}
-    <div class="h-46"></div>
+      <div class="h-46"></div>
+    </div>
   </div>
-</div>
-<div class="sticky bottom-5 w-full px-28 flex justify-center">
+  <div class="sticky bottom-5 w-full px-28 pt-16 flex justify-center">
   <Card.Root class="w-full">
     <Card.Content class="max-h-fit">
       <form class="flex w-full max-h-48 items-center space-x-2" onsubmit={send_message}>
@@ -258,7 +237,5 @@
     <Card.Footer>
     </Card.Footer>
   </Card.Root>
-</div>
+  </div>
 {/key}
-
-
