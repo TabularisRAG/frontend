@@ -1,8 +1,7 @@
+import {BaseAPI} from "../BaseAPI";
 import type {RequestEvent} from "@sveltejs/kit";
 import type {Session} from "$lib/entities/session";
 import {LoginUser, RegistrationUser, User} from "$lib/entities/user";
-import { BaseAPI } from "../BaseAPI";
-import type { UserDTO } from "../userAPI/response/UserDTO";
 
 export const SESSION_COOKIE_NAME = "auth-session";
 
@@ -56,8 +55,7 @@ export class AuthenticationAPI extends BaseAPI {
             return;
         }
     
-        const { session, userdto } = JSON.parse(responseBody) as { session: Session | null, userdto: UserDTO | null };
-        const user = new User(userdto!.id, userdto!.email, userdto!.last_name, userdto!.first_name, userdto!.is_admin);
+        const { session, user } = JSON.parse(responseBody) as { session: Session | null, user: User | null };
     
         if (!session || !user) {
             this.deleteSession(event);
