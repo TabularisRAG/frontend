@@ -25,7 +25,7 @@ export const actions: Actions = {
             redirect(302, `/documents`)
         } catch (e) {
             console.error(e)
-            redirect(302, `/documents`)
+            redirect(302, `/`)
         }
     }
 }
