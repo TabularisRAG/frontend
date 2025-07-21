@@ -2,7 +2,6 @@ import {BaseAPI} from "./BaseAPI";
 import type {RequestEvent} from "@sveltejs/kit";
 import type {Session} from "$lib/entities/session";
 import {LoginUser, RegistrationUser, User} from "$lib/entities/user";
-import type { UserDTO } from "./userAPI/response/UserDTO";
 
 export const SESSION_COOKIE_NAME = "auth-session";
 
@@ -32,6 +31,7 @@ export class AuthenticationAPI extends BaseAPI {
         if (!session || !user) {
             throw new Error(`Login failed - no session or user returned`);
         }
+    
         this.setSessionAndUser(session, user, event);
     }
 
