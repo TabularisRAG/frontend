@@ -4,15 +4,15 @@
   import Send from "@lucide/svelte/icons/send-horizontal";
   import * as Card from "$lib/components/ui/card/index.js";
   import {m} from '$lib/paraglide/messages.js';
-  import { onDestroy, onMount, tick } from "svelte";
+  import { onDestroy, onMount, setContext, tick } from "svelte";
   import { ChatMessageType, type Chat, type ChatMessageRequest, type Message } from "$lib/types/chat.js";
   import { page } from "$app/state";
   import { LoadEllipsis } from 'svelte-loading-animation';
   import { getContext } from 'svelte';
   import SvelteMarkdown from '@humanspeak/svelte-markdown'
+  import CitationButton from "./CitationButton.svelte";
 
-  //will be made selectable by user 
-  const MODEL_ID = "gpt-4-mini";
+  const MODEL_ID = "22dd6109-e513-465a-9593-506e7d97e77e";
   const WEB_SOCKET_BASE_URL = `ws://localhost:8000/api`;
 
   let scroll_container: HTMLElement | null = $state(null);
@@ -21,6 +21,7 @@
   let streaming_message: Message | null = $state(null);
   let socket: WebSocket | null = null;
   let current_session_id = $state(page.data.session_id);
+  setContext('token', data.token ?? '');
 
   const { chat_list, move_current_chat_to_front } = getContext<{
     chat_list: Chat[],
@@ -60,7 +61,8 @@
   }
 
   function initializeWebSocket() {
-    socket = new WebSocket(`${WEB_SOCKET_BASE_URL}/chats/${page.data.session_id}/ws`);
+    const wsUrl = `${WEB_SOCKET_BASE_URL}/chats/${page.data.session_id}/ws?access_token=${data.token}`;
+    socket = new WebSocket(wsUrl);
 
     let message = sessionStorage.getItem("initialMessage") ?? "";
     if(message.trim() !== ""){
@@ -71,7 +73,7 @@
 
       let chat_message_request: ChatMessageRequest = {
         model_id: MODEL_ID,
-        message: message,
+        message: first_message.value,
         stop: false,
       }
 
@@ -195,14 +197,17 @@
 </script>
 
 {#key page.params.session_id}
-<div class="flex sticky flex-grow justify-center max-h-[calc(100vh-54px)]">
+  <div class="flex sticky flex-grow justify-center max-h-[calc(100vh-54px)]">
     <div bind:this={scroll_container} class="h-full w-full px-28 rounded-md mt-2 overflow-y-auto">
       {#each display_messages as message}
         {#if message.value !== ""}
           <div class="flex {message.type === ChatMessageType.HUMAN ? 'justify-end' : 'justify-start'} pb-2">
             <Card.Root class={message.type === ChatMessageType.HUMAN ? 'w-11/12 bg-gray-100 dark:bg-primary text-black' : 'w-full dark:bg-secondary dark:border-gray-700'}>
               <Card.Content class="max-h-fit">
-                <SvelteMarkdown source={message.value} />
+                <SvelteMarkdown
+                  source={message.value}
+                  renderers={{ link: CitationButton }}
+                />
               </Card.Content>
             </Card.Root>
           </div>
@@ -216,10 +221,10 @@
           </Card.Root>
         {/if}
       {/each}
-    <div class="h-46"></div>
+      <div class="h-46"></div>
+    </div>
   </div>
-</div>
-<div class="sticky bottom-5 w-full px-28 flex justify-center">
+  <div class="sticky bottom-5 w-full px-28 pt-16 flex justify-center">
   <Card.Root class="w-full">
     <Card.Content class="max-h-fit">
       <form class="flex w-full max-h-48 items-center space-x-2" onsubmit={send_message}>
@@ -232,5 +237,5 @@
     <Card.Footer>
     </Card.Footer>
   </Card.Root>
-</div>
+  </div>
 {/key}

@@ -6,10 +6,10 @@
   import {m} from '$lib/paraglide/messages.js';
   import { goto } from "$app/navigation";
   import { ChatMessageType, type ChatMessageRequest, type Message } from "$lib/types/chat.js";
+  import ChatAPI from "$lib/api/chatAPI/chatAPI.js";
+ 
+  let {data} = $props();
   
-
-  const API_BASE_URL = 'http://localhost:8000/api';
-
   let message: Message = {
     type: ChatMessageType.HUMAN,
     value:'',
@@ -20,21 +20,15 @@
     if (!message.value.trim()) return;
   
     let chat_message_request: ChatMessageRequest = {
-      model_id: "gpt-4o-mini",
+      model_id: "22dd6109-e513-465a-9593-506e7d97e77e",
       message: message.value,
       stop: false,
     }
 
-    const response = await fetch(`${API_BASE_URL}/chats/new`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(chat_message_request)  
-    });
+    const chat_API = new ChatAPI();
 
-    const data = await response.json();
-    const chat_id = data.session_id;
+    const new_chat = await chat_API.create_new_chat(data.token, chat_message_request); 
+    const chat_id = new_chat.session_id;
 
     sessionStorage.setItem("initialMessage", JSON.stringify(message));
     goto(`/chat/${chat_id}`);

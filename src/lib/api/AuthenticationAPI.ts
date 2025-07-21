@@ -1,6 +1,5 @@
 import {BaseAPI} from "./BaseAPI";
 import type {RequestEvent} from "@sveltejs/kit";
-import * as argon2 from "@node-rs/argon2";
 import type {Session} from "$lib/entities/session";
 import {LoginUser, RegistrationUser, User} from "$lib/entities/user";
 
@@ -9,27 +8,28 @@ export const SESSION_COOKIE_NAME = "auth-session";
 export class AuthenticationAPI extends BaseAPI {
 
     public async login(loginUser: LoginUser, event: RequestEvent) {
-        const hashedPassword = await this.hashPassword(loginUser.password);
-            const response: Response = await fetch(this.serverURL + "/auth/token", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    email: loginUser.email,
-                    password: hashedPassword
-                })
-            })
-
-        if (!response.ok) {
-            throw new Error(`Login failed! Status: ${response.status} - ${await response.text()}`);
-        }
-
-        const {session, user} = await response.json() as { session: Session, user: User };
+        const params = new URLSearchParams({
+            grant_type: 'password',
+            username: loginUser.email,  
+            password: loginUser.password, 
+        });
+        
+        const response: Response = await fetch(this.serverURL + "/auth/token", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: params
+        });
+    
+        const json = await response.json();
+    
+        const { session, user } = json as { session: Session, user: User };
+    
         if (!session || !user) {
             throw new Error(`Login failed - no session or user returned`);
         }
-
+    
         this.setSessionAndUser(session, user, event);
     }
 
@@ -40,20 +40,28 @@ export class AuthenticationAPI extends BaseAPI {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                token
+                token: token
             })
         })
+    
+        const responseBody = await response.text();
+    
         if (!response.ok) {
-            console.error(`Validation failed! Status: ${response.status} - ${await response.text()}`);
+            console.error(`Validation failed! Status: ${response.status} - ${responseBody}`);
+            this.deleteSession(event);
+            return;
         }
-
-        const {session, user} = await response.json() as { session: Session | null, user: User | null };
+    
+        const { session, user } = JSON.parse(responseBody) as { session: Session | null, user: User | null };
+    
         if (!session || !user) {
-            this.deleteSession(event)
+            this.deleteSession(event);
         } else {
             this.setSessionAndUser(session, user, event);
         }
+            
     }
+    
 
     public async registerUser(newUser: RegistrationUser) {
 
@@ -68,10 +76,10 @@ export class AuthenticationAPI extends BaseAPI {
             },
             body: JSON.stringify({
                 email: newUser.email,
-                firstName: newUser.firstName,
-                lastName: newUser.lastName,
-                isAdmin: newUser.isAdmin,
-                password: await this.hashPassword(newUser.password)
+                first_name: newUser.firstName,
+                last_name: newUser.lastName,
+                is_admin: newUser.isAdmin,
+                password: newUser.password
             })
         })
 
@@ -84,27 +92,9 @@ export class AuthenticationAPI extends BaseAPI {
         if (!event.locals.session) {
             throw new Error("No session found");
         }
-        const sessionId = event.locals.session.id;
-        const response = await fetch(this.serverURL + "/auth/logout", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                sessionId
-            })
-        })
-
-        if (!response.ok) {
-            throw new Error(`Logout failed! Status: ${response.status} - ${await response.text()}`);
-        }
-
         this.deleteSession(event);
     }
 
-    private async hashPassword(password: string): Promise<string> {
-        return await argon2.hash(password);
-    }
 
     public setSessionAndUser(session: Session, user: User, event: RequestEvent) {
         event.cookies.set(SESSION_COOKIE_NAME, session.token, {
