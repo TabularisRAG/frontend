@@ -1,6 +1,5 @@
-import type { UserGroup } from "$lib/entities/groups";
 import APIClient from "../ApiClient";
-import type { GetAllUserGroupsResponse, UserGroupDTO, UserDTO, AssignmentDTO, CreateUserGroupDTO } from "./response/GetAllUserGroupsResponse";
+import type { CreateUserGroupDTO, GetAllUserGroupsResponse, UserGroupDTO } from "./response/GetAllUserGroupsResponse";
 
 export default class UserGroupAPI extends APIClient {
 

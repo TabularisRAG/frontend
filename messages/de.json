@@ -117,5 +117,10 @@
     "user_role_revoked": "Leiter-Rolle von {userName} entzogen!",
     "error_changing_role": "Fehler beim Ändern der Rolle.",
     "more_actions": "Weitere Aktionen",
-    "actions_for": "Aktionen für {memberName}"
+    "actions_for": "Aktionen für {memberName}",
+	"are_you_sure_you_want_to_leave_the_group": "Bist Sie sicher, dass Sie die Gruppe verlassen möchten ?",
+    "are_you_sure_you_want_to_delete_the_group": "Bist Sie sicher, dass Sie die Gruppe löschen möchten ?",
+    "deleting_group" : "Lösche Gruppe...",
+    "group_left_or_deleted_successfully" : "Gruppe erfolgreich verlassen / gelöscht",
+    "error_while_leaving_or_deleting_group" : "Fehler beim Verlassen / Löschen der Gruppe"
 }

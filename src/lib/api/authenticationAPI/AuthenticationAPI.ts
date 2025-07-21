@@ -1,66 +1,120 @@
-import type { User } from "$lib/entities/user";
-import APIClient from "../ApiClient";
+import type {RequestEvent} from "@sveltejs/kit";
+import type {Session} from "$lib/entities/session";
+import {LoginUser, RegistrationUser, User} from "$lib/entities/user";
+import { BaseAPI } from "../BaseAPI";
+import type { UserDTO } from "../userAPI/response/UserDTO";
 
-export default class AuthenticationAPI extends APIClient {
+export const SESSION_COOKIE_NAME = "auth-session";
 
-    public async login(user: User): Promise<string> {
-        const params = new URLSearchParams();
-        params.append("grant_type", "password");
-        params.append("username", user.email);
-        if (user.password) {
-            params.append("password", user.password);
+export class AuthenticationAPI extends BaseAPI {
+
+    public async login(loginUser: LoginUser, event: RequestEvent) {
+        const params = new URLSearchParams({
+            grant_type: 'password',
+            username: loginUser.email,  
+            password: loginUser.password, 
+        });
+        
+        const response: Response = await fetch(this.serverURL + "/auth/token", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: params
+        });
+    
+        const json = await response.json();
+    
+        console.log("This is the response:", json);
+    
+        const { session, user } = json as { session: Session, user: User };
+    
+        if (!session || !user) {
+            throw new Error(`Login failed - no session or user returned`);
+        }
+    
+        this.setSessionAndUser(session, user, event);
+    }
+
+    public async validateSessionToken(token: string, event: RequestEvent) {
+        console.log("VALIDATE TOKEN ", token)
+        const response = await fetch(this.serverURL + "/auth/validate", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                token: token
+            })
+        })
+    
+        const responseBody = await response.text();
+    
+        if (!response.ok) {
+            console.error(`Validation failed! Status: ${response.status} - ${responseBody}`);
+            this.deleteSession(event);
+            return;
+        }
+    
+        const { session, userdto } = JSON.parse(responseBody) as { session: Session | null, userdto: UserDTO | null };
+        const user = new User(userdto!.id, userdto!.email, userdto!.last_name, userdto!.first_name, userdto!.is_admin);
+    
+        if (!session || !user) {
+            this.deleteSession(event);
         } else {
+            this.setSessionAndUser(session, user, event);
+        }
+            
+    }
+    
+
+    public async registerUser(newUser: RegistrationUser) {
+
+        if (!newUser.password) {
             throw new Error("Password is required");
         }
-    
-        try {
-            const response = await fetch(this.serverURL + "/auth/token", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded"
-                },
-                body: params.toString()
-            });
-    
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-    
-            const data = await response.json();
-            return data.access_token;  // Assuming the token is returned as 'access_token'
-        } catch (error) {
-            console.error("Login failed:", error);
-            return "UNAUTHORIZED";
+
+        const response = await fetch(this.serverURL + "/auth/register", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                email: newUser.email,
+                first_name: newUser.firstName,
+                last_name: newUser.lastName,
+                is_admin: newUser.isAdmin,
+                password: newUser.password
+            })
+        })
+
+        if (!response.ok) {
+            throw new Error(`Registration failed! Status: ${response.status} - ${await response.text()}`);
         }
     }
 
-    public async registerUser(newUser: User): Promise<void> {
-        try {
-            const response = await fetch(this.serverURL + "/auth/register", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    email: newUser.email,
-                    first_name: newUser.firstName,
-                    last_name: newUser.lastName,
-                    password: newUser.password
-                })
-            });
-    
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`Registration failed! Status: ${response.status} - ${errorText}`);
-            }
-    
-            console.log("User registered successfully");
-        } catch (error) {
-            console.error("Registration failed:", error);
-            throw error;
+    public async logout(event: RequestEvent) {
+        if (!event.locals.session) {
+            throw new Error("No session found");
         }
+        this.deleteSession(event);
     }
-    
-    
 
+
+    public setSessionAndUser(session: Session, user: User, event: RequestEvent) {
+        event.cookies.set(SESSION_COOKIE_NAME, session.token, {
+            path: "/",
+            expires: session.expiresAt
+        })
+        event.locals.session = session
+        event.locals.user = user
+    }
+
+    public deleteSession(event: RequestEvent) {
+        event.cookies.delete(SESSION_COOKIE_NAME, {
+            path: "/"
+        })
+        event.locals.session = null
+        event.locals.user = null
+    }
 }

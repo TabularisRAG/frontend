@@ -116,5 +116,10 @@
 	"user_role_revoked": "Leader role revoked from {userName}!",
 	"error_changing_role": "Error changing role.",
 	"more_actions": "More actions",
-	"actions_for": "Actions for {memberName}"
+	"actions_for": "Actions for {memberName}",
+	"are_you_sure_you_want_to_leave_the_group": "Are you sure you want to leave the group?",
+	"are_you_sure_you_want_to_delete_the_group": "Are you sure you want to delete the group?",
+    "deleting_group" : "Deleting group...",
+	"group_left_or_deleted_successfully" : "Group left / deleted successfully",
+	"error_while_leaving_or_deleting_group" : "Error while leaving / deleting the group"
 }

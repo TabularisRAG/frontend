@@ -13,13 +13,15 @@ import { createGroupSchema } from './schema';
 export const load: PageServerLoad = async ({ fetch, depends }) => {  
   depends('app:groups');
   const {user, jwt} = getCurrentUserAndSessionOrRedirct()
-
+  console.log(user)
   try {
     const response: GetAllUserGroupsResponse = await new UserGroupAPI().getUserGroups(jwt);
+    console.log(response)
     return {
       usergroups: response.groups,
       number_of_docs: response.number_of_unique_documents,
       success: true,
+      currentUser : user,
       form: await superValidate(zod4(createGroupSchema))
     };
   } catch (e) {    
@@ -27,6 +29,7 @@ export const load: PageServerLoad = async ({ fetch, depends }) => {
       usergroups: [], 
       success: false,
       number_of_docs: 0,
+      currentUser : user,
       form: await superValidate(zod4(createGroupSchema)) 
     };
   }
@@ -56,7 +59,7 @@ export const actions: Actions = {
       }
   },
   
-  leaveGroup: async ({ request, locals }) => {
+  leaveOrDeleteGroup: async ({ request, locals }) => {
     const {user, jwt} = getCurrentUserAndSessionOrRedirct()
 
     const formData = await request.formData();
@@ -65,7 +68,13 @@ export const actions: Actions = {
     try {
         const usergroup = await new UserGroupAPI().getUserGroup(groupId as string, jwt);
 
-        if(usergroup.user_count == 1) {
+        const isAdminAndNotInGroup = user.is_admin && !usergroup.current_user_is_in_group
+        const isLastMemberInGroup = usergroup.user_count == 1 && usergroup.current_user_is_in_group
+        const isLastLeaderAndOthersAreOnlyMembers = usergroup.current_user_is_leader && usergroup.leader_count == 1
+
+        const shouldDelete =  isAdminAndNotInGroup || isLastMemberInGroup || isLastLeaderAndOthersAreOnlyMembers
+
+        if(shouldDelete) {
             await new UserGroupAPI().deleteGroup(groupId as string, jwt)
         } else {
             await new UserGroupAPI().removeMemberFromGroup(groupId as string, user.id, jwt)
@@ -77,7 +86,7 @@ export const actions: Actions = {
         
     } catch (e) {
         return fail(500, { 
-            error: m.error_while_leaving_group()
+            error: m.error_while_leaving_or_deleting_group()
         });
     }
   }

@@ -1,22 +1,22 @@
-import type { UserGroup } from "$lib/entities/groups";
-import type { User } from "$lib/entities/user";
 
 export class GetAllUserGroupsResponse {
     constructor(
-        readonly groups : UserGroup[],
+        readonly groups : UserGroupDTO[],
         readonly number_of_unique_documents : Number
     ){}
 }
 
 export class UserGroupDTO {
     constructor(
-        readonly id: string,
-        readonly name: string,
-        readonly current_user_is_leader : boolean,
-        readonly created_at : string,
-        readonly user_count : number,
-        readonly assignments : AssignmentDTO[] = []
-    ) {}
+            readonly id: string,
+            readonly name: string,
+            readonly current_user_is_leader : boolean,
+            readonly current_user_is_in_group : boolean,
+            readonly created_at : string,
+            readonly user_count : number,
+            readonly leader_count : number,
+            readonly assignments : AssignmentDTO[] = []
+        ) {}
 }
 
 export class UserDTO {

@@ -44,7 +44,7 @@
             <Button href="/chat" variant="link">{m.chat()}</Button>
             <Button href="/groups" variant="link">{m.groups()}</Button>
             <!--admin only-->
-            {#if user?.isAdmin}
+            {#if user?.is_admin}
                 <Button href="/users" variant="link">{m.users()}</Button>
                
             {/if}
