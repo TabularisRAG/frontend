@@ -9,7 +9,7 @@ export const load: PageServerLoad = async (event) => {
     const success = event.url.searchParams.get("success") === "true";
     const error = event.url.searchParams.has("error");
     
-    console.log("Load function - success param:", success); // Debug log
+    console.log("Load function - success param:", success);
     
     return {
         success,
@@ -32,13 +32,11 @@ export const actions: Actions = {
                 form.data.newPassword
             );
             
-            // If we get here, the reset was successful
             console.log("Password reset successful:", result);
             
         } catch (error) {
             console.error("Password reset failed:", error);
             
-            // Add error message to form and return it
             if (error instanceof Error) {
                 if (error.message.includes("User not found")) {
                     form.errors.email = ["User with this email does not exist"];
@@ -54,7 +52,6 @@ export const actions: Actions = {
             return fail(400, { form });
         }
         
-        // Redirect only happens if no errors occurred
         redirect(302, `/forget-pw?success=true`)
     }
 }

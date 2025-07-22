@@ -17,13 +17,10 @@
         validators: zod4Client(registerSchema),
         applyAction: true,
         onResult: ({result}) => {
-            // Only show error toast for actual failures
             if (result.type === 'failure') {
-                // Check if there's a custom message from the server
                 const message = result.data?.message || m.error_occurred();
                 toast.error(message);
             }
-            // result.type === 'redirect' means success - redirect will handle navigation
         }
     });
     

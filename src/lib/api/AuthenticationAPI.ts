@@ -111,11 +111,16 @@ export class AuthenticationAPI extends BaseAPI {
         };
     }
 
-    public async getInactiveUsers() {
+    public async getInactiveUsers(event: RequestEvent) {
+        if (!event.locals.session?.token) {
+            throw new Error("No session found");
+        }
+
         const response = await fetch(this.serverURL + "/auth/inactive-users", {
             method: "GET",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${event.locals.session.token}`
             }
         });
 
@@ -146,22 +151,28 @@ export class AuthenticationAPI extends BaseAPI {
         this.deleteSession(event);
     }
 
-    public async changePassword(oldPassword: string, newPassword: string) {
-        if (!oldPassword) {
-            throw new Error("Old password is required");
-        }
+    public async changePassword(newPassword: string, event: RequestEvent, oldPassword?: string) {
         if (!newPassword) {
             throw new Error("New password is required");
         }
 
-        const requestBody: { new_password: string; old_password: string } = {
-            new_password: newPassword,
-            old_password: oldPassword
+        if (!event.locals.session?.token) {
+            throw new Error("No session found");
+        }
+
+        const requestBody: { new_password: string; old_password?: string } = {
+            new_password: newPassword
         };
+
+        if (oldPassword) {
+            requestBody.old_password = oldPassword;
+        }
+
         const response = await fetch(this.serverURL + "/auth/change-password", {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${event.locals.session.token}`
             },
             body: JSON.stringify(requestBody)
         });

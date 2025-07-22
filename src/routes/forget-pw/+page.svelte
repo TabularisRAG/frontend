@@ -16,7 +16,6 @@
 
     let {data}: PageProps = $props();
     
-    // Show toasts when component mounts
     onMount(() => {
         if (data.success) {
             toast.success("Password reset successfully! Your account has been deactivated and requires admin reactivation.");

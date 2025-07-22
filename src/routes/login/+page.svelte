@@ -25,18 +25,13 @@
 
     const form = superForm(data.form, {
         validators: zod4Client(loginSchema),
-        // This prevents the redirect from throwing an error
         applyAction: true,
         onResult: ({result}) => {
-            // Only show error toast for actual failures
             if (result.type === 'failure') {
-                // Check if there's a custom message from the server
                 const message = result.data?.message || m.error_occurred();
                 toast.error(message);
             }
-            // result.type === 'redirect' will be handled properly without error
         }
-        // No need for onError now since redirects won't throw errors
     });
     
     const {form: formData, enhance} = form;
