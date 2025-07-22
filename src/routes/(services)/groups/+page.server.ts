@@ -5,17 +5,16 @@ import { superValidate } from "sveltekit-superforms";
 import { zod4 } from 'sveltekit-superforms/adapters';
 import {m} from "$lib/paraglide/messages";
 import UserGroupAPI from '$lib/api/usergroupAPI/usergroupAPI';
-import { getCurrentUserAndSessionOrRedirct } from '$lib/auth/getUserOrRedirect';
+import { getCurrentUserAndSessionOrRedirect } from '$lib/auth/getUserOrRedirect';
 import type { GetAllUserGroupsResponse, UserGroupDTO } from '$lib/api/usergroupAPI/response/GetAllUserGroupsResponse';
 import { createGroupSchema } from './schema';
 
 export const load: PageServerLoad = async ({ fetch, depends }) => {  
   depends('app:groups');
-  const {user, jwt} = getCurrentUserAndSessionOrRedirct()
+  const {user, jwt} = getCurrentUserAndSessionOrRedirect()
 
   try {
     const response: GetAllUserGroupsResponse = await new UserGroupAPI().getUserGroups(jwt);
-    console.log(response)
     return {
       usergroups: response.groups,
       number_of_docs: response.number_of_unique_documents,
@@ -36,7 +35,7 @@ export const load: PageServerLoad = async ({ fetch, depends }) => {
 
 export const actions: Actions = {
   createGroup: async (request) => {
-      const {user, jwt} = getCurrentUserAndSessionOrRedirct()
+      const {user, jwt} = getCurrentUserAndSessionOrRedirect()
 
       const form = await superValidate(request, zod4(createGroupSchema))
       
@@ -59,7 +58,7 @@ export const actions: Actions = {
   },
   
   leaveOrDeleteGroup: async ({ request, locals }) => {
-    const {user, jwt} = getCurrentUserAndSessionOrRedirct()
+    const {user, jwt} = getCurrentUserAndSessionOrRedirect()
 
     const formData = await request.formData();
     const groupId = formData.get("groupId");

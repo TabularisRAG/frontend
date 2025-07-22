@@ -1,7 +1,7 @@
 import { getRequestEvent } from "$app/server";
 import { redirect } from "@sveltejs/kit";
 
-export function getCurrentUserAndSessionOrRedirct() {
+export function getCurrentUserAndSessionOrRedirect() {
      const {locals} = getRequestEvent();
     
       const jwt = locals.session?.token

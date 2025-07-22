@@ -121,5 +121,8 @@
 	"are_you_sure_you_want_to_delete_the_group": "Are you sure you want to delete the group?",
     "deleting_group" : "Deleting group...",
 	"group_left_or_deleted_successfully" : "Group left / deleted successfully",
-	"error_while_leaving_or_deleting_group" : "Error while leaving / deleting the group"
+	"error_while_leaving_or_deleting_group" : "Error while leaving / deleting the group",
+	"group_name_required" : "Group name required",
+	"group_name_too_long" : "Group name too long",
+	"valid_email_address_required" : "Valid email-address required"
 }
