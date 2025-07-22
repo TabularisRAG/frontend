@@ -39,7 +39,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
     try {
         const userGroupAPI = new UserGroupAPI();
         const group = await userGroupAPI.getUserGroup(groupId, jwt);
-        const allUsers = await new UserAPI().getAllUsers();
+        const allUsers = await new UserAPI().getAllUsers(jwt);
 
         return {
             group: group,

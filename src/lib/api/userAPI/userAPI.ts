@@ -32,13 +32,14 @@ export default class UserAPI extends APIClient {
 
     }
 
-    public async getAllUsers() {
+    public async getAllUsers(jwt : string) {
 
         try {
             const response = await fetch(this.serverURL + "/user/all", {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded",
+                    "Authorization": "Bearer " + jwt
                 }
             });
     
