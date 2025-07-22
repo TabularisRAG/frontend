@@ -418,8 +418,8 @@ $effect(() => {
 });
 </script>
 
-<div class="bg-muted/30 min-h-svh p-3 sm:p-6">
-  <div class="mx-auto max-w-6xl">
+<div class="sticky top-[54px] overflow-hidden max-h-[calc(100vh-54px)] h-screen p-3 sm:p-6">
+    <div class="mx-auto max-w-6xl h-full flex flex-col">
     <div class="mb-6 sm:mb-8">
       <div class="flex items-center gap-4 mb-4">
         <Button variant="ghost" size="sm" onclick={() => goto('/groups')} class="gap-2">
@@ -495,8 +495,8 @@ $effect(() => {
       </div>
     </div>
     
-    <Card.Root>
-      <Card.Header class="p-4 sm:p-6">
+    <Card.Root class="flex-1 flex flex-col min-h-0">
+      <Card.Header class="flex-shrink-0">
         <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <Card.Title>{m.members_title()}</Card.Title>
@@ -514,8 +514,8 @@ $effect(() => {
           </div>
         </div>
       </Card.Header>
-      <Card.Content class="p-0">
-        <div class="divide-y">
+      <Card.Content class="p-0 flex-1 overflow-hidden">
+        <div class="divide-y h-full overflow-y-auto">
           {#each filteredMembers as member (member.user.id)}
             <div class="p-4 sm:p-6">
               <div class="flex items-start sm:items-center justify-between gap-4">
