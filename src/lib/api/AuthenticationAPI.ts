@@ -146,19 +146,18 @@ export class AuthenticationAPI extends BaseAPI {
         this.deleteSession(event);
     }
 
-    public async changePassword(newPassword: string, oldPassword?: string) {
+    public async changePassword(oldPassword: string, newPassword: string) {
+        if (!oldPassword) {
+            throw new Error("Old password is required");
+        }
         if (!newPassword) {
             throw new Error("New password is required");
         }
 
-        const requestBody: { new_password: string; old_password?: string } = {
-            new_password: newPassword
+        const requestBody: { new_password: string; old_password: string } = {
+            new_password: newPassword,
+            old_password: oldPassword
         };
-
-        if (oldPassword) {
-            requestBody.old_password = oldPassword;
-        }
-
         const response = await fetch(this.serverURL + "/auth/change-password", {
             method: "POST",
             headers: {
