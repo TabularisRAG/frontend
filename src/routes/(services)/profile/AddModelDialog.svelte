@@ -1,19 +1,15 @@
 <script>
-    import { createEventDispatcher } from 'svelte';
+    import { createEventDispatcher, onMount } from 'svelte';
     import ModelAPI from '$lib/api/modelAPI/modelAPI.js';
     import { X, Plus } from 'lucide-svelte';
-  
+
     const modelAPI = new ModelAPI();
     export let jwt = '';
     export let showAddModelDialog = false;
-    export let availableProviders = [
-        { value: 'OPENAI', label: 'OpenAI' },
-        { value: 'ANTHROPIC', label: 'Anthropic' },
-        { value: 'GOOGLE', label: 'Google' }
-    ];
+    export let availableProviders = [];
 
     let newModelForm = {
-        provider: 'OPENAI',
+        provider: '',
         model: '',
         apiKey: ''
     };
@@ -24,6 +20,18 @@
 
     const dispatch = createEventDispatcher();
 
+    onMount(async () => {
+        try {
+            const providers = await modelAPI.getAvailableProviders(jwt);
+            availableProviders = providers.map(p => ({
+                value: p,
+                label: p.charAt(0) + p.slice(1).toLowerCase()
+            }));
+        } catch (error) {
+            console.error('Fehler beim Laden der Provider:', error);
+        }
+    });
+
     function closeAddModelDialog() {
         showAddModelDialog = false;
         resetForm();
@@ -32,7 +40,7 @@
 
     function resetForm() {
         newModelForm = {
-            provider: 'OPENAI',
+            provider: '',
             model: '',
             apiKey: ''
         };
@@ -45,7 +53,7 @@
 
     async function addNewModel() {
         if (isAddingModel) return;
-        
+
         if (!newModelForm.model.trim() || !newModelForm.apiKey.trim()) {
             errorMessage = 'Bitte füllen Sie alle erforderlichen Felder aus';
             return;
@@ -57,8 +65,6 @@
 
             const result = await modelAPI.createModel(jwt, newModelForm);
             successMessage = 'Modell erfolgreich hinzugefügt!';
-
-            // Event dispatchen mit den Modelldaten
             dispatch('modelAdded', result);
 
             setTimeout(() => {
@@ -72,22 +78,21 @@
         }
     }
 
-    // Provider-spezifische Hinweise
     $: providerInfo = getProviderInfo(newModelForm.provider);
 
     function getProviderInfo(provider) {
         const info = {
-            'OPENAI': {
+            'openai': {
                 examples: 'gpt-4, gpt-4-turbo, gpt-3.5-turbo',
                 keyFormat: 'sk-...',
                 color: 'blue'
             },
-            'ANTHROPIC': {
+            'anthropic': {
                 examples: 'claude-3-opus, claude-3-sonnet, claude-3-haiku',
                 keyFormat: 'sk-ant-...',
                 color: 'purple'
             },
-            'GOOGLE': {
+            'google': {
                 examples: 'gemini-pro, gemini-pro-vision',
                 keyFormat: 'Google AI Studio API Key',
                 color: 'green'
@@ -96,6 +101,7 @@
         return info[provider] || { examples: '', keyFormat: '', color: 'blue' };
     }
 </script>
+
 
 {#if showAddModelDialog}
     <div class="modal-overlay" on:click={closeAddModelDialog} role="dialog" aria-modal="true">

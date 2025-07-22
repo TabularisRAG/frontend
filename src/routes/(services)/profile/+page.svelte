@@ -26,9 +26,7 @@
     import Settings from "@lucide/svelte/icons/settings";
     import Cpu from "@lucide/svelte/icons/cpu";
     import BarChart from "@lucide/svelte/icons/bar-chart";
-    import Zap from "@lucide/svelte/icons/zap";
     import Plus from "@lucide/svelte/icons/plus";
-    import Trash2 from "@lucide/svelte/icons/trash-2";
     import type { PageData } from './$types';
 
     let { data }: { data: PageData } = $props();
@@ -43,49 +41,55 @@
         chatCount: data.chatCount || 0
     });
 
-    // Admin LLM settings
+    // Admin LLM settings - now fetched from API
     let adminSettings = $state({
-        currentLLM: data.currentLLM || 'gpt-4',
-        availableLLMs: data.availableLLMs || [
-            { value: 'gpt-4', label: 'GPT-4', provider: 'OPENAI' },
-            { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo', provider: 'OPENAI' },
-            { value: 'claude-3-sonnet', label: 'Claude 3 Sonnet', provider: 'ANTHROPIC' },
-            { value: 'claude-3-haiku', label: 'Claude 3 Haiku', provider: 'ANTHROPIC' },
-            { value: 'gemini-pro', label: 'Gemini Pro', provider: 'GOOGLE' }
-        ]
+        availableModels: data.adminData?.availableModels || [],
+        availableProviders: data.adminData?.availableProviders || [],
+        isLoading: false, // Immer false, da bereits server-side geladen
+        error: data.adminData?.error || null
     });
 
-    // Model management
-
-    // Entferne das doppelte Dialog-System und verwende nur:
     let showAddModelDialog = $state(false);
     
-    // Event handler
-    function handleModelAdded(event) {
-        const createdModel = event.detail;
-        
-        // Aktualisiere die verfügbaren LLMs
-        adminSettings.availableLLMs = [
-            ...adminSettings.availableLLMs,
-            {
-                value: createdModel.model_name,
-                label: createdModel.model_name, // oder createdModel.display_name falls verfügbar
-                provider: createdModel.provider
-            }
-        ];
-        
-        toast.success('Modell erfolgreich hinzugefügt');
+    // Load admin data when component mounts
+    $effect(() => {
+    if (data.adminData?.error) {
+        console.error('Admin data error:', data.adminData.error);
     }
+    });
+
+
+// Add a separate flag to track if we've already started loading
+let adminDataLoaded = $state(false);
+
+    
+    function handleModelAdded(event) {
+    const createdModel = event.detail;
+    
+    adminSettings.availableModels = [
+        ...adminSettings.availableModels,
+        {
+            provider: createdModel.provider,
+            model: createdModel.model_name,
+            apiKey: createdModel.apiKey
+        }
+    ];
+    
+    toast.success('Modell erfolgreich hinzugefügt');
+}
+
     
     function openAddModelDialog() {
         showAddModelDialog = true;
     }
 
-    const availableProviders = [
-        { value: 'OPENAI', label: 'OpenAI' },
-        { value: 'ANTHROPIC', label: 'Anthropic' },
-        { value: 'GOOGLE', label: 'Google' }
-    ];
+    // Convert providers array to the format expected by AddModelDialog
+    const availableProvidersForDialog = $derived(
+        adminSettings.availableProviders.map(provider => ({
+            value: provider,
+            label: provider
+        }))
+    );
 
     // LLM Usage Statistics
     let llmUsage = $state({
@@ -168,53 +172,12 @@
         }
     }
 
-    async function changeLLM(newLLM: string) {
-        try {
-            // await updateLLMSetting(newLLM);
-            adminSettings.currentLLM = newLLM;
-            toast.success(`LLM erfolgreich auf ${newLLM} geändert`);
-        } catch (error) {
-            toast.error('Fehler beim Ändern des LLM');
-        }
+    function getInitials(first_name: string, last_name: string) {
+        return (first_name[0] + last_name[0]).toUpperCase();
     }
 
-    async function deleteModel(modelValue: string) {
-        if (!confirm('Sind Sie sicher, dass Sie dieses Modell löschen möchten?')) {
-            return;
-        }
-
-        try {
-            const response = await fetch(`/api/admin/models/${modelValue}`, {
-                method: 'DELETE'
-            });
-
-            if (!response.ok) {
-                throw new Error('Fehler beim Löschen des Modells');
-            }
-
-            // Remove from available LLMs list
-            adminSettings.availableLLMs = adminSettings.availableLLMs.filter(
-                llm => llm.value !== modelValue
-            );
-
-            // If deleted model was the current one, switch to first available
-            if (adminSettings.currentLLM === modelValue && adminSettings.availableLLMs.length > 0) {
-                adminSettings.currentLLM = adminSettings.availableLLMs[0].value;
-            }
-
-            toast.success('Modell erfolgreich gelöscht');
-        } catch (error) {
-            toast.error('Fehler beim Löschen des Modells');
-            console.error('Error deleting model:', error);
-        }
-    }
-
-    function getInitials(firstName: string, lastName: string) {
-        return (firstName[0] + lastName[0]).toUpperCase();
-    }
-
-    function getFullName(firstName: string, lastName: string) {
-        return `${firstName} ${lastName}`;
+    function getFullName(first_name: string, last_name: string) {
+        return `${first_name} ${last_name}`;
     }
 
     function formatDate(dateString: string) {
@@ -264,7 +227,6 @@
                 {:else}
                     <div class="flex items-center gap-6">
                         <Avatar class="w-20 h-20">
-                            <AvatarImage src={user.avatar} alt={getFullName(user.first_name, user.last_name)} />
                             <AvatarFallback class="text-xl">{getInitials(user.first_name, user.last_name)}</AvatarFallback>
                         </Avatar>
                         <div class="flex-1">
@@ -367,10 +329,9 @@
         {#if user}
             <div class="lg:col-span-3">
                 <Tabs.Root value="account" class="w-full">
-                    <Tabs.List class="grid w-full {user.is_admin ? 'grid-cols-4' : 'grid-cols-3'}">
+                    <Tabs.List class="grid w-full {user.is_admin ? 'grid-cols-3' : 'grid-cols-2'}">
                         <Tabs.Trigger value="account">{m.account()}</Tabs.Trigger>
                         <Tabs.Trigger value="security">{m.security()}</Tabs.Trigger>
-                        <Tabs.Trigger value="preferences">{m.preferences()}</Tabs.Trigger>
                         {#if user.is_admin}
                             <Tabs.Trigger value="admin">
                                 <Settings class="w-4 h-4 mr-2" />
@@ -447,37 +408,6 @@
                         </Card>
                     </Tabs.Content>
                     
-                    <Tabs.Content value="preferences" class="space-y-4">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>{m.user_preferences()}</CardTitle>
-                                <CardDescription>{m.personalize_experience()}</CardDescription>
-                            </CardHeader>
-                            <CardContent class="space-y-4">
-                                <div class="text-sm text-muted-foreground">
-                                    {m.language_theme_settings_in_navbar()}
-                                </div>
-                                <Separator />
-                                <div>
-                                    <Label class="text-sm font-medium">{m.notifications()}</Label>
-                                    <div class="space-y-2 mt-2">
-                                        <div class="flex items-center justify-between">
-                                            <span class="text-sm">{m.email_notifications()}</span>
-                                            <input type="checkbox" class="rounded" checked />
-                                        </div>
-                                        <div class="flex items-center justify-between">
-                                            <span class="text-sm">{m.chat_notifications()}</span>
-                                            <input type="checkbox" class="rounded" checked />
-                                        </div>
-                                        <div class="flex items-center justify-between">
-                                            <span class="text-sm">{m.document_updates()}</span>
-                                            <input type="checkbox" class="rounded" />
-                                        </div>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </Tabs.Content>
 
                     {#if user.is_admin}
                         <Tabs.Content value="admin" class="space-y-4">
@@ -501,64 +431,39 @@
                                     </div>
                                 </CardHeader>
                                 <CardContent class="space-y-4">
-                                    <div class="space-y-2">
-                                        <Label for="llm-select">Aktuelles Standard-LLM</Label>
-                                        <Select.Root bind:value={adminSettings.currentLLM}>
-                                            <Select.Trigger class="w-full">
-                                                <span class="text-sm">
-                                                    {adminSettings.availableLLMs.find(llm => llm.value === adminSettings.currentLLM)?.label || 'LLM auswählen'}
-                                                </span>
-                                            </Select.Trigger>
-                                            <Select.Content>
-                                                {#each adminSettings.availableLLMs as llm}
-                                                    <Select.Item 
-                                                        value={llm.value} 
-                                                        onclick={() => changeLLM(llm.value)}
-                                                    >
-                                                        {llm.label}
-                                                    </Select.Item>
-                                                {/each}
-                                            </Select.Content>
-                                        </Select.Root>
-                                    </div>
-                                    
-                                    <div class="p-3 bg-muted rounded-md">
-                                        <div class="flex items-center gap-2 text-sm">
-                                            <Zap class="w-4 h-4" />
-                                            <span class="font-medium">Aktuell aktiv:</span>
-                                            <Badge variant="secondary">{adminSettings.currentLLM}</Badge>
-                                        </div>
-                                    </div>
-
                                     <!-- Available Models List -->
                                     <div>
                                         <Label class="text-sm font-medium mb-3 block">Verfügbare Modelle</Label>
-                                        <div class="space-y-2 max-h-60 overflow-y-auto">
-                                            {#each adminSettings.availableLLMs as llm}
-                                                <div class="flex items-center justify-between p-3 border rounded-lg">
-                                                    <div class="flex items-center gap-3">
-                                                        <Badge variant="outline" class="text-xs">
-                                                            {llm.provider}
-                                                        </Badge>
-                                                        <div>
-                                                            <div class="font-medium text-sm">{llm.label}</div>
-                                                            <div class="text-xs text-muted-foreground">{llm.value}</div>
+                                        {#if adminSettings.isLoading}
+                                            <div class="flex items-center justify-center p-8">
+                                                <div class="text-sm text-muted-foreground">Lade Modelle...</div>
+                                            </div>
+                                        {:else if adminSettings.availableModels.length === 0}
+                                            <div class="text-center p-8 text-muted-foreground">
+                                                <p>Keine Modelle verfügbar</p>
+                                                <p class="text-xs mt-1">Fügen Sie ein neues Modell hinzu</p>
+                                            </div>
+                                        {:else}
+                                            <div class="space-y-2 max-h-60 overflow-y-auto">
+                                                {#each adminSettings.availableModels as model}
+                                                    <div class="flex items-center justify-between p-3 border rounded-lg">
+                                                        <div class="flex items-center gap-3">
+                                                            <Badge variant="outline" class="text-xs">
+                                                                {model.provider}
+                                                            </Badge>
+                                                            <div>
+                                                                <div class="font-medium text-sm">{model.model}</div>
+                                                                {#if model.apiKey}
+                                                                    <div class="text-xs text-muted-foreground">
+                                                                        API Key: ****{model.apiKey.slice(-4)}
+                                                                    </div>
+                                                                {/if}
+                                                            </div>
                                                         </div>
-                                                        {#if llm.value === adminSettings.currentLLM}
-                                                            <Badge variant="secondary" class="text-xs">Standard</Badge>
-                                                        {/if}
                                                     </div>
-                                                    <Button 
-                                                        variant="ghost" 
-                                                        size="sm"
-                                                        onclick={() => deleteModel(llm.value)}
-                                                        class="text-destructive hover:text-destructive"
-                                                    >
-                                                        <Trash2 class="w-4 h-4" />
-                                                    </Button>
-                                                </div>
-                                            {/each}
-                                        </div>
+                                                {/each}
+                                            </div>
+                                        {/if}
                                     </div>
                                 </CardContent>
                             </Card>
@@ -643,11 +548,7 @@
 
 <AddModelDialog
     bind:showAddModelDialog
-    {availableProviders}
+    availableProviders={availableProvidersForDialog}
     on:modelAdded={handleModelAdded}
-    jwt=jwt
-<<<<<<< HEAD
+    jwt={jwt}
 />
-=======
-/>
->>>>>>> 186d0d7 (added backend interaction to create model to use)
