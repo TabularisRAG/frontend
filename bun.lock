@@ -9,7 +9,6 @@
         "@oslojs/crypto": "^1.0.1",
         "@oslojs/encoding": "^1.1.0",
         "mode-watcher": "^1.0.7",
-        "zod": "^3.25.67",
       },
       "devDependencies": {
         "@lucide/svelte": "^0.482.0",
@@ -31,7 +30,7 @@
         "svelte": "^5.0.0",
         "svelte-check": "^4.0.0",
         "svelte-sonner": "^1.0.1",
-        "sveltekit-superforms": "^2.27.0",
+        "sveltekit-superforms": "^2.19.1",
         "tailwind-merge": "^3.0.2",
         "tailwind-variants": "^0.2.1",
         "tailwindcss": "^4.0.0",
