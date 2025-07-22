@@ -47,9 +47,9 @@
             {/if}
 
             <!--admin only-->
-            {#if user?.isAdmin}
+            {#if user?.is_admin}
                 <Button href="/users" variant="link">{m.users()}</Button>
-                <Button href="/groups" variant="link">{m.groups()}</Button>
+               
             {/if}
         </div>
         <div class="hidden md:flex justify-center items-center gap-2">

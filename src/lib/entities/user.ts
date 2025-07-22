@@ -29,7 +29,7 @@ export class User implements BaseUser {
         readonly email: string,
         readonly lastName: string,
         readonly firstName: string,
-        readonly isAdmin: boolean = false
+        readonly is_admin: boolean = false,
     ) {}
 
     public getFullName(): string {
