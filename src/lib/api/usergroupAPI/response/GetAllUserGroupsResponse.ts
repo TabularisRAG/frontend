@@ -32,7 +32,7 @@ export class UserDTO {
 export class AssignmentDTO {
     constructor(
         readonly user : UserDTO,
-        readonly is_leader: boolean | string, // Can be boolean or string
+        readonly is_leader: boolean,
         readonly joined_at: string 
     ) {}
 }
