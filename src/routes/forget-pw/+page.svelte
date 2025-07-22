@@ -3,6 +3,7 @@
     import {m} from "$lib/paraglide/messages";
     import type {PageProps} from './$types';
     import {browser} from '$app/environment';
+    import {onMount} from 'svelte';
     import {toast} from "svelte-sonner";
     import * as Card from "$lib/components/ui/card";
     import * as Form from "$lib/components/ui/form";
@@ -15,22 +16,14 @@
 
     let {data}: PageProps = $props();
     
-    // Track if toasts have been shown to prevent infinite loops
-    let hasShownSuccessToast = $state(false);
-    let hasShownErrorToast = $state(false);
-    
-    // Use $effect to show toasts when data changes
-    $effect(() => {
-        if (browser && data.success && !hasShownSuccessToast) {
+    // Show toasts when component mounts
+    onMount(() => {
+        if (data.success) {
             toast.success("Password reset successfully! Your account has been deactivated and requires admin reactivation.");
-            hasShownSuccessToast = true;
         }
-    });
-
-    $effect(() => {
-        if (browser && data.error && !hasShownErrorToast) {
+        
+        if (data.error) {
             toast.error(m.error_occurred());
-            hasShownErrorToast = true;
         }
     });
 
