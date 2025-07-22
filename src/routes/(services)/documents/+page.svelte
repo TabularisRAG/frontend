@@ -3,11 +3,9 @@
     import {columns} from "./columns.js";
 
     let {data} = $props();
+
+    let cols = columns(data.token);
 </script>
 <div class="m-8">
-    {#await data.documents}
-        <DataTable {columns} data={[]}/>
-    {:then documents}
-        <DataTable {columns} data={documents}/>
-    {/await}
+    <DataTable columns={cols} data={data.documents}/>
 </div>

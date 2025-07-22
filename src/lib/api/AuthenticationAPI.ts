@@ -2,16 +2,19 @@ import {BaseAPI} from "./BaseAPI";
 import type {RequestEvent} from "@sveltejs/kit";
 import type {Session} from "$lib/entities/session";
 import {LoginUser, RegistrationUser, User, type UserResponse} from "$lib/entities/user";
+import APIClient from "$lib/api/ApiClient";
 
 export const SESSION_COOKIE_NAME = "auth-session";
 
-export class AuthenticationAPI extends BaseAPI {
+export class AuthenticationAPI extends APIClient {
+
     public async login(loginUser: LoginUser, event: RequestEvent) {
         const params = new URLSearchParams({
             grant_type: 'password',
             username: loginUser.email,
             password: loginUser.password,
         });
+
         const response: Response = await fetch(this.serverURL + "/auth/token", {
             method: "POST",
             headers: {
@@ -126,7 +129,7 @@ export class AuthenticationAPI extends BaseAPI {
 
         if (!response.ok) {
             const errorText = await response.text();
-            
+
             if (response.status === 403) {
                 throw new Error("Access denied. Admin privileges required");
             } else if (response.status === 401) {
@@ -179,7 +182,7 @@ export class AuthenticationAPI extends BaseAPI {
 
         if (!response.ok) {
             const errorText = await response.text();
-            
+
             if (response.status === 403) {
                 throw new Error("Default admin password cannot be changed");
             } else if (response.status === 401) {

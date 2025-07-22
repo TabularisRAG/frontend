@@ -25,3 +25,24 @@ export const formatSize = (sizeInBytes: number) => {
 
     return formatter.format(sizeInBytes / Math.pow(1024, i)) + " " + sizes[i];
 }
+
+export const formatDateTime = (date: Date) => {
+    const formatter = new Intl.DateTimeFormat(getLocale(), {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        minute: "2-digit",
+        hour: "2-digit",
+        hour12: false
+    })
+    return formatter.format(date)
+}
+
+export const formatDate = (date: Date) => {
+    const formatter = new Intl.DateTimeFormat(getLocale(), {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric"
+    })
+    return formatter.format(date)
+}

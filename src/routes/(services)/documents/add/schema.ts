@@ -9,4 +9,4 @@ export let schema = z.object({
     year: z.int(m.doc_validation_year_missing()),
     author: z.string().nonempty(m.doc_validation_author_missing()),
     keywords: z.string().array().min(1, m.doc_validation_keywords_missing())
-})
+})  

@@ -6,7 +6,8 @@ export class LoginUser implements BaseUser {
     constructor(
         readonly email: string,
         readonly password: string
-    ) {}
+    ) {
+    }
 }
 
 export class RegistrationUser implements BaseUser {
@@ -16,7 +17,8 @@ export class RegistrationUser implements BaseUser {
         readonly firstName: string,
         readonly isAdmin: boolean = false,
         readonly password: string
-    ) {}
+    ) {
+    }
 
     public getFullName(): string {
         return `${this.firstName} ${this.lastName}`;

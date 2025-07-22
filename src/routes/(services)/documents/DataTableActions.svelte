@@ -6,8 +6,18 @@
     import Eye from "@lucide/svelte/icons/eye";
     import Pencil from "@lucide/svelte/icons/pencil";
     import Trash from "@lucide/svelte/icons/trash";
+    import {page} from "$app/state";
+    import {invalidateAll} from "$app/navigation";
+    import {DocumentAPI} from "$lib/api/DocumentAPI";
+    import {SESSION_COOKIE_NAME} from "$lib/api/AuthenticationAPI";
 
-    let {id}: { id: string } = $props();
+    let {id, token}: { id: string, token: string } = $props();
+
+    async function deleteDocument() {
+        console.log("delete " + id)
+        await new DocumentAPI().deleteDocument(token, id)
+        await invalidateAll()
+    }
 </script>
 
 <DropdownMenu.Root>
@@ -27,7 +37,7 @@
     <DropdownMenu.Content>
         <DropdownMenu.Group>
             <DropdownMenu.Label>{m.label_actions()}</DropdownMenu.Label>
-            <DropdownMenu.Separator />
+            <DropdownMenu.Separator/>
             <DropdownMenu.Item>
                 {#snippet child({props})}
                     <a href="/documents/{id}" {...props}>
@@ -36,15 +46,15 @@
                     </a>
                 {/snippet}
             </DropdownMenu.Item>
-            <DropdownMenu.Item>
-                {#snippet child({props})}
-                    <a href="/documents/{id}/edit" {...props}>
-                        <Pencil class="mr-1 text-foreground"/>
-                        {m.action_edit()}
-                    </a>
-                {/snippet}
-            </DropdownMenu.Item>
-            <DropdownMenu.Item onclick={()=> console.log("deleting " + id)}>
+            <!--            <DropdownMenu.Item>-->
+            <!--                {#snippet child({props})}-->
+            <!--                    <a href="/documents/{id}/edit" {...props}>-->
+            <!--                        <Pencil class="mr-1 text-foreground"/>-->
+            <!--                        {m.action_edit()}-->
+            <!--                    </a>-->
+            <!--                {/snippet}-->
+            <!--            </DropdownMenu.Item>-->
+            <DropdownMenu.Item onclick={async () => await deleteDocument()}>
                 <Trash class="mr-1 text-foreground"/>
                 {m.action_delete()}
             </DropdownMenu.Item>
