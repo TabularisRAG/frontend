@@ -1,7 +1,7 @@
 import {BaseAPI} from "./BaseAPI";
 import type {RequestEvent} from "@sveltejs/kit";
 import type {Session} from "$lib/entities/session";
-import {LoginUser, RegistrationUser, User} from "$lib/entities/user";
+import {LoginUser, RegistrationUser, User, type UserResponse} from "$lib/entities/user";
 
 export const SESSION_COOKIE_NAME = "auth-session";
 
@@ -111,11 +111,89 @@ export class AuthenticationAPI extends BaseAPI {
         };
     }
 
+    public async getInactiveUsers(event: RequestEvent) {
+        if (!event.locals.session?.token) {
+            throw new Error("No session found");
+        }
+
+        const response = await fetch(this.serverURL + "/auth/inactive-users", {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${event.locals.session.token}`
+            }
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            
+            if (response.status === 403) {
+                throw new Error("Access denied. Admin privileges required");
+            } else if (response.status === 401) {
+                throw new Error("Authentication required");
+            } else {
+                throw new Error(`Failed to retrieve inactive users: ${errorText}`);
+            }
+        }
+
+        const result = await response.json();
+        return result as {
+            inactive_users: UserResponse[];
+            count: number;
+            message: string;
+        };
+    }
+
     public async logout(event: RequestEvent) {
         if (!event.locals.session) {
             throw new Error("No session found");
         }
         this.deleteSession(event);
+    }
+
+    public async changePassword(newPassword: string, event: RequestEvent, oldPassword?: string) {
+        if (!newPassword) {
+            throw new Error("New password is required");
+        }
+
+        if (!event.locals.session?.token) {
+            throw new Error("No session found");
+        }
+
+        const requestBody: { new_password: string; old_password?: string } = {
+            new_password: newPassword
+        };
+
+        if (oldPassword) {
+            requestBody.old_password = oldPassword;
+        }
+
+        const response = await fetch(this.serverURL + "/auth/change-password", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${event.locals.session.token}`
+            },
+            body: JSON.stringify(requestBody)
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            
+            if (response.status === 403) {
+                throw new Error("Default admin password cannot be changed");
+            } else if (response.status === 401) {
+                throw new Error("Authentication failed. Check your old password");
+            } else {
+                throw new Error(`Password change failed: ${errorText}`);
+            }
+        }
+
+        const result = await response.json();
+        return result as {
+            message: string;
+            requires_reactivation: boolean;
+        };
     }
 
     public setSessionAndUser(session: Session, user: User, event: RequestEvent) {

@@ -14,6 +14,7 @@
     import {loginSchema} from "./schema";
 
     let {data}: PageProps = $props();
+    
     onMount(() => {
         if (data.logout && !data.error) {
             toast.success(m.logout_success())
@@ -23,11 +24,19 @@
     })
 
     const form = superForm(data.form, {
-        validators: zod4Client(loginSchema)
-    })
-    const {form: formData, enhance} = form
-
+        validators: zod4Client(loginSchema),
+        applyAction: true,
+        onResult: ({result}) => {
+            if (result.type === 'failure') {
+                const message = result.data?.message || m.error_occurred();
+                toast.error(message);
+            }
+        }
+    });
+    
+    const {form: formData, enhance} = form;
 </script>
+
 <div class="bg-muted flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
     <div class="flex w-full max-w-sm flex-col gap-6">
         <a class="flex items-center gap-2 self-center font-medium" href="##">
@@ -75,7 +84,6 @@
                                                 </a>
                                             </div>
                                             <Input
-
                                                     {...props}
                                                     bind:value={$formData.password}
                                                     type="password"
@@ -102,7 +110,6 @@
                 {m.terms_agree()} <a href="##">{m.terms_of_service()}</a>
                 {` ${m.and()} `}<a href="##">{m.privacy_policy()}</a>.
             </div>
-
         </div>
     </div>
 </div>

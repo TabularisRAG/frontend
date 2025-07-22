@@ -9,15 +9,24 @@
     import {superForm} from "sveltekit-superforms";
     import {zod4Client} from "sveltekit-superforms/adapters";
     import {registerSchema} from "./schema";
+    import {toast} from "svelte-sonner";
 
     let {data}: PageProps = $props();
 
     const form = superForm(data.form, {
-        validators: zod4Client(registerSchema)
-    })
-    const {form: formData, enhance} = form
-
+        validators: zod4Client(registerSchema),
+        applyAction: true,
+        onResult: ({result}) => {
+            if (result.type === 'failure') {
+                const message = result.data?.message || m.error_occurred();
+                toast.error(message);
+            }
+        }
+    });
+    
+    const {form: formData, enhance} = form;
 </script>
+
 <div class="bg-muted flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
     <div class="flex w-full max-w-sm flex-col gap-6">
         <a class="flex items-center gap-2 self-center font-medium" href="##">
