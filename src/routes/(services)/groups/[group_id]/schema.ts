@@ -1,14 +1,18 @@
 import { z } from 'zod/v4';
-import { m } from "$lib/paraglide/messages";
 
+export const createGroupSchema = z.object({
+    name: z.string().min(3, 'Gruppenname ist erforderlich').max(100, 'Gruppenname zu lang'),
+    description: z.string().max(500, 'Beschreibung zu lang').optional()
+});
 
 export const addMemberSchema = z.object({
-    email: z.string().email(m.valid_email_address_required())
+    email: z.string().email('Gültige E-Mail-Adresse erforderlich')
 });
 
 export const changeGroupNameSchema = z.object({
-    name: z.string().min(1, m.group_name_required()).max(100, m.group_name_too_long()),
+    name: z.string().min(3, 'Der neue Gruppenname muss mindestens 3 Zeichen lang sein.'),
 });
 
+export type CreateGroupSchema = typeof createGroupSchema;
 export type AddMemberSchema = typeof addMemberSchema;
 export type ChangeGroupNameSchema = typeof changeGroupNameSchema;
