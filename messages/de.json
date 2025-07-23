@@ -124,5 +124,7 @@
     "error_while_leaving_or_deleting_group" : "Fehler beim Verlassen / Löschen der Gruppe",
     "group_name_required": "Gruppenname erforderlich",
     "group_name_too_long": "Gruppenname zu lang",
-    "valid_email_address_required": "Gültige E-Mail-Adresse erforderlich"
+    "valid_email_address_required": "Gültige E-Mail-Adresse erforderlich",
+    "incorrect_current_password": "Das aktuelle Passwort ist falsch",
+    "default_admin_password_change_not_allowed": "Das Passwort des Default Admins kann nicht geändert werden."
 }

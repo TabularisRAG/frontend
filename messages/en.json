@@ -79,5 +79,7 @@
     "profile_update_error": "Error saving profile",
     "passwords_dont_match": "Passwords don't match",
     "password_changed_successfully": "Password changed successfully!",
-    "password_change_error": "Error changing password"
+    "password_change_error": "Error changing password",
+	"incorrect_current_password": "The current password is incorrect",
+	"default_admin_password_change_not_allowed":"The password of the default admin cannot be changed."
 }

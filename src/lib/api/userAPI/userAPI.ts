@@ -67,19 +67,34 @@ export default class UserAPI extends APIClient {
                 },
                 body: JSON.stringify({
                     new_password: newPassword,
-                    current_password: currentPassword
+                    old_password: currentPassword
                 })
             });
     
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
                 const errorMessage = errorData.message || errorData.error || `HTTP ${response.status}`;
-                throw new Error(errorMessage);
+            
+                // Fehlercode lokal bestimmen
+                if (response.status === 403) {
+                  throw new Error("ERR_DEFAULT_ADMIN_PASSWORD");
+                }
+            
+                if (response.status === 401 || /invalid|wrong|incorrect/i.test(errorMessage)) {
+                  throw new Error("ERR_INCORRECT_OLD_PASSWORD");
+                }
+            
+                throw new Error("ERR_UNKNOWN");
             }
-    
         } catch (error) {
-            throw new Error("Failed to change password");
+            // Gibt die spezifische Fehlermeldung weiter, falls vorhanden
+            if (error instanceof Error) {
+                throw new Error(error.message);
+            } else {
+                throw new Error("Fehler beim Ändern des Passworts.");
+            }
         }
     }
+    
     
 }

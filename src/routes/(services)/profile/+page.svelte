@@ -90,23 +90,40 @@
     });
 
     async function changePassword() {
-        if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-            toast.error(m.passwords_dont_match());
-            return;
-        }
-        
-        try {
-            await userAPI.changePassword(jwt, passwordForm.currentPassword, passwordForm.newPassword);
-            passwordForm = {
-                currentPassword: '',
-                newPassword: '',
-                confirmPassword: ''
-            };
-            toast.success(m.password_changed_successfully());
-        } catch (error) {
-            toast.error(m.password_change_error());
-        }
+  if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+    toast.error(m.passwords_dont_match());
+    return;
+  }
+
+  try {
+    await userAPI.changePassword(jwt, passwordForm.currentPassword, passwordForm.newPassword);
+
+    passwordForm = {
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: ''
+    };
+
+    toast.success(m.password_changed_successfully());
+
+} catch (error) {
+  if (error instanceof Error) {
+    switch (error.message) {
+      case "ERR_INCORRECT_OLD_PASSWORD":
+        toast.error(m.incorrect_current_password());
+        break;
+      case "ERR_DEFAULT_ADMIN_PASSWORD":
+        toast.error(m.default_admin_password_change_not_allowed());
+        break;
+      default:
+        toast.error(m.password_change_error());
     }
+  } else {
+    toast.error(m.password_change_error());
+  }
+}
+    }
+
 
     function getInitials(first_name: string, last_name: string) {
         return (first_name[0] + last_name[0]).toUpperCase();
