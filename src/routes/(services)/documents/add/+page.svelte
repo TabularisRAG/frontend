@@ -7,6 +7,7 @@
     import {Field, Control, Label, Description, FieldErrors} from "formsnap";
     import Button from "$lib/components/ui/button/button.svelte";
     import {toast} from "svelte-sonner";
+    import LoaderCircle from "@lucide/svelte/icons/loader-circle";
     import {
         displaySize,
         FileDropZone,
@@ -37,7 +38,7 @@
         }
     });
 
-    let {form: formData, enhance, message} = form;
+    let {form: formData, enhance, submitting, message} = form;
     let keywords_value = $state([]);
     $effect(() => {
         $formData.keywords = keywords_value;
@@ -204,7 +205,7 @@
                 </Field>
             </div>
             <div class="mt-4">
-                <Button size="sm" class="w-full" type="submit">{m.action_submit()}</Button>
+                <Button size="sm" class="w-full" disabled={$submitting} type="submit" >{#if $submitting}<LoaderCircle class="animate-spin" />{/if}{m.action_submit()}</Button>
             </div>
         </form>
     </div>

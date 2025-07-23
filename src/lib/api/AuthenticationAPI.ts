@@ -1,4 +1,3 @@
-import {BaseAPI} from "./BaseAPI";
 import type {RequestEvent} from "@sveltejs/kit";
 import type {Session} from "$lib/entities/session";
 import {LoginUser, RegistrationUser, User, type UserResponse} from "$lib/entities/user";

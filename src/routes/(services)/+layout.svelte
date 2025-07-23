@@ -42,7 +42,7 @@
         <div class="hidden md:flex justify-center items-center gap-2">
             <Button href="/documents" variant="link">{m.nav_documents()}</Button>
             <Button href="/chat" variant="link">{m.nav_chat()}</Button>
-            <Button href="/groups" variant="link">{m.groups()}</Button>
+            <Button href="/groups" variant="link">{m.nav_groups()}</Button>
             <!--admin only-->
             {#if user?.is_admin}
                 <Button href="/users" variant="link">{m.nav_users()}</Button>
