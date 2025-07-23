@@ -38,6 +38,7 @@
   "doc_validation_title_missing": "Please enter a title",
   "doc_validation_title_too_short": "Title must contain at least three characters",
   "doc_validation_year_missing": "Please enter a year",
+  "doc_validation_year_too_high": "Year can not be higher than today",
   "doc_validation_author_missing": "Please enter an author",
   "doc_validation_keywords_missing": "Please enter at least one keyword",
 

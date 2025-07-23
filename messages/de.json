@@ -38,6 +38,7 @@
   "doc_validation_title_missing": "Ein Titel muss eingegeben werden",
   "doc_validation_title_too_short": "Der Titel muss mindestens drei Zeichen enthalten",
   "doc_validation_year_missing": "Ein Jahr muss eingegeben werden",
+  "doc_validation_year_too_high": "Jahr kann nicht größer sein als heute ",
   "doc_validation_author_missing": "Ein Autor muss angegeben werden",
   "doc_validation_keywords_missing": "Mindestens ein Schlagwort muss eingegeben werden",
 
