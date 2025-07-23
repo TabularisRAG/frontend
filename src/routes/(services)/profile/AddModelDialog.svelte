@@ -10,7 +10,7 @@
 
     let newModelForm = {
         provider: '',
-        model: '',
+        model_name: '',
         apiKey: ''
     };
 
@@ -41,7 +41,7 @@
     function resetForm() {
         newModelForm = {
             provider: '',
-            model: '',
+            model_name: '',
             apiKey: ''
         };
     }
@@ -54,7 +54,7 @@
     async function addNewModel() {
         if (isAddingModel) return;
 
-        if (!newModelForm.model.trim() || !newModelForm.apiKey.trim()) {
+        if (!newModelForm.model_name.trim() || !newModelForm.apiKey.trim()) {
             errorMessage = 'Bitte füllen Sie alle erforderlichen Felder aus';
             return;
         }
@@ -141,7 +141,7 @@
                     Modell Name:
                     <input 
                         type="text" 
-                        bind:value={newModelForm.model} 
+                        bind:value={newModelForm.model_name} 
                         placeholder="z.B. gpt-4-turbo, claude-3-opus"
                         required 
                         disabled={isAddingModel}
@@ -177,7 +177,7 @@
                     </button>
                     <button 
                         type="submit" 
-                        disabled={!newModelForm.model.trim() || 
+                        disabled={!newModelForm.model_name.trim() || 
                                  !newModelForm.apiKey.trim() || 
                                  !newModelForm.provider || 
                                  isAddingModel}

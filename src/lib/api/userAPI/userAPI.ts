@@ -56,4 +56,30 @@ export default class UserAPI extends APIClient {
         }
 
     }
+
+    public async changePassword(jwt: string, currentPassword: string, newPassword: string): Promise<void> {
+        try {
+            const response = await fetch(this.serverURL + "/auth/change-password", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + jwt
+                },
+                body: JSON.stringify({
+                    new_password: newPassword,
+                    current_password: currentPassword
+                })
+            });
+    
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                const errorMessage = errorData.message || errorData.error || `HTTP ${response.status}`;
+                throw new Error(errorMessage);
+            }
+    
+        } catch (error) {
+            throw new Error("Failed to change password");
+        }
+    }
+    
 }

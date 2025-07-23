@@ -12,8 +12,8 @@ export default class ModelAPI extends APIClient {
                 "Authorization": "Bearer " + jwt
             },
             body: JSON.stringify({
-                provider: modelData.provider,
-                model_name: modelData.model.trim(),
+                provider: modelData.provider.toLocaleUpperCase(),
+                model_name: modelData.model_name.trim(),
                 api_key: modelData.apiKey?.trim()
             })
         });
@@ -25,7 +25,7 @@ export default class ModelAPI extends APIClient {
                                 `HTTP ${response.status}: ${response.statusText}`;
             throw new Error(errorMessage);
         }
-        return await response.json();
+        return await this.getAvailableModels(jwt);
     } catch (error) {
 
         if (error instanceof TypeError && error.message.includes('fetch')) {
@@ -79,17 +79,9 @@ public async getAvailableModels(jwt: string): Promise<ModelData[]> {
             throw new Error(errorMessage);
         }
 
-        const result = await response.json();
-        const rawModels = result.models || [];
+        const mappedModels : ModelData[] = await response.json();
 
-        // Mapping der Server-Modelle in ModelData
-        const models: ModelData[] = rawModels.map((m: any) => ({
-            provider: m.provider,
-            model: m.model_name,
-            apiKey: undefined // nicht vom Server geliefert
-        }));
-
-        return models;
+        return mappedModels;
     } catch (error) {
         if (error instanceof TypeError && error.message.includes('fetch')) {
             throw new Error('Error: No connection to the server possible');

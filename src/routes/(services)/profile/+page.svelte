@@ -28,55 +28,26 @@
     import BarChart from "@lucide/svelte/icons/bar-chart";
     import Plus from "@lucide/svelte/icons/plus";
     import type { PageData } from './$types';
+    import UserAPI from '$lib/api/userAPI/userAPI.js';
+    import type { AdminData } from "$lib/entities/adminData";
+    
 
     let { data }: { data: PageData } = $props();
     
-    // User data from layout - updated structure
     const user = data.user;
-    const jwt = data.jwt;
-    
-    // Additional profile data that might come from a specific profile API
-    let profileData = $state({
-        documentsCount: data.documentsCount || 0,
-        chatCount: data.chatCount || 0
-    });
+    const jwt = data.jwt || "";
+    const userAPI = new UserAPI();
 
-    // Admin LLM settings - now fetched from API
-    let adminSettings = $state({
-        availableModels: data.adminData?.availableModels || [],
-        availableProviders: data.adminData?.availableProviders || [],
-        isLoading: false, // Immer false, da bereits server-side geladen
-        error: data.adminData?.error || null
-    });
+    let adminSettings =  $state(data.adminData)
 
     let showAddModelDialog = $state(false);
-    
-    // Load admin data when component mounts
-    $effect(() => {
-    if (data.adminData?.error) {
-        console.error('Admin data error:', data.adminData.error);
-    }
-    });
-
-
-// Add a separate flag to track if we've already started loading
-let adminDataLoaded = $state(false);
-
-    
+        
     function handleModelAdded(event) {
-    const createdModel = event.detail;
     
-    adminSettings.availableModels = [
-        ...adminSettings.availableModels,
-        {
-            provider: createdModel.provider,
-            model: createdModel.model_name,
-            apiKey: createdModel.apiKey
-        }
-    ];
+    adminSettings.availableModels = event.detail;
     
     toast.success('Modell erfolgreich hinzugefügt');
-}
+    }
 
     
     function openAddModelDialog() {
@@ -110,48 +81,13 @@ let adminDataLoaded = $state(false);
         ]
     });
 
-    let isEditing = $state(false);
-    let editForm = $state({
-        first_name: user?.first_name || '',
-        last_name: user?.last_name || '',
-        email: user?.email || ''
-    });
+
 
     let passwordForm = $state({
         currentPassword: '',
         newPassword: '',
         confirmPassword: ''
     });
-
-    function startEditing() {
-        if (!user) return;
-        isEditing = true;
-        editForm.first_name = user.first_name;
-        editForm.last_name = user.last_name;
-        editForm.email = user.email;
-    }
-
-    function cancelEditing() {
-        if (!user) return;
-        isEditing = false;
-        editForm = {
-            first_name: user.first_name,
-            last_name: user.last_name,
-            email: user.email
-        };
-    }
-
-    async function saveProfile() {
-        if (!user) return;
-        // API call to save profile
-        try {
-            // await updateProfile(editForm);
-            isEditing = false;
-            toast.success(m.profile_updated_successfully());
-        } catch (error) {
-            toast.error(m.profile_update_error());
-        }
-    }
 
     async function changePassword() {
         if (passwordForm.newPassword !== passwordForm.confirmPassword) {
@@ -160,7 +96,7 @@ let adminDataLoaded = $state(false);
         }
         
         try {
-            // await updatePassword(passwordForm);
+            await userAPI.changePassword(jwt, passwordForm.currentPassword, passwordForm.newPassword);
             passwordForm = {
                 currentPassword: '',
                 newPassword: '',
@@ -207,12 +143,6 @@ let adminDataLoaded = $state(false);
 <main class="container mx-auto px-4 py-8 max-w-4xl">
     <div class="flex items-center gap-4 mb-8">
         <h1 class="text-3xl font-bold">{m.profile()}</h1>
-        {#if !isEditing}
-            <Button variant="outline" size="sm" onclick={startEditing}>
-                <Edit class="w-4 h-4 mr-2" />
-                {m.edit()}
-            </Button>
-        {/if}
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -230,34 +160,6 @@ let adminDataLoaded = $state(false);
                             <AvatarFallback class="text-xl">{getInitials(user.first_name, user.last_name)}</AvatarFallback>
                         </Avatar>
                         <div class="flex-1">
-                            {#if isEditing}
-                                <div class="space-y-4">
-                                    <div class="flex gap-4">
-                                        <div class="flex-1">
-                                            <Label for="first_name">{m.first_name()}</Label>
-                                            <Input id="first_name" bind:value={editForm.first_name} />
-                                        </div>
-                                        <div class="flex-1">
-                                            <Label for="last_name">{m.last_name()}</Label>
-                                            <Input id="last_name" bind:value={editForm.last_name} />
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <Label for="email">{m.email()}</Label>
-                                        <Input id="email" type="email" bind:value={editForm.email} />
-                                    </div>
-                                    <div class="flex gap-2">
-                                        <Button onclick={saveProfile} size="sm">
-                                            <Save class="w-4 h-4 mr-2" />
-                                            {m.save()}
-                                        </Button>
-                                        <Button variant="outline" onclick={cancelEditing} size="sm">
-                                            <X class="w-4 h-4 mr-2" />
-                                            {m.cancel()}
-                                        </Button>
-                                    </div>
-                                </div>
-                            {:else}
                                 <div class="space-y-2">
                                     <div class="flex items-center gap-2">
                                         <h2 class="text-2xl font-semibold">{getFullName(user.first_name, user.last_name)}</h2>
@@ -278,7 +180,6 @@ let adminDataLoaded = $state(false);
                                         {user.email}
                                     </div>
                                 </div>
-                            {/if}
                         </div>
                     </div>
                 {/if}
@@ -286,32 +187,6 @@ let adminDataLoaded = $state(false);
         </Card>
 
         {#if user}
-            <Card>
-                <CardHeader class="pb-3">
-                    <CardTitle class="text-base flex items-center gap-2">
-                        <FileText class="w-4 h-4" />
-                        {m.documents()}
-                    </CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div class="text-2xl font-bold">{profileData.documentsCount}</div>
-                    <p class="text-xs text-muted-foreground">{m.uploaded()}</p>
-                </CardContent>
-            </Card>
-
-            <Card>
-                <CardHeader class="pb-3">
-                    <CardTitle class="text-base flex items-center gap-2">
-                        <MessageSquare class="w-4 h-4" />
-                        {m.chats()}
-                    </CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div class="text-2xl font-bold">{profileData.chatCount}</div>
-                    <p class="text-xs text-muted-foreground">{m.conversations_held()}</p>
-                </CardContent>
-            </Card>
-
             <Card>
                 <CardHeader class="pb-3">
                     <CardTitle class="text-base flex items-center gap-2">
@@ -452,7 +327,7 @@ let adminDataLoaded = $state(false);
                                                                 {model.provider}
                                                             </Badge>
                                                             <div>
-                                                                <div class="font-medium text-sm">{model.model}</div>
+                                                                <div class="font-medium text-sm">{model.model_name}</div>
                                                                 {#if model.apiKey}
                                                                     <div class="text-xs text-muted-foreground">
                                                                         API Key: ****{model.apiKey.slice(-4)}
