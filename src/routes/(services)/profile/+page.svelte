@@ -5,83 +5,59 @@
     import { Label } from "$lib/components/ui/label";
     import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "$lib/components/ui/card";
     import AddModelDialog from './AddModelDialog.svelte';
-    import { Separator } from "$lib/components/ui/separator";
     import { Badge } from "$lib/components/ui/badge";
     import { Avatar, AvatarFallback, AvatarImage } from "$lib/components/ui/avatar";
     import * as Tabs from "$lib/components/ui/tabs";
-    import * as Select from "$lib/components/ui/select";
-    import * as Dialog from "$lib/components/ui/dialog";
     import { toast } from "svelte-sonner";
     import UserIcon from "@lucide/svelte/icons/user";
     import Mail from "@lucide/svelte/icons/mail";
-    import Calendar from "@lucide/svelte/icons/calendar";
     import Shield from "@lucide/svelte/icons/shield";
-    import Edit from "@lucide/svelte/icons/edit";
-    import Save from "@lucide/svelte/icons/save";
-    import X from "@lucide/svelte/icons/x";
     import Key from "@lucide/svelte/icons/key";
     import Activity from "@lucide/svelte/icons/activity";
-    import FileText from "@lucide/svelte/icons/file-text";
-    import MessageSquare from "@lucide/svelte/icons/message-square";
     import Settings from "@lucide/svelte/icons/settings";
     import Cpu from "@lucide/svelte/icons/cpu";
     import BarChart from "@lucide/svelte/icons/bar-chart";
     import Plus from "@lucide/svelte/icons/plus";
     import type { PageData } from './$types';
     import UserAPI from '$lib/api/userAPI/userAPI.js';
-    import type { AdminData } from "$lib/entities/adminData";
+  import type { ModelData } from "$lib/entities/modelData";
     
 
     let { data }: { data: PageData } = $props();
     
     const user = data.user;
+
     const jwt = data.jwt || "";
     const userAPI = new UserAPI();
 
     let adminSettings =  $state(data.adminData)
-
+    let total_tokens_for_all_models = $state(calculateAllTokens(adminSettings.availableModels))
     let showAddModelDialog = $state(false);
         
-    function handleModelAdded(event) {
+    function handleModelAdded(models: ModelData[]) {
     
-    adminSettings.availableModels = event.detail;
+    adminSettings.availableModels = models;
     
     toast.success('Modell erfolgreich hinzugefügt');
     }
-
     
     function openAddModelDialog() {
+        console.log("openAddModelDialog")
         showAddModelDialog = true;
     }
 
-    // Convert providers array to the format expected by AddModelDialog
+    function calculateAllTokens(models: ModelData[]): number {
+    return models.reduce((sum, model) => {
+        return sum + (model.total_tokens || 0);
+    }, 0); }
+
+
     const availableProvidersForDialog = $derived(
         adminSettings.availableProviders.map(provider => ({
             value: provider,
             label: provider
         }))
     );
-
-    // LLM Usage Statistics
-    let llmUsage = $state({
-        totalTokens: data.totalTokens || 0,
-        totalCost: data.totalCost || 0,
-        monthlyUsage: data.monthlyUsage || [
-            { month: 'Januar', tokens: 45000, cost: 12.50 },
-            { month: 'Februar', tokens: 52000, cost: 14.30 },
-            { month: 'März', tokens: 48000, cost: 13.20 },
-            { month: 'April', tokens: 61000, cost: 16.80 },
-            { month: 'Mai', tokens: 55000, cost: 15.10 },
-            { month: 'Juni', tokens: 67000, cost: 18.40 }
-        ],
-        modelUsage: data.modelUsage || [
-            { model: 'GPT-4', tokens: 150000, cost: 45.00, percentage: 55 },
-            { model: 'GPT-3.5 Turbo', tokens: 200000, cost: 20.00, percentage: 30 },
-            { model: 'Claude 3 Sonnet', tokens: 80000, cost: 24.00, percentage: 15 }
-        ]
-    });
-
-
 
     let passwordForm = $state({
         currentPassword: '',
@@ -131,21 +107,6 @@
 
     function getFullName(first_name: string, last_name: string) {
         return `${first_name} ${last_name}`;
-    }
-
-    function formatDate(dateString: string) {
-        return new Date(dateString).toLocaleDateString('de-DE', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
-    }
-
-    function formatCurrency(amount: number) {
-        return new Intl.NumberFormat('de-DE', {
-            style: 'currency',
-            currency: 'EUR'
-        }).format(amount);
     }
 
     function formatNumber(num: number) {
@@ -376,15 +337,9 @@
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div class="p-4 bg-blue-50 rounded-lg">
                                             <div class="text-2xl font-bold text-blue-600">
-                                                {formatNumber(llmUsage.totalTokens)}
+                                                {formatNumber(total_tokens_for_all_models)}
                                             </div>
                                             <div class="text-sm text-blue-600">Tokens gesamt</div>
-                                        </div>
-                                        <div class="p-4 bg-green-50 rounded-lg">
-                                            <div class="text-2xl font-bold text-green-600">
-                                                {formatCurrency(llmUsage.totalCost)}
-                                            </div>
-                                            <div class="text-sm text-green-600">Kosten gesamt</div>
                                         </div>
                                     </div>
 
@@ -392,36 +347,12 @@
                                     <div>
                                         <h4 class="font-medium mb-3">Nutzung nach Modell</h4>
                                         <div class="space-y-3">
-                                            {#each llmUsage.modelUsage as model}
+                                            {#each adminSettings.availableModels as model}
                                                 <div class="flex items-center justify-between p-3 border rounded-lg">
                                                     <div class="flex-1">
-                                                        <div class="font-medium">{model.model}</div>
+                                                        <div class="font-medium">{model.model_name}</div>
                                                         <div class="text-sm text-muted-foreground">
-                                                            {formatNumber(model.tokens)} Tokens
-                                                        </div>
-                                                    </div>
-                                                    <div class="text-right">
-                                                        <div class="font-medium">{formatCurrency(model.cost)}</div>
-                                                        <div class="text-sm text-muted-foreground">
-                                                            {model.percentage}% der Nutzung
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            {/each}
-                                        </div>
-                                    </div>
-
-                                    <!-- Monthly Usage -->
-                                    <div>
-                                        <h4 class="font-medium mb-3">Monatliche Nutzung</h4>
-                                        <div class="space-y-2">
-                                            {#each llmUsage.monthlyUsage as month}
-                                                <div class="flex items-center justify-between p-2 rounded">
-                                                    <span class="text-sm">{month.month}</span>
-                                                    <div class="text-right">
-                                                        <div class="text-sm font-medium">{formatCurrency(month.cost)}</div>
-                                                        <div class="text-xs text-muted-foreground">
-                                                            {formatNumber(month.tokens)} Tokens
+                                                            {formatNumber(model.total_tokens)} Tokens
                                                         </div>
                                                     </div>
                                                 </div>
@@ -439,8 +370,8 @@
 </main>
 
 <AddModelDialog
-    bind:showAddModelDialog
+    modelAdded={handleModelAdded}
+    bind:showAddModelDialog={showAddModelDialog}
     availableProviders={availableProvidersForDialog}
-    on:modelAdded={handleModelAdded}
     jwt={jwt}
 />

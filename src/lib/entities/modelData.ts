@@ -1,7 +1,6 @@
-export class ModelData {
-    constructor(
-        readonly provider: string,
-        readonly model_name: string,
-        readonly apiKey?: string 
-    ) {}
+export interface ModelData {
+    provider: string;
+    model_name: string;
+    apiKey: string;
+    total_tokens: number;
 }

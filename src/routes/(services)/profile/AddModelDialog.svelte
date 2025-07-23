@@ -1,443 +1,429 @@
-<script>
-    import { createEventDispatcher, onMount } from 'svelte';
-    import ModelAPI from '$lib/api/modelAPI/modelAPI.js';
-    import { X, Plus } from 'lucide-svelte';
+<script lang="ts">
+  import { onMount } from 'svelte';
+  import ModelAPI from '$lib/api/modelAPI/modelAPI.js';
+  import { X, Plus } from 'lucide-svelte';
 
-    const modelAPI = new ModelAPI();
-    export let jwt = '';
-    export let showAddModelDialog = false;
-    export let availableProviders = [];
+  const modelAPI = new ModelAPI();
 
-    let newModelForm = {
-        provider: '',
-        model_name: '',
-        apiKey: ''
-    };
+  
+let {modelAdded, jwt, showAddModelDialog = $bindable(), availableProviders} = $props();
 
-    let isAddingModel = false;
-    let successMessage = '';
-    let errorMessage = '';
 
-    const dispatch = createEventDispatcher();
 
-    onMount(async () => {
-        try {
-            const providers = await modelAPI.getAvailableProviders(jwt);
-            availableProviders = providers.map(p => ({
-                value: p,
-                label: p.charAt(0) + p.slice(1).toLowerCase()
-            }));
-        } catch (error) {
-            console.error('Fehler beim Laden der Provider:', error);
-        }
-    });
+  let newModelForm = $state({
+      provider: '',
+      model_name: '',
+      apiKey: '',
+      total_tokens: 0
+  });
 
-    function closeAddModelDialog() {
-        showAddModelDialog = false;
-        resetForm();
-        clearMessages();
-    }
+  let isAddingModel = $state(false);
+  let successMessage = $state('');
+  let errorMessage = $state('');
+  let dialogElement: HTMLDialogElement | null = null;;
 
-    function resetForm() {
-        newModelForm = {
-            provider: '',
-            model_name: '',
-            apiKey: ''
-        };
-    }
+  $effect(() => {
+    if (showAddModelDialog && dialogElement) {
+      if (dialogElement.hasAttribute('open')) {
+        dialogElement.close(); // sicher vor dem Öffnen schließen
+      }
+      dialogElement.showModal();
+  } else if (!showAddModelDialog && dialogElement) {
+      dialogElement.close();
+  }
+  })
 
-    function clearMessages() {
-        successMessage = '';
-        errorMessage = '';
-    }
 
-    async function addNewModel() {
-        if (isAddingModel) return;
+  onMount(async () => {
+      try {
+          const providers = await modelAPI.getAvailableProviders(jwt);
+          availableProviders = providers.map(p => ({
+              value: p,
+              label: p.charAt(0) + p.slice(1).toLowerCase()
+          }));
+      } catch (error) {
+          console.error('Fehler beim Laden der Provider:', error);
+      }
+  });
 
-        if (!newModelForm.model_name.trim() || !newModelForm.apiKey.trim()) {
-            errorMessage = 'Bitte füllen Sie alle erforderlichen Felder aus';
-            return;
-        }
+  function closeAddModelDialog() {
+      showAddModelDialog = false;
+      resetForm();
+      clearMessages();
+      if (dialogElement?.hasAttribute('open')) {
+        dialogElement.close();
+  }
+  }
 
-        try {
-            isAddingModel = true;
-            clearMessages();
+  function resetForm() {
+      newModelForm = {
+          provider: '',
+          model_name: '',
+          apiKey: '',
+          total_tokens: 0
+      };
+  }
 
-            const result = await modelAPI.createModel(jwt, newModelForm);
-            successMessage = 'Modell erfolgreich hinzugefügt!';
-            dispatch('modelAdded', result);
+  function clearMessages() {
+      successMessage = '';
+      errorMessage = '';
+  }
 
-            setTimeout(() => {
-                closeAddModelDialog();
-            }, 1500);
-        } catch (error) {
-            console.error('Fehler beim Hinzufügen des Modells:', error);
-            errorMessage = error.message || 'Ein unbekannter Fehler ist aufgetreten';
-        } finally {
-            isAddingModel = false;
-        }
-    }
+  async function addNewModel() {
+      if (isAddingModel) return;
 
-    $: providerInfo = getProviderInfo(newModelForm.provider);
+      if (!newModelForm.model_name.trim() || !newModelForm.apiKey.trim()) {
+          errorMessage = 'Bitte füllen Sie alle erforderlichen Felder aus';
+          return;
+      }
 
-    function getProviderInfo(provider) {
-        const info = {
-            'openai': {
-                examples: 'gpt-4, gpt-4-turbo, gpt-3.5-turbo',
-                keyFormat: 'sk-...',
-                color: 'blue'
-            },
-            'anthropic': {
-                examples: 'claude-3-opus, claude-3-sonnet, claude-3-haiku',
-                keyFormat: 'sk-ant-...',
-                color: 'purple'
-            },
-            'google': {
-                examples: 'gemini-pro, gemini-pro-vision',
-                keyFormat: 'Google AI Studio API Key',
-                color: 'green'
-            }
-        };
-        return info[provider] || { examples: '', keyFormat: '', color: 'blue' };
-    }
+      try {
+          isAddingModel = true;
+          clearMessages();
+
+          const result = await modelAPI.createModel(jwt, newModelForm);
+          successMessage = 'Modell erfolgreich hinzugefügt!';
+          modelAdded(result)
+
+          setTimeout(() => {
+              closeAddModelDialog();
+          }, 1500);
+      } catch (error) {
+        const err = error as Error;
+          console.error('Fehler beim Hinzufügen des Modells:', error);
+          errorMessage = err.message || 'Ein unbekannter Fehler ist aufgetreten';
+      } finally {
+          isAddingModel = false;
+      }
+  }
+
+  // Handle backdrop click
+  function handleDialogClick(event: MouseEvent) {
+      if (event.target === dialogElement) {
+          closeAddModelDialog();
+      }
+  }
+
+  // Handle dialog close event
+  function handleDialogClose() {
+      showAddModelDialog = false;
+      console.log("handleDialgClose", showAddModelDialog)
+      resetForm();
+      clearMessages();
+  }
+
 </script>
 
+<!-- Native Dialog Element -->
+<dialog 
+  bind:this={dialogElement} 
+  onclick={handleDialogClick}
+  onclose={handleDialogClose}
+  class="modal-dialog"
+>
+  <div class="modal-content">
+      <header class="modal-header">
+          <h2>Neues Modell hinzufügen</h2>
+          <button onclick={closeAddModelDialog} aria-label="Schließen" class="close-button">
+              <X size={20} />
+          </button>
+      </header>
 
-{#if showAddModelDialog}
-    <div class="modal-overlay" on:click={closeAddModelDialog} role="dialog" aria-modal="true">
-        <div class="modal" on:click|stopPropagation role="document">
-            <header class="modal-header">
-                <h2>Neues Modell hinzufügen</h2>
-                <button on:click={closeAddModelDialog} aria-label="Schließen" class="close-button">
-                    <X size={20} />
-                </button>
-            </header>
+      {#if successMessage}
+          <div class="message success" role="status" aria-live="polite">
+              <div class="message-icon">✓</div>
+              {successMessage}
+          </div>
+      {/if}
 
-            {#if successMessage}
-                <div class="message success">
-                    <div class="message-icon">✓</div>
-                    {successMessage}
-                </div>
-            {/if}
+      {#if errorMessage}
+          <div class="message error" role="alert">
+              <div class="message-icon">⚠</div>
+              {errorMessage}
+          </div>
+      {/if}
 
-            {#if errorMessage}
-                <div class="message error">
-                    <div class="message-icon">⚠</div>
-                    {errorMessage}
-                </div>
-            {/if}
+      <form onsubmit={addNewModel} class="modal-form">
+          <label>
+              Provider:
+              <select bind:value={newModelForm.provider} required disabled={isAddingModel}>
+                  {#each availableProviders as p}
+                      <option value={p.value}>{p.label}</option>
+                  {/each}
+              </select>
+          </label>
 
-            <form on:submit|preventDefault={addNewModel} class="modal-form">
-                <label>
-                    Provider:
-                    <select bind:value={newModelForm.provider} required disabled={isAddingModel}>
-                        {#each availableProviders as p}
-                            <option value={p.value}>{p.label}</option>
-                        {/each}
-                    </select>
-                </label>
+          <label>
+              Modell Name:
+              <input 
+                  type="text" 
+                  bind:value={newModelForm.model_name} 
+                  placeholder="z.B. gpt-4-turbo, claude-3-opus"
+                  required 
+                  disabled={isAddingModel}
+              />
+              <small>Geben Sie den exakten Modellnamen ein, wie er von der API verwendet wird</small>
+          </label>
 
-                <label>
-                    Modell Name:
-                    <input 
-                        type="text" 
-                        bind:value={newModelForm.model_name} 
-                        placeholder="z.B. gpt-4-turbo, claude-3-opus"
-                        required 
-                        disabled={isAddingModel}
-                    />
-                    <small>Geben Sie den exakten Modellnamen ein, wie er von der API verwendet wird</small>
-                </label>
+          <label>
+              API Key:
+              <input 
+                  type="text" 
+                  bind:value={newModelForm.apiKey} 
+                  placeholder="Ihr API Key für diesen Provider"
+                  required 
+                  disabled={isAddingModel}
+              />
+              <small>Der API Key wird sicher verschlüsselt gespeichert</small>
+          </label>
 
-                <label>
-                    API Key:
-                    <input 
-                        type="text" 
-                        bind:value={newModelForm.apiKey} 
-                        placeholder="Ihr API Key für diesen Provider"
-                        required 
-                        disabled={isAddingModel}
-                    />
-                    <small>Der API Key wird sicher verschlüsselt gespeichert</small>
-                </label>
-
-                <!-- Provider-spezifische Hinweise -->
-                {#if providerInfo.examples}
-                    <div class="provider-info {providerInfo.color}">
-                        <strong>{availableProviders.find(p => p.value === newModelForm.provider)?.label} Modelle:</strong><br>
-                        Beispiele: {providerInfo.examples}<br>
-                        API Key Format: {providerInfo.keyFormat}
-                    </div>
-                {/if}
-
-                <div class="form-actions">
-                    <button type="button" on:click={closeAddModelDialog} disabled={isAddingModel} class="btn-secondary">
-                        <X size={16} />
-                        Abbrechen
-                    </button>
-                    <button 
-                        type="submit" 
-                        disabled={!newModelForm.model_name.trim() || 
-                                 !newModelForm.apiKey.trim() || 
-                                 !newModelForm.provider || 
-                                 isAddingModel}
-                        class="btn-primary"
-                    >
-                        {#if isAddingModel}
-                            <div class="spinner"></div>
-                            Wird hinzugefügt...
-                        {:else}
-                            <Plus size={16} />
-                            Modell hinzufügen
-                        {/if}
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-{/if}
+          <div class="form-actions">
+              <button
+                  type="button"
+                  onclick={closeAddModelDialog}
+                  disabled={isAddingModel}
+                  class="btn-secondary"
+              >
+                  <X size={16} />
+                  Abbrechen
+              </button>
+              <button
+                  type="submit"
+                  disabled={
+                      !newModelForm.model_name.trim() ||
+                      !newModelForm.apiKey.trim() ||
+                      !newModelForm.provider ||
+                      isAddingModel
+                  }
+                  class="btn-primary"
+              >
+                  {#if isAddingModel}
+                      <div class="spinner"></div>
+                      Wird hinzugefügt...
+                  {:else}
+                      <Plus size={16} />
+                      Modell hinzufügen
+                  {/if}
+              </button>
+          </div>
+      </form>
+  </div>
+</dialog>
 
 <style>
-    .modal-overlay {
-        position: fixed;
-        top: 0; left: 0;
-        width: 100vw; height: 100vh;
-        background: rgba(0, 0, 0, 0.5);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 1000;
-        backdrop-filter: blur(2px);
-    }
+  .modal-dialog {
+      padding: 0;
+      border: none;
+      border-radius: 0.75rem;
+      width: 500px;
+      max-width: 90vw;
+      max-height: 90vh;
+      overflow: visible;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      
+      /* Zentrieren des Dialogs */
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      margin: 0;
+  }
 
-    .modal {
-        background: white;
-        padding: 2rem;
-        border-radius: 0.75rem;
-        width: 500px;
-        max-width: 90vw;
-        max-height: 90vh;
-        overflow-y: auto;
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-    }
+  .modal-dialog::backdrop {
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(2px);
+  }
 
-    .modal-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1.5rem;
-        padding-bottom: 1rem;
-        border-bottom: 1px solid #e5e7eb;
-    }
+  .modal-content {
+      padding: 2rem;
+      background: white;
+      border-radius: 0.75rem;
+  }
 
-    .modal-header h2 {
-        margin: 0;
-        font-size: 1.25rem;
-        font-weight: 600;
-        color: #111827;
-    }
+  .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #e5e7eb;
+  }
 
-    .close-button {
-        background: none;
-        border: none;
-        padding: 0.5rem;
-        border-radius: 0.375rem;
-        cursor: pointer;
-        color: #6b7280;
-        transition: all 0.2s;
-    }
+  .modal-header h2 {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #111827;
+  }
 
-    .close-button:hover {
-        background: #f3f4f6;
-        color: #111827;
-    }
+  .close-button {
+      background: none;
+      border: none;
+      padding: 0.5rem;
+      border-radius: 0.375rem;
+      cursor: pointer;
+      color: #6b7280;
+      transition: all 0.2s;
+  }
 
-    .message {
-        display: flex;
-        align-items: center;
-        padding: 0.75rem 1rem;
-        border-radius: 0.5rem;
-        margin-bottom: 1rem;
-        font-size: 0.875rem;
-    }
+  .close-button:hover {
+      background: #f3f4f6;
+      color: #111827;
+  }
 
-    .message-icon {
-        margin-right: 0.5rem;
-        font-weight: bold;
-    }
+  .message {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      border-radius: 0.5rem;
+      margin-bottom: 1rem;
+      font-size: 0.875rem;
+  }
 
-    .message.success {
-        background: #dcfce7;
-        border: 1px solid #bbf7d0;
-        color: #166534;
-    }
+  .message-icon {
+      margin-right: 0.5rem;
+      font-weight: bold;
+  }
 
-    .message.error {
-        background: #fef2f2;
-        border: 1px solid #fecaca;
-        color: #dc2626;
-    }
+  .message.success {
+      background: #dcfce7;
+      border: 1px solid #bbf7d0;
+      color: #166534;
+  }
 
-    .modal-form {
-        display: flex;
-        flex-direction: column;
-        gap: 1.5rem;
-    }
+  .message.error {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #dc2626;
+  }
 
-    .modal-form label {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-        font-weight: 500;
-        color: #374151;
-    }
+  .modal-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+  }
 
-    .modal-form input,
-    .modal-form select {
-        width: 100%;
-        padding: 0.75rem;
-        border: 1px solid #d1d5db;
-        border-radius: 0.375rem;
-        font-size: 0.875rem;
-        transition: all 0.2s;
-    }
+  .modal-form label {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      font-weight: 500;
+      color: #374151;
+  }
 
-    .modal-form input:focus,
-    .modal-form select:focus {
-        outline: none;
-        border-color: #3b82f6;
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    }
+  .modal-form input,
+  .modal-form select {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #d1d5db;
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+      transition: all 0.2s;
+  }
 
-    .modal-form input:disabled,
-    .modal-form select:disabled {
-        background: #f9fafb;
-        color: #6b7280;
-        cursor: not-allowed;
-    }
+  .modal-form input:focus,
+  .modal-form select:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
 
-    .modal-form small {
-        font-size: 0.75rem;
-        color: #6b7280;
-        margin-top: 0.25rem;
-    }
+  .modal-form input:disabled,
+  .modal-form select:disabled {
+      background: #f9fafb;
+      color: #6b7280;
+      cursor: not-allowed;
+  }
 
-    .provider-info {
-        padding: 1rem;
-        border-radius: 0.5rem;
-        font-size: 0.875rem;
-        line-height: 1.5;
-    }
+  .modal-form small {
+      font-size: 0.75rem;
+      color: #6b7280;
+      margin-top: 0.25rem;
+  }
 
-    .provider-info.blue {
-        background: #eff6ff;
-        color: #1e40af;
-        border: 1px solid #dbeafe;
-    }
+  .form-actions {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: flex-end;
+      padding-top: 1rem;
+      border-top: 1px solid #e5e7eb;
+  }
 
-    .provider-info.purple {
-        background: #faf5ff;
-        color: #7c3aed;
-        border: 1px solid #e9d5ff;
-    }
+  .btn-primary,
+  .btn-secondary {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.375rem;
+      font-weight: 500;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 1px solid transparent;
+  }
 
-    .provider-info.green {
-        background: #f0fdf4;
-        color: #166534;
-        border: 1px solid #dcfce7;
-    }
+  .btn-primary {
+      background: #3b82f6;
+      color: white;
+  }
 
-    .provider-info.orange {
-        background: #fff7ed;
-        color: #c2410c;
-        border: 1px solid #fed7aa;
-    }
+  .btn-primary:hover:not(:disabled) {
+      background: #2563eb;
+  }
 
-    .provider-info.gray {
-        background: #f9fafb;
-        color: #374151;
-        border: 1px solid #e5e7eb;
-    }
+  .btn-primary:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+  }
 
-    .form-actions {
-        display: flex;
-        gap: 0.75rem;
-        justify-content: flex-end;
-        padding-top: 1rem;
-        border-top: 1px solid #e5e7eb;
-    }
+  .btn-secondary {
+      background: white;
+      color: #374151;
+      border-color: #d1d5db;
+  }
 
-    .btn-primary,
-    .btn-secondary {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.75rem 1.5rem;
-        border-radius: 0.375rem;
-        font-weight: 500;
-        font-size: 0.875rem;
-        cursor: pointer;
-        transition: all 0.2s;
-        border: 1px solid transparent;
-    }
+  .btn-secondary:hover:not(:disabled) {
+      background: #f9fafb;
+  }
 
-    .btn-primary {
-        background: #3b82f6;
-        color: white;
-    }
+  .btn-secondary:disabled {
+      color: #9ca3af;
+      cursor: not-allowed;
+  }
 
-    .btn-primary:hover:not(:disabled) {
-        background: #2563eb;
-    }
+  .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top: 2px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+  }
 
-    .btn-primary:disabled {
-        background: #9ca3af;
-        cursor: not-allowed;
-    }
+  @keyframes spin {
+      to { transform: rotate(360deg); }
+  }
 
-    .btn-secondary {
-        background: white;
-        color: #374151;
-        border-color: #d1d5db;
-    }
+  /* Mobile Responsiveness */
+  @media (max-width: 640px) {
+      .modal-dialog {
+          margin: 1rem;
+          width: calc(100vw - 2rem);
+      }
+      
+      .modal-content {
+          padding: 1.5rem;
+      }
 
-    .btn-secondary:hover:not(:disabled) {
-        background: #f9fafb;
-    }
+      .form-actions {
+          flex-direction: column-reverse;
+      }
 
-    .btn-secondary:disabled {
-        color: #9ca3af;
-        cursor: not-allowed;
-    }
-
-    .spinner {
-        width: 16px;
-        height: 16px;
-        border: 2px solid rgba(255, 255, 255, 0.3);
-        border-top: 2px solid white;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-        to { transform: rotate(360deg); }
-    }
-
-    /* Mobile Responsiveness */
-    @media (max-width: 640px) {
-        .modal {
-            margin: 1rem;
-            padding: 1.5rem;
-        }
-
-        .form-actions {
-            flex-direction: column-reverse;
-        }
-
-        .btn-primary,
-        .btn-secondary {
-            width: 100%;
-            justify-content: center;
-        }
-    }
+      .btn-primary,
+      .btn-secondary {
+          width: 100%;
+          justify-content: center;
+      }
+  }
 </style>

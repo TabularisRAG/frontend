@@ -64,7 +64,7 @@ public async getAvailableProviders(jwt: string): Promise<string[]> {
 
 public async getAvailableModels(jwt: string): Promise<ModelData[]> {
     try {
-        const response = await fetch(`${this.serverURL}/api/chats/llm-models`, {
+        const response = await fetch(`${this.serverURL}/api/chats/llm-models_with_token_usage`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${jwt}`
