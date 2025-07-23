@@ -14,7 +14,6 @@
     let {id, token}: { id: string, token: string } = $props();
 
     async function deleteDocument() {
-        console.log("delete " + id)
         await new DocumentAPI().deleteDocument(token, id)
         await invalidateAll()
     }

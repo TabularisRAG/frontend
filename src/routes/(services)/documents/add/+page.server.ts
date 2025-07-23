@@ -18,9 +18,7 @@ export const actions: Actions = {
         let form = await superValidate(request, zod4(schema));
         let doc = form.data
         let document = new NewDocument(doc.title, doc.year, doc.keywords, doc.author, doc.file[0])
-        console.log(document)
         await new DocumentAPI().uploadDocument(cookies.get(SESSION_COOKIE_NAME) ?? "", document)
-        console.log(form,'form');
         if (!form.valid) {
             return fail(400, { form });
         }

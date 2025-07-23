@@ -17,7 +17,6 @@
     let {data}: PageProps = $props();
 
     let {markdown, document} = data;
-    console.log(markdown);
 
 </script>
 

@@ -9,8 +9,6 @@ export const load: PageServerLoad = async (event) => {
     const success = event.url.searchParams.get("success") === "true";
     const error = event.url.searchParams.has("error");
     
-    console.log("Load function - success param:", success);
-    
     return {
         success,
         error,
@@ -31,8 +29,6 @@ export const actions: Actions = {
                 form.data.email, 
                 form.data.newPassword
             );
-            
-            console.log("Password reset successful:", result);
             
         } catch (error) {
             console.error("Password reset failed:", error);

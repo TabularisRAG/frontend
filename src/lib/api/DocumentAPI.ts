@@ -5,7 +5,6 @@ export class DocumentAPI extends APIClient {
 
     public async getDocuments(token: string): Promise<Array<Doc>> {
         try {
-            console.log(token)
             const response = await fetch(this.serverURL + "/api/documents", {
                 method: "GET",
                 headers: {
@@ -13,9 +12,8 @@ export class DocumentAPI extends APIClient {
                     "Authorization": `Bearer ${token}`
                 }
             });
-            console.debug("RESPONSE: ", response.status);
             const docs = await response.json() as Array<any>;
-            const documents= docs.map((doc: any) => new Doc(
+            return docs.map((doc: any) => new Doc(
                 doc.title,
                 doc.year,
                 doc.keywords,
@@ -24,9 +22,7 @@ export class DocumentAPI extends APIClient {
                 new Date(doc.uploaded_at),
                 doc.size_byte,
                 doc.word_count
-            ));
-            console.log(documents)
-            return documents
+            ))
         } catch (e) {
             console.error(e)
             return Promise.reject(e)
@@ -42,7 +38,6 @@ export class DocumentAPI extends APIClient {
                 "Authorization": `Bearer ${token}`
             }
         });
-        console.debug("RESPONSE: ", response.status);
         const doc = await response.json();
         return new Doc(
             doc.title,
@@ -64,7 +59,6 @@ export class DocumentAPI extends APIClient {
                 "Authorization": `Bearer ${token}`
             }
         })
-        console.debug("RESPONSE: ", response.status)
         const res = await response.json();
         return res.markdown as string;
     }
@@ -84,7 +78,6 @@ export class DocumentAPI extends APIClient {
             },
             body: formData
         })
-        console.debug("RESPONSE: ", response.status)
     }
 
     public async deleteDocument(token: string, id: string) {
@@ -95,6 +88,5 @@ export class DocumentAPI extends APIClient {
                 "Authorization": `Bearer ${token}`
             }
         })
-        console.debug("RESPONSE: ", response.status)
     }
 }

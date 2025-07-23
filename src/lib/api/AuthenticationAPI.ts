@@ -22,7 +22,6 @@ export class AuthenticationAPI extends APIClient {
             body: params
         });
         const json = await response.json();
-        console.log("This is the response:", json);
         const { session, user } = json as { session: Session, user: User };
         if (!session || !user) {
             throw new Error(`Login failed - no session or user returned`);
@@ -31,7 +30,6 @@ export class AuthenticationAPI extends APIClient {
     }
 
     public async validateSessionToken(token: string, event: RequestEvent) {
-        console.log("VALIDATE TOKEN ", token)
         const response = await fetch(this.serverURL + "/auth/validate", {
             method: "POST",
             headers: {
