@@ -43,6 +43,7 @@
             <Button href="/documents" variant="link">{m.documents()}</Button>
             <Button href="/chat" variant="link">{m.chat()}</Button>
             <Button href="/groups" variant="link">{m.groups()}</Button>
+            <Button href="/profile" variant="link">{m.profile()}</Button>
             <!--admin only-->
             {#if user?.is_admin}
                 <Button href="/users" variant="link">{m.users()}</Button>
