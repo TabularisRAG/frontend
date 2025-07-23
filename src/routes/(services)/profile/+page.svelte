@@ -28,12 +28,16 @@
     import Cpu from "@lucide/svelte/icons/cpu";
     import BarChart from "@lucide/svelte/icons/bar-chart";
     import Plus from "@lucide/svelte/icons/plus";
+    import Users from "@lucide/svelte/icons/users";
+    import UserCheck from "@lucide/svelte/icons/user-check";
     import type { PageData } from "./$types";
     import type { ModelData } from "$lib/entities/modelData";
     import { superForm } from "sveltekit-superforms";
     import { zod4Client } from "sveltekit-superforms/adapters";
     import { changePasswordSchema } from "./schema";
     import type { UserResponse } from "$lib/entities/user";
+    import { enhance } from "$app/forms";
+    import type { SubmitFunction } from "@sveltejs/kit";
   
     let { data }: { data: PageData } = $props();
   
@@ -41,6 +45,7 @@
     const jwt = data.jwt || "";
   
     let adminSettings = $state(data.adminData);
+    let inactive_users = $state(data.inactive_users);
     let total_tokens_for_all_models = $state(
       calculateAllTokens(adminSettings.availableModels)
     );
@@ -70,14 +75,17 @@
       validators: zod4Client(changePasswordSchema),
       applyAction: true,
       onResult: ({ result }) => {
-        if (result.type === "failure") {
+        if (result.type === "success" && result.data?.success) {
+          const message = result.data?.message || m.password_changed_successfully();
+          toast.success(message);
+        } else if (result.type === "failure") {
           const message = result.data?.message || m.error_occurred();
           toast.error(message);
         }
       }
     });
   
-    const { form: formData, enhance } = form;
+    const { form: formData, enhance: passwordEnhance } = form;
   
     function getInitials(first_name: string, last_name: string) {
       return (first_name[0] + last_name[0]).toUpperCase();
@@ -89,6 +97,52 @@
   
     function formatNumber(num: number) {
       return new Intl.NumberFormat("de-DE").format(num);
+    }
+
+    let activatingUser = $state(false);
+
+    const activateUserAction: SubmitFunction = ({ formData }) => {
+      activatingUser = true;
+      const userId = formData.get('userId') as string;
+      const userEmail = formData.get('userEmail') as string;
+      
+      return async ({ result }) => {
+        activatingUser = false;
+        
+        if (result.type === 'success') {
+          toast.success(m.user_activated_successfully({ email: userEmail }));
+          
+          inactive_users = inactive_users.filter(u => u.id !== userId);
+        } else if (result.type === 'failure') {
+          const message = result.data?.message || m.user_activation_error();
+          toast.error(message);
+        }
+      };
+    };
+
+    async function activateUser(userId: string, userEmail: string) {
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = '?/activateUser';
+      
+      const userIdInput = document.createElement('input');
+      userIdInput.type = 'hidden';
+      userIdInput.name = 'userId';
+      userIdInput.value = userId;
+      form.appendChild(userIdInput);
+
+      const userEmailInput = document.createElement('input');
+      userEmailInput.type = 'hidden';
+      userEmailInput.name = 'userEmail';
+      userEmailInput.value = userEmail;
+      form.appendChild(userEmailInput);
+      
+      document.body.appendChild(form);
+      
+      enhance(form, activateUserAction);
+      form.requestSubmit();
+      
+      document.body.removeChild(form);
     }
   </script>
   
@@ -159,13 +213,17 @@
   
         <div class="lg:col-span-3">
           <Tabs.Root value="account" class="w-full">
-            <Tabs.List class="grid w-full {user.is_admin ? 'grid-cols-3' : 'grid-cols-2'}">
+            <Tabs.List class="grid w-full {user.is_admin ? 'grid-cols-4' : 'grid-cols-2'}">
               <Tabs.Trigger value="account">{m.account()}</Tabs.Trigger>
               <Tabs.Trigger value="security">{m.security()}</Tabs.Trigger>
               {#if user.is_admin}
                 <Tabs.Trigger value="admin">
                   <Settings class="w-4 h-4 mr-2" />
                   {m.model_management()}
+                </Tabs.Trigger>
+                <Tabs.Trigger value="users">
+                  <Users class="w-4 h-4 mr-2" />
+                  {m.users()}
                 </Tabs.Trigger>
               {/if}
             </Tabs.List>
@@ -208,7 +266,7 @@
                   <CardDescription>{m.update_password_for_security()}</CardDescription>
                 </CardHeader>
                 <CardContent class="space-y-4">
-                  <form method="POST" use:enhance>
+                  <form method="POST" action="?/changePassword" use:passwordEnhance>
                     <div class="grid gap-3">
                       <Form.Field {form} name="oldpassword">
                         <Form.Control>
@@ -341,6 +399,65 @@
                   </CardContent>
                 </Card>
               </Tabs.Content>
+
+              <Tabs.Content value="users" class="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle class="flex items-center gap-2">
+                      <Users class="w-5 h-5" />
+                      {m.inactive_users()}
+                    </CardTitle>
+                    <CardDescription>{m.manage_inactive_users_description()}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {#if inactive_users && inactive_users.length > 0}
+                      <div class="space-y-3">
+                        {#each inactive_users as inactiveUser}
+                          <div class="flex items-center justify-between p-4 border rounded-lg">
+                            <div class="flex items-center gap-3">
+                              <Avatar class="w-10 h-10">
+                                <AvatarFallback class="text-sm">
+                                  {getInitials(inactiveUser.first_name, inactiveUser.last_name)}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <div class="font-medium">
+                                  {getFullName(inactiveUser.first_name, inactiveUser.last_name)}
+                                </div>
+                                <div class="text-sm text-muted-foreground">
+                                  {inactiveUser.email}
+                                </div>
+                                <div class="text-xs text-muted-foreground">
+                                  ID: {inactiveUser.id}
+                                </div>
+                              </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                              <Badge variant="secondary">{m.inactive()}</Badge>
+                              <Button 
+                                type="button" 
+                                size="sm" 
+                                variant="outline"
+                                onclick={() => activateUser(inactiveUser.id, inactiveUser.email)}
+                                disabled={activatingUser}
+                              >
+                                <UserCheck class="w-4 h-4 mr-2" />
+                                {activatingUser ? m.activating() : m.activate()}
+                              </Button>
+                            </div>
+                          </div>
+                        {/each}
+                      </div>
+                    {:else}
+                      <div class="text-center py-8 text-muted-foreground">
+                        <Users class="w-12 h-12 mx-auto mb-4 opacity-50" />
+                        <p>{m.no_inactive_users()}</p>
+                        <p class="text-sm mt-1">{m.all_users_activated()}</p>
+                      </div>
+                    {/if}
+                  </CardContent>
+                </Card>
+              </Tabs.Content>
             {/if}
           </Tabs.Root>
         </div>
@@ -354,4 +471,3 @@
     availableProviders={availableProvidersForDialog}
     {jwt}
   />
-  

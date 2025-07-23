@@ -185,5 +185,16 @@
   "llm_usage_statistics": "LLM Usage Statistics",
   "usage_overview": "Overview of usage and costs of various LLM models",
   "total_tokens": "Total tokens",
-  "usage_by_model": "Usage by model"
+  "usage_by_model": "Usage by model",
+  "inactive_users": "Inactive Users",
+  "manage_inactive_users_description": "Manage users that have not been activated yet",
+  "inactive": "Inactive",
+  "activate": "Activate",
+  "activating": "Activating...",
+  "no_inactive_users": "No inactive users available",
+  "all_users_activated": "All users are already activated",
+  "user_activated_successfully": "User {email} successfully activated",
+  "user_activation_error": "Error activating user",
+  "user_id_required": "User ID is required",
+  "user_activation_failed": "Error activating user"
 }

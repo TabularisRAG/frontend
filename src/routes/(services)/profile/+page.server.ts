@@ -6,6 +6,7 @@ import { zod4 } from "sveltekit-superforms/adapters";
 import { fail, redirect } from "@sveltejs/kit";
 import { AuthenticationAPI } from "$lib/api/AuthenticationAPI";
 import {m} from "$lib/paraglide/messages";
+import type { UserResponse  } from '$lib/entities/user';
 import ModelAPI from '$lib/api/modelAPI/modelAPI.js';
 
 
@@ -28,10 +29,11 @@ export const load: PageServerLoad = async ({ locals }) => {
     isLoading: false
   };
 
+  let inactive_users: UserResponse[] = [];
+
   if (user?.is_admin && jwt) {
     try {
       const modelAPI = new ModelAPI();
-
       const [availableModels, availableProviders] = await Promise.all([
         modelAPI.getAvailableModels(jwt),
         modelAPI.getAvailableProviders(jwt)
@@ -42,6 +44,11 @@ export const load: PageServerLoad = async ({ locals }) => {
         availableProviders: Array.isArray(availableProviders) ? availableProviders : [],
         isLoading: false
       };
+
+      const authAPI = new AuthenticationAPI();
+      const response =  await authAPI.getUsersInactive(jwt);
+      inactive_users = response.inactive_users;
+      
     } catch (error) {
       console.error('Error loading admin data in server:', error);
     }
@@ -51,13 +58,14 @@ export const load: PageServerLoad = async ({ locals }) => {
     jwt,
     user,
     adminData,
+    inactive_users,
     form: await superValidate(zod4(changePasswordSchema))
   };
 
 };
 
 export const actions: Actions = {
-  default: async (event) => {
+  changePassword: async (event) => {
     const form = await superValidate(event, zod4(changePasswordSchema))
 
     if (!form.valid) {
@@ -65,7 +73,13 @@ export const actions: Actions = {
     }
 
     try {
-      await new AuthenticationAPI().changePassword(form.data.newpassword, event, form.data.confirmPassword)
+      await new AuthenticationAPI().changePassword(form.data.newpassword, event, form.data.oldpassword)
+      return {
+        form,
+        success: true,
+        message: m.password_changed_successfully()
+      }
+
     } catch (e) {
       console.error(e)
 
@@ -89,5 +103,34 @@ export const actions: Actions = {
       }
     }
 
+  },
+  activateUser: async (event) => {
+    const formData = await event.request.formData();
+    const userId = formData.get('userId') as string;
+    const userEmail = formData.get('userEmail') as string;
+
+    if (!userId) {
+      return fail(400, {
+        success: false,
+        message: m.user_id_required()
+      });
+    }
+
+    try {
+      const authAPI = new AuthenticationAPI();
+      await authAPI.activateUser(userEmail, event);
+      
+      return {
+        success: true,
+        message: m.user_activated_successfully({ email: userEmail })
+      };
+    } catch (e) {
+      console.error(`Error activating user ${userEmail}:`, e);
+      
+      return fail(400, {
+        success: false,
+        message: m.user_activation_failed()
+      });
+    }
   }
 }

@@ -144,6 +144,67 @@ export class AuthenticationAPI extends BaseAPI {
         };
     }
 
+    public async getUsersInactive(jwt: string) {
+        const response = await fetch(this.serverURL + "/auth/inactive-users", {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${jwt}`
+            }
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            
+            if (response.status === 403) {
+                throw new Error("Access denied. Admin privileges required");
+            } else if (response.status === 401) {
+                throw new Error("Authentication required");
+            } else {
+                throw new Error(`Failed to retrieve inactive users: ${errorText}`);
+            }
+        }
+
+        const result = await response.json();
+        return result as {
+            inactive_users: UserResponse[];
+            count: number;
+            message: string;
+        };
+    }
+    public async activateUser(userEmail: string, event: RequestEvent) {
+        if (!event.locals.session?.token) {
+            throw new Error("No session found");
+        }
+    
+        const response = await fetch(this.serverURL + `/auth/activate-user`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${event.locals.session.token}`
+            },
+            body: JSON.stringify({
+                user_email: userEmail,
+            })
+        });
+    
+        if (!response.ok) {
+            const errorText = await response.text();
+            
+            if (response.status === 403) {
+                throw new Error("Access denied. Admin privileges required");
+            } else if (response.status === 401) {
+                throw new Error("Authentication required");
+            } else if (response.status === 404) {
+                throw new Error("User not found");
+            } else {
+                throw new Error(`Failed to activate user: ${errorText}`);
+            }
+        }
+        const result = await response.json();
+        return result;
+    }
+
     public async logout(event: RequestEvent) {
         if (!event.locals.session) {
             throw new Error("No session found");
