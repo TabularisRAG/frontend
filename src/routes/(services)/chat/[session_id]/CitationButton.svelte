@@ -5,6 +5,7 @@
   import LoaderCircle from "@lucide/svelte/icons/loader-circle";
   import BookMark from "@lucide/svelte/icons/book-marked";
   import {m} from '$lib/paraglide/messages.js';
+    import { DocumentAPI } from "$lib/api/DocumentAPI";
 
   let {href} =  $props();
   const token = getContext<() => string>('token');
@@ -28,17 +29,10 @@
     citationContent    = '';
 
     try {
-      const res = await fetch(`http://localhost:8000/api/documents/chunks/${id}`, {
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json"
-        }
-      });
-      if (!res.ok) throw new Error('Error loading citation');
-      const json = await res.json();
-      citationContent = json.chunk_text;
+      const chunk = await new DocumentAPI().getDocumentChunk(token, id);
+      citationContent = chunk.chunk_text;
     } catch {
-      citationError = 'Source could not be loaded';
+      citationError = "Citation could not be loaded..." 
     } finally {
       citationLoading = false;
     }

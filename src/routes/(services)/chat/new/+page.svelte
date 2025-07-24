@@ -61,7 +61,7 @@
       <form class="flex pb-2 w-full max-h-48 items-center space-x-2" onsubmit={handleSubmit}> 
         <Textarea 
               bind:value={messageValue}
-              class="h-fit  max-h-24 overflow-auto bg-white dark_bg-secondary" 
+              class="h-fit  max-h-24 overflow-auto bg-white dark:bg-secondary" 
               placeholder={m.enter_prompt()}
               onkeydown={handleKeydown}
             />

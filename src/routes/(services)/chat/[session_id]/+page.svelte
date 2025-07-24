@@ -82,7 +82,6 @@
       let firstMessage: Message = JSON.parse(message);
       sessionStorage.removeItem("initialMessage"); 
       selectedModel = availableModels.find((m) => m.id === firstMessage.model_id) ?? selectedModel;
-      $inspect(selectedModel);
       messages.push(firstMessage);
 
       let chatMessageRequest: ChatMessageRequest = {
@@ -268,7 +267,7 @@
       <form class="flex w-full max-h-48 items-center space-x-2 pb-1" onsubmit={sendMessage}>
         <Textarea 
               bind:value={userInput.value}
-              class="h-auto max-h-36 overflow-auto bg-white dark_bg-secondary" 
+              class="h-auto max-h-36 overflow-auto bg-white dark:bg-secondary" 
               placeholder={m.enter_prompt()}
               onkeydown={handleKeydown}
             />
@@ -278,7 +277,7 @@
       </form>
     {:else}
       <form class="flex w-full max-h-48 items-center space-x-2 pb-1" onsubmit={stopGeneration}>
-        <Textarea disabled={true} class="h-auto  max-h-48 overflow-auto bg-white dark_bg-secondary" placeholder={m.enter_prompt()} />
+        <Textarea disabled={true} class="h-auto  max-h-48 overflow-auto bg-white dark:bg-secondary" placeholder={m.enter_prompt()} />
         <Button type="submit" onsubmit={stopGeneration}>
           <Square />
         </Button>
