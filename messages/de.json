@@ -55,5 +55,6 @@
   "rename": "Umbenennen",
   "delete": "Löschen",
   "confirm": "Bestätigen",
-  "cancel": "widerrufen"
+  "cancel": "Widerrufen",
+  "available_models": "Mögliche Modelle"
 }

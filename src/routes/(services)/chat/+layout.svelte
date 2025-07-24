@@ -12,6 +12,7 @@
   import type { Chat } from '$lib/types/chat';
   import ChatAPI from "$lib/api/chatAPI/chatAPI";
   import type { UUID } from "crypto";
+  import { invalidateAll } from "$app/navigation";
 
   let { data, children } = $props();
   let open = $state(true);
@@ -62,7 +63,8 @@
   }
 
   function delete_chat(chat_id: UUID) {
-    const response = new ChatAPI().delete_chat(chat_id, data.token)
+    const response = new ChatAPI().delete_chat(chat_id, data.token);
+    invalidateAll();
   }
 
 </script>
@@ -130,7 +132,7 @@
                           </button>
                         </Tooltip.Trigger>
                         <Tooltip.Content>
-                          <p>{m.confirm}</p>
+                          <p>{m.confirm()}</p>
                         </Tooltip.Content>
                       </Tooltip.Root>
                     </Tooltip.Provider>
@@ -143,14 +145,14 @@
                           </button>
                         </Tooltip.Trigger>
                         <Tooltip.Content>
-                          <p>{m.cancel}</p>
+                          <p>{m.cancel()}</p>
                         </Tooltip.Content>
                       </Tooltip.Root>
                     </Tooltip.Provider>
                     </div>
                   {:else}
                     <Tooltip.Provider>
-                      <Tooltip.Root>
+                     <Tooltip.Root>
                         <Tooltip.Trigger>
                           <Sidebar.MenuItem>
                             <Sidebar.MenuButton>

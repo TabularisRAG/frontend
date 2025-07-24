@@ -15,7 +15,7 @@ export enum ChatMessageType {
 export type Message = {
   type: string;
   value: string;
-  modelId?: string
+  model_id: UUID 
 };
 
 export interface ChatMessageResponse {
@@ -34,7 +34,7 @@ export interface ChatDataResponse {
 
 export interface ChatMessageRequest {
   message?: string;
-  model_id?: UUID;
+  model_id: UUID;
   stop: boolean;
 }
 

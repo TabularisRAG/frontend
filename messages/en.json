@@ -53,6 +53,7 @@
   "copy": "Copy",
   "rename": "Rename",
   "delete": "Delete",
-  "confirm": "Bestätigen",
-  "cancel": "widerrufen"
+  "confirm": "Confirm",
+  "cancel": "Cancel",
+  "available_models": "Available Models"
 }

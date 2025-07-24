@@ -6,13 +6,15 @@
   import {m} from '$lib/paraglide/messages.js';
   import { onDestroy, onMount, setContext, tick } from "svelte";
   import { ChatMessageType, type Chat, type ChatMessageRequest, type Message } from "$lib/types/chat.js";
+  import { type Model } from "$lib/types/model"
   import { page } from "$app/state";
   import { LoadEllipsis } from 'svelte-loading-animation';
   import { getContext } from 'svelte';
   import SvelteMarkdown from '@humanspeak/svelte-markdown'
   import CitationButton from "./CitationButton.svelte";
+  import ModelSelectionDropdown from "../ModelSelectionDropdown.svelte";
+  import type { UUID } from "crypto";
 
-  const MODEL_ID = "22dd6109-e513-465a-9593-506e7d97e77e";
   const WEB_SOCKET_BASE_URL = `ws://localhost:8000/api`;
 
   let scroll_container: HTMLElement | null = $state(null);
@@ -21,6 +23,10 @@
   let streaming_message: Message | null = $state(null);
   let socket: WebSocket | null = null;
   let current_session_id = $state(page.data.session_id);
+  const available_models = data.available_models
+  // svelte-ignore state_referenced_locally
+  let selected_model = $state<Model>(available_models[0]);
+
   setContext('token', data.token ?? '');
 
   const { chat_list, move_current_chat_to_front } = getContext<{
@@ -31,6 +37,7 @@
   let user_input: Message = $state({
     type: ChatMessageType.HUMAN,
     value: '',
+    model_id:'',
   });
 
   let display_messages = $derived(
@@ -68,11 +75,12 @@
     if(message.trim() !== ""){
       let first_message: Message = JSON.parse(message);
       sessionStorage.removeItem("initialMessage"); 
-
+      selected_model = available_models.find((m) => m.id === first_message.model_id);
+      $inspect(selected_model);
       messages.push(first_message);
 
       let chat_message_request: ChatMessageRequest = {
-        model_id: MODEL_ID,
+        model_id: first_message.model_id,
         message: first_message.value,
         stop: false,
       }
@@ -115,6 +123,7 @@
         streaming_message= {
             type: ChatMessageType.AI,
             value: '',
+            model_id: '',
           };
         move_current_chat_to_front(data.session_id);
         break;
@@ -161,7 +170,7 @@
 
     const payload = {
       message: user_input.value,
-      model_id: MODEL_ID,
+      model_id: selected_model.id,
       stop: false,
     };
 
@@ -226,13 +235,14 @@
   </div>
   <div class="sticky bottom-5 w-full px-28 pt-16 flex justify-center">
   <Card.Root class="w-full">
-    <Card.Content class="max-h-fit">
-      <form class="flex w-full max-h-48 items-center space-x-2" onsubmit={send_message}>
-        <Textarea bind:value={user_input.value} class="h-fit max-h-36 overflow-auto bg-white dark_bg-secondary" placeholder={m.enter_prompt()} />
+    <Card.Content class="max-h-fit h-16 w-full">
+      <form class="flex w-full max-h-48 items-center space-x-2 pb-1" onsubmit={send_message}>
+        <Textarea bind:value={user_input.value} class="h-fit  max-h-36 overflow-auto bg-white dark_bg-secondary" placeholder={m.enter_prompt()} />
         <Button type="submit">
           <Send />
         </Button>
       </form>
+      <ModelSelectionDropdown {available_models} bind:model={selected_model}/>
     </Card.Content>
     <Card.Footer>
     </Card.Footer>
