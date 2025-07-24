@@ -39,17 +39,22 @@
         >TabulaRAG
         </Button
         >
+        
+        <!-- Main navigation - only show if user is logged in -->
+        {#if user}
+            <div class="hidden md:flex justify-center items-center gap-2">
+                <Button href="/documents" variant="link">{m.nav_documents()}</Button>
+                <Button href="/chat" variant="link">{m.nav_chat()}</Button>
+                <Button href="/groups" variant="link">{m.nav_groups()}</Button>
+                <!--admin only-->
+                {#if user?.is_admin}
+                    <Button href="/users" variant="link">{m.nav_users()}</Button>
+                {/if}
+            </div>
+        {/if}
+        
         <div class="hidden md:flex justify-center items-center gap-2">
-            <Button href="/documents" variant="link">{m.nav_documents()}</Button>
-            <Button href="/chat" variant="link">{m.nav_chat()}</Button>
-            <Button href="/groups" variant="link">{m.nav_groups()}</Button>
-            <!--admin only-->
-            {#if user?.is_admin}
-                <Button href="/users" variant="link">{m.nav_users()}</Button>
-
-            {/if}
-        </div>
-        <div class="hidden md:flex justify-center items-center gap-2">
+            <!-- Language dropdown -->
             <DropdownMenu.Root>
                 <DropdownMenu.Trigger>
                     {#snippet child({props})}
@@ -79,6 +84,8 @@
                     </DropdownMenu.Group>
                 </DropdownMenu.Content>
             </DropdownMenu.Root>
+            
+            <!-- Theme dropdown -->
             <DropdownMenu.Root>
                 <DropdownMenu.Trigger>
                     {#snippet child({props})}
@@ -114,7 +121,8 @@
                 </DropdownMenu.Content>
             </DropdownMenu.Root>
 
-            {#if !user}
+            <!-- User profile dropdown - only show if user is logged in -->
+            {#if user}
                 <DropdownMenu.Root>
                     <DropdownMenu.Trigger>
                         {#snippet child({props})}
@@ -130,24 +138,23 @@
                     </DropdownMenu.Trigger>
                     <DropdownMenu.Content align="end">
                         <DropdownMenu.Group>
-                            {#if !user}
-                                <DropdownMenu.Item onSelect={() => goto("/profile")}>
-                                    <UserIcon class="mr-1 text-foreground"/>
-                                    {m.nav_profile()}
-                                </DropdownMenu.Item>
-                                <DropdownMenu.Item onSelect={() => goto("/settings")}>
-                                    <Settings class="mr-1 text-foreground"/>
-                                    {m.nav_settings()}
-                                </DropdownMenu.Item>
-                                <DropdownMenu.Item onSelect={() => form.submit()}>
-                                    <LogOut class="mr-1 text-foreground"/>
-                                    {m.auth_logout()}
-                                </DropdownMenu.Item>
-                            {/if}
+                            <DropdownMenu.Item onSelect={() => goto("/profile")}>
+                                <UserIcon class="mr-1 text-foreground"/>
+                                {m.nav_profile()}
+                            </DropdownMenu.Item>
+                            <DropdownMenu.Item onSelect={() => goto("/settings")}>
+                                <Settings class="mr-1 text-foreground"/>
+                                {m.nav_settings()}
+                            </DropdownMenu.Item>
+                            <DropdownMenu.Item onSelect={() => form.submit()}>
+                                <LogOut class="mr-1 text-foreground"/>
+                                {m.auth_logout()}
+                            </DropdownMenu.Item>
                         </DropdownMenu.Group>
                     </DropdownMenu.Content>
                 </DropdownMenu.Root>
 
+                <!-- Mobile menu dropdown - only show if user is logged in -->
                 <DropdownMenu.Root>
                     <DropdownMenu.Trigger>
                         {#snippet child({props})}
@@ -171,14 +178,16 @@
                                 <MessageCircle class="mr-1 text-foreground"/>
                                 {m.nav_chat()}
                             </DropdownMenu.Item>
-                            <DropdownMenu.Item onSelect={() => goto("/users")}>
-                                <CircleUser class="mr-1 text-foreground"/>
-                                {m.nav_users()}
-                            </DropdownMenu.Item>
                             <DropdownMenu.Item onSelect={() => goto("/groups")}>
                                 <Users class="mr-1 text-foreground"/>
                                 {m.nav_groups()}
                             </DropdownMenu.Item>
+                            {#if user?.is_admin}
+                                <DropdownMenu.Item onSelect={() => goto("/users")}>
+                                    <CircleUser class="mr-1 text-foreground"/>
+                                    {m.nav_users()}
+                                </DropdownMenu.Item>
+                            {/if}
                         </DropdownMenu.Group>
                         <DropdownMenu.Separator/>
                         <DropdownMenu.Group>
@@ -232,13 +241,14 @@
                             </DropdownMenu.Item>
                             <DropdownMenu.Item onSelect={() => form.submit()}>
                                 <LogOut class="mr-1 text-foreground"/>
+                                {m.auth_logout()}
                             </DropdownMenu.Item>
                         </DropdownMenu.Group>
                     </DropdownMenu.Content>
-
                 </DropdownMenu.Root>
             {/if}
 
+            <!-- Login button - only show if user is NOT logged in -->
             {#if !user}
                 <Button href="/login">{m.auth_login()}</Button>
             {/if}
