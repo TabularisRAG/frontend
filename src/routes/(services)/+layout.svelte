@@ -40,13 +40,13 @@
         </Button
         >
         <div class="hidden md:flex justify-center items-center gap-2">
-            <Button href="/documents" variant="link">{m.documents()}</Button>
-            <Button href="/chat" variant="link">{m.chat()}</Button>
-            <Button href="/groups" variant="link">{m.groups()}</Button>
+            <Button href="/documents" variant="link">{m.nav_documents()}</Button>
+            <Button href="/chat" variant="link">{m.nav_chat()}</Button>
+            <Button href="/groups" variant="link">{m.nav_groups()}</Button>
             <!--admin only-->
             {#if user?.is_admin}
-                <Button href="/users" variant="link">{m.users()}</Button>
-               
+                <Button href="/users" variant="link">{m.nav_users()}</Button>
+
             {/if}
         </div>
         <div class="hidden md:flex justify-center items-center gap-2">
@@ -59,13 +59,13 @@
                                 class="h-9 w-9 lg:h-9 lg:px-4 lg:py-2 lg:w-fit"
                         >
                             <Globe/>
-                            <span class="sr-only lg:not-sr-only">{m.language()}</span>
+                            <span class="sr-only lg:not-sr-only">{m.nav_language()}</span>
                         </Button>
                     {/snippet}
                 </DropdownMenu.Trigger>
                 <DropdownMenu.Content>
                     <DropdownMenu.Group>
-                        <DropdownMenu.GroupHeading>{m.language()}</DropdownMenu.GroupHeading
+                        <DropdownMenu.GroupHeading>{m.nav_language()}</DropdownMenu.GroupHeading
                         >
                         <DropdownMenu.Separator/>
                         <DropdownMenu.Group>
@@ -88,26 +88,26 @@
                                 class="h-9 w-9 lg:h-9 lg:px-4 lg:py-2 lg:w-fit"
                         >
                             <SunMoon/>
-                            <span class="sr-only lg:not-sr-only">{m.theme()}</span>
+                            <span class="sr-only lg:not-sr-only">{m.nav_theme()}</span>
                         </Button>
                     {/snippet}
                 </DropdownMenu.Trigger>
                 <DropdownMenu.Content>
                     <DropdownMenu.Group>
-                        <DropdownMenu.GroupHeading>{m.theme()}</DropdownMenu.GroupHeading>
+                        <DropdownMenu.GroupHeading>{m.nav_theme()}</DropdownMenu.GroupHeading>
                         <DropdownMenu.Separator/>
                         <DropdownMenu.Group>
                             <DropdownMenu.Item onSelect={() => setMode("dark")}>
                                 <Moon class="mr-1 text-foreground"/>
-                                {m.dark()}
+                                {m.nav_theme_dark()}
                             </DropdownMenu.Item>
                             <DropdownMenu.Item onSelect={() => setMode("light")}>
                                 <Sun class="mr-1 text-foreground"/>
-                                {m.light()}
+                                {m.nav_theme_light()}
                             </DropdownMenu.Item>
                             <DropdownMenu.Item onSelect={() => resetMode()}>
                                 <MonitorSmartphone class="mr-1 text-foreground"/>
-                                {m.system()}
+                                {m.nav_theme_system()}
                             </DropdownMenu.Item>
                         </DropdownMenu.Group>
                     </DropdownMenu.Group>
@@ -124,7 +124,7 @@
                                     class="h-9 w-9 lg:h-9 lg:px-4 lg:py-2 lg:w-fit"
                             >
                                 <UserCog/>
-                                <span class="sr-only lg:not-sr-only">{m.profile()}</span>
+                                <span class="sr-only lg:not-sr-only">{m.nav_profile()}</span>
                             </Button>
                         {/snippet}
                     </DropdownMenu.Trigger>
@@ -133,15 +133,15 @@
                             {#if !user}
                                 <DropdownMenu.Item onSelect={() => goto("/profile")}>
                                     <UserIcon class="mr-1 text-foreground"/>
-                                    {m.profile()}
+                                    {m.nav_profile()}
                                 </DropdownMenu.Item>
                                 <DropdownMenu.Item onSelect={() => goto("/settings")}>
                                     <Settings class="mr-1 text-foreground"/>
-                                    {m.settigs()}
+                                    {m.nav_settings()}
                                 </DropdownMenu.Item>
                                 <DropdownMenu.Item onSelect={() => form.submit()}>
                                     <LogOut class="mr-1 text-foreground"/>
-                                    {m.logout()}
+                                    {m.auth_logout()}
                                 </DropdownMenu.Item>
                             {/if}
                         </DropdownMenu.Group>
@@ -165,48 +165,48 @@
                         <DropdownMenu.Group>
                             <DropdownMenu.Item onSelect={() => goto("/documents")}>
                                 <Files class="mr-1 text-foreground"/>
-                                {m.documents()}
+                                {m.nav_documents()}
                             </DropdownMenu.Item>
                             <DropdownMenu.Item onSelect={() => goto("/chat")}>
                                 <MessageCircle class="mr-1 text-foreground"/>
-                                {m.chat()}
+                                {m.nav_chat()}
                             </DropdownMenu.Item>
                             <DropdownMenu.Item onSelect={() => goto("/users")}>
                                 <CircleUser class="mr-1 text-foreground"/>
-                                {m.users()}
+                                {m.nav_users()}
                             </DropdownMenu.Item>
                             <DropdownMenu.Item onSelect={() => goto("/groups")}>
                                 <Users class="mr-1 text-foreground"/>
-                                {m.groups()}
+                                {m.nav_groups()}
                             </DropdownMenu.Item>
                         </DropdownMenu.Group>
                         <DropdownMenu.Separator/>
                         <DropdownMenu.Group>
                             <DropdownMenu.Sub>
                                 <DropdownMenu.SubTrigger>
-                                    <SunMoon class="mr-1 text-foreground"/>{m.theme()}
+                                    <SunMoon class="mr-1 text-foreground"/>{m.nav_theme()}
                                 </DropdownMenu.SubTrigger>
                                 <DropdownMenu.SubContent sideOffset={8}>
                                     <DropdownMenu.Item onSelect={() => setMode("dark")}>
                                         <Moon
                                                 class="mr-1 text-foreground"
-                                        />{m.dark()}</DropdownMenu.Item
+                                        />{m.nav_theme_dark()}</DropdownMenu.Item
                                     >
                                     <DropdownMenu.Item onSelect={() => setMode("light")}>
                                         <Sun
                                                 class="mr-1 text-foreground"
-                                        />{m.light()}</DropdownMenu.Item
+                                        />{m.nav_theme_light()}</DropdownMenu.Item
                                     >
                                     <DropdownMenu.Item onSelect={() => resetMode()}>
                                         <MonitorSmartphone
                                                 class="mr-1 text-foreground"
-                                        />{m.system()}</DropdownMenu.Item
+                                        />{m.nav_theme_system()}</DropdownMenu.Item
                                     >
                                 </DropdownMenu.SubContent>
                             </DropdownMenu.Sub>
                             <DropdownMenu.Sub>
                                 <DropdownMenu.SubTrigger>
-                                    <Globe class="mr-1 text-foreground"/>{m.language()}
+                                    <Globe class="mr-1 text-foreground"/>{m.nav_language()}
                                 </DropdownMenu.SubTrigger>
                                 <DropdownMenu.SubContent sideOffset={8}>
                                     {#each languages as {code, name, flag}}
@@ -224,11 +224,11 @@
                         <DropdownMenu.Group>
                             <DropdownMenu.Item onSelect={() => goto("/profile")}>
                                 <UserIcon class="mr-1 text-foreground"/>
-                                {m.profile()}
+                                {m.nav_profile()}
                             </DropdownMenu.Item>
                             <DropdownMenu.Item onSelect={() => goto("/settings")}>
                                 <Settings class="mr-1 text-foreground"/>
-                                {m.settigs()}
+                                {m.nav_settings()}
                             </DropdownMenu.Item>
                             <DropdownMenu.Item onSelect={() => form.submit()}>
                                 <LogOut class="mr-1 text-foreground"/>
@@ -240,7 +240,7 @@
             {/if}
 
             {#if !user}
-                <Button href="/login">{m.login_now()}</Button>
+                <Button href="/login">{m.auth_login()}</Button>
             {/if}
         </div>
 
