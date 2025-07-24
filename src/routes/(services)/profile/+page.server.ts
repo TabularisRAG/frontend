@@ -44,13 +44,19 @@ export const load: PageServerLoad = async ({ locals }) => {
         availableProviders: Array.isArray(availableProviders) ? availableProviders : [],
         isLoading: false
       };
-
-      const authAPI = new AuthenticationAPI();
-      const response =  await authAPI.getUsersInactive(jwt);
-      inactive_users = response.inactive_users;
       
     } catch (error) {
       console.error('Error loading admin data in server:', error);
+    }
+
+    // Separater TryCatch für das Laden der inactive_users
+    try {
+      const authAPI = new AuthenticationAPI();
+      const response = await authAPI.getUsersInactive(jwt);
+      inactive_users = response.inactive_users;
+    } catch (error) {
+      console.error('Error loading inactive users:', error);
+      // inactive_users bleibt als leeres Array initialisiert
     }
   }
 

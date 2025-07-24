@@ -79,7 +79,7 @@
           const message = result.data?.message || m.password_changed_successfully();
           toast.success(message);
         } else if (result.type === "failure") {
-          const message = result.data?.message || m.error_occurred();
+          const message = result.data?.message || m.message_error();
           toast.error(message);
         }
       }
@@ -147,23 +147,17 @@
   </script>
   
   <svelte:head>
-    <title>{m.profile()} - TabulaRAG</title>
+    <title>{m.nav_profile()} - TabulaRAG</title>
   </svelte:head>
   
   <main class="container mx-auto px-4 py-8 max-w-4xl">
     <div class="flex items-center gap-4 mb-8">
-      <h1 class="text-3xl font-bold">{m.profile()}</h1>
+      <h1 class="text-3xl font-bold">{m.nav_profile()}</h1>
     </div>
   
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <Card class="lg:col-span-3">
         <CardHeader>
-          {#if !user}
-            <div class="text-center py-8">
-              <p class="text-muted-foreground">{m.please_login_to_view_profile()}</p>
-              <Button href="/login" class="mt-4">{m.login()}</Button>
-            </div>
-          {:else}
             <div class="flex items-center gap-6">
               <Avatar class="w-20 h-20">
                 <AvatarFallback class="text-xl">{getInitials(user.first_name, user.last_name)}</AvatarFallback>
@@ -193,24 +187,10 @@
                 </div>
               </div>
             </div>
-          {/if}
         </CardHeader>
       </Card>
   
-      {#if user}
-        <Card>
-          <CardHeader class="pb-3">
-            <CardTitle class="text-base flex items-center gap-2">
-              <Activity class="w-4 h-4" />
-              {m.activity()}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div class="text-xs text-muted-foreground">{m.user_id()}</div>
-            <div class="text-sm font-medium">{user.id}</div>
-          </CardContent>
-        </Card>
-  
+      {#if user}  
         <div class="lg:col-span-3">
           <Tabs.Root value="account" class="w-full">
             <Tabs.List class="grid w-full {user.is_admin ? 'grid-cols-4' : 'grid-cols-2'}">
@@ -223,7 +203,7 @@
                 </Tabs.Trigger>
                 <Tabs.Trigger value="users">
                   <Users class="w-4 h-4 mr-2" />
-                  {m.users()}
+                  {m.user()}
                 </Tabs.Trigger>
               {/if}
             </Tabs.List>
@@ -247,11 +227,11 @@
                       </p>
                     </div>
                     <div>
-                      <Label>{m.first_name()}</Label>
+                      <Label>{m.field_first_name()}</Label>
                       <p class="text-sm text-muted-foreground">{user.first_name}</p>
                     </div>
                     <div>
-                      <Label>{m.last_name()}</Label>
+                      <Label>{m.field_last_name()}</Label>
                       <p class="text-sm text-muted-foreground">{user.last_name}</p>
                     </div>
                   </div>
@@ -281,7 +261,7 @@
                       <Form.Field {form} name="newPassword">
                         <Form.Control>
                           {#snippet children({ props })}
-                            <Form.Label>{m.password()}</Form.Label>
+                            <Form.Label>{m.field_password()}</Form.Label>
                             <Input {...props} bind:value={$formData.newPassword} type="password" />
                           {/snippet}
                         </Form.Control>
