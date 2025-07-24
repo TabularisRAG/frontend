@@ -46,6 +46,7 @@
                 <Button href="/documents" variant="link">{m.nav_documents()}</Button>
                 <Button href="/chat" variant="link">{m.nav_chat()}</Button>
                 <Button href="/groups" variant="link">{m.nav_groups()}</Button>
+                <Button href="/profile" variant="link">{m.nav_profile()}</Button>
                 <!--admin only-->
                 {#if user?.is_admin}
                     <Button href="/users" variant="link">{m.nav_users()}</Button>
