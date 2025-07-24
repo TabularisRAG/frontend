@@ -14,16 +14,21 @@ export const load: PageServerLoad = async (event) => {
 
 export const actions: Actions = {
     default: async (event) => {
-        const form = await superValidate(event, zod4(registerSchema))
-        if (!form.valid) {
-            return fail(400, { form})
-        }
-        try {
-            await new AuthenticationAPI().registerUser(form.data as unknown as RegistrationUser)
-            redirect(302, `/login`)
-        } catch (e) {
-            console.error(e)
-            redirect(302, `/login?error`)
-        }
+      const form = await superValidate(event, zod4(registerSchema))
+      if (!form.valid) {
+        return fail(400, { form })
+      }
+      
+      try {
+        await new AuthenticationAPI().registerUser(form.data as unknown as RegistrationUser)
+      } catch (e) {
+        console.error(e)
+        return fail(400, {
+          form,
+          message: 'Registration failed. Please try again.'
+        })
+      }
+      
+      redirect(302, `/login?registered=true`)
     }
-}
+  }
