@@ -104,12 +104,7 @@
                     </form>
                 </Card.Content>
             </Card.Root>
-            <div
-                    class="text-muted-foreground *:[a]:hover:text-primary *:[a]:underline *:[a]:underline-offset-4 text-balance text-center text-xs"
-            >
-                {m.legal_terms_agree()} <a href="##">{m.legal_terms_service()}</a>
-                {` ${m.legal_and()} `}<a href="##">{m.legal_privacy()}</a>.
-            </div>
+           
         </div>
     </div>
 </div>
