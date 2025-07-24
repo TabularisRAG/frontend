@@ -88,7 +88,6 @@
         }, 1500);
       } catch (error) {
         const err = error as Error;
-        console.error(m.model_add_error_log(), error);
         errorMessage = err.message || m.model_add_unknown_error();
       } finally {
         isAddingModel = false;
