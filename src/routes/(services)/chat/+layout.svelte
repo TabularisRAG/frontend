@@ -12,6 +12,7 @@
   import type { Chat } from '$lib/types/chat';
   import ChatAPI from "$lib/api/chatAPI/chatAPI";
   import type { UUID } from "crypto";
+  import {invalidateAll} from "$app/navigation";
 
   let { data, children } = $props();
   let open = $state(true);
@@ -61,9 +62,10 @@
     cancelRename();
   }
 
-  function deleteChat(chat_id: UUID) {
-    const response = new ChatAPI().deleteChat(chat_id, data.token);
-    chatList = chatList.filter(chat => chat.session_id !== chat_id);
+  function deleteChat(chatId: UUID) {
+    new ChatAPI().deleteChat(chatId, data.token);
+    chatList = chatList.filter(chat => chat.session_id !== chatId);
+    invalidateAll();
   }
 
 </script>

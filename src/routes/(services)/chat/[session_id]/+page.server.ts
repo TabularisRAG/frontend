@@ -2,6 +2,7 @@ import ChatAPI from '$lib/api/chatAPI/chatAPI';
 import type { ChatMessageResponse, Message } from '$lib/types/chat';
 import type { UUID } from 'crypto';
 import type { PageServerLoad } from './$types';
+import { redirect } from '@sveltejs/kit';
 
 export const load: PageServerLoad = async ({ params, depends, cookies }) => {
   depends(`/chat/${params.session_id}`);
@@ -27,13 +28,6 @@ export const load: PageServerLoad = async ({ params, depends, cookies }) => {
       messages,                        
     };
   } catch (e) {
-    return {
-      session_id: sessionId,
-      chat_name: "anonymous",
-      started_at: null,       
-      last_message_at: null,
-      token: token,
-      messages: [] as Message[]
-    };
+    throw redirect(307, "/chat/new");
   }
 };
