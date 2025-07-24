@@ -2,6 +2,7 @@
   import { Button } from "$lib/components/ui/button/index.js";
   import { Textarea } from "$lib/components/ui/textarea/index.js";
   import Send from "@lucide/svelte/icons/send-horizontal";
+  import Square from "@lucide/svelte/icons/square";
   import * as Card from "$lib/components/ui/card/index.js";
   import {m} from '$lib/paraglide/messages.js';
   import { onDestroy, onMount, setContext, tick } from "svelte";
@@ -13,35 +14,40 @@
   import SvelteMarkdown from '@humanspeak/svelte-markdown'
   import CitationButton from "./CitationButton.svelte";
   import ModelSelectionDropdown from "../ModelSelectionDropdown.svelte";
-  import type { UUID } from "crypto";
+  import HeadingRenderer from "$lib/components/HeadingRenderer.svelte";
+  import ListRenderer from "$lib/components/ListRenderer.svelte";
+  import TableRenderer from "$lib/components/TableRenderer.svelte";
+  import TableHeadRenderer from "$lib/components/TableHeadRenderer.svelte";
+  import TableBodyRenderer from "$lib/components/TableBodyRenderer.svelte";
+  import TableCellRenderer from "$lib/components/TableCellRenderer.svelte";
+  import TableRowRenderer from "$lib/components/TableRowRenderer.svelte";
 
   const WEB_SOCKET_BASE_URL = `ws://localhost:8000/api`;
 
-  let scroll_container: HTMLElement | null = $state(null);
+  let scrollContainer: HTMLElement | null = $state(null);
   let {data} = $props();
   let messages: Message[] = $state(data.messages ?? []);
-  let streaming_message: Message | null = $state(null);
+  let streamingMessage: Message | null = $state(null);
   let socket: WebSocket | null = null;
-  let current_session_id = $state(page.data.session_id);
-  const available_models = data.available_models
+  let currentSessionId = $state(page.data.session_id);
+  const availableModels = data.availableModels
   // svelte-ignore state_referenced_locally
-  let selected_model = $state<Model>(available_models[0]);
+  let selectedModel = $state<Model>(availableModels[0]);
 
   setContext('token', data.token ?? '');
 
-  const { chat_list, move_current_chat_to_front } = getContext<{
-    chat_list: Chat[],
-    move_current_chat_to_front: (session_id: string) => void
+  const { chatList: chatList, moveCurrentChatToFront } = getContext<{
+    chatList: Chat[],
+    moveCurrentChatToFront: (session_id: string) => void
   }>('chat');
 
-  let user_input: Message = $state({
+  let userInput: Message = $state({
     type: ChatMessageType.HUMAN,
     value: '',
-    model_id:'',
-  });
+  } as Message);
 
-  let display_messages = $derived(
-    streaming_message ? [...messages, streaming_message] : messages
+  let displayMessages = $derived(
+    streamingMessage ? [...messages, streamingMessage] : messages
   );
 
   $effect(() => {
@@ -51,20 +57,20 @@
   });
 
   $effect(() => {
-    if (current_session_id !== page.data.session_id) {
+    if (currentSessionId !== page.data.session_id) {
       if (socket && socket.readyState === WebSocket.OPEN) {
         socket.close();
       }
-      streaming_message = null;
-      current_session_id = page.data.session_id;
+      streamingMessage = null;
+      currentSessionId = page.data.session_id;
       initializeWebSocket();
     }
   });
 
-  async function scroll_to_bottom() {
-    if (!scroll_container) return;
+  async function scrollToBottom() {
+    if (!scrollContainer) return;
     await tick();
-    scroll_container.scrollTop = scroll_container.scrollHeight;
+    scrollContainer.scrollTop = scrollContainer.scrollHeight;
   }
 
   function initializeWebSocket() {
@@ -73,30 +79,30 @@
 
     let message = sessionStorage.getItem("initialMessage") ?? "";
     if(message.trim() !== ""){
-      let first_message: Message = JSON.parse(message);
+      let firstMessage: Message = JSON.parse(message);
       sessionStorage.removeItem("initialMessage"); 
-      selected_model = available_models.find((m) => m.id === first_message.model_id);
-      $inspect(selected_model);
-      messages.push(first_message);
+      selectedModel = availableModels.find((m) => m.id === firstMessage.model_id) ?? selectedModel;
+      $inspect(selectedModel);
+      messages.push(firstMessage);
 
-      let chat_message_request: ChatMessageRequest = {
-        model_id: first_message.model_id,
-        message: first_message.value,
+      let chatMessageRequest: ChatMessageRequest = {
+        model_id: firstMessage.model_id,
+        message: firstMessage.value,
         stop: false,
       }
 
       socket.onopen = () => {
         if (socket && socket.readyState === WebSocket.OPEN) {
-          socket.send(JSON.stringify(chat_message_request));
+          socket.send(JSON.stringify(chatMessageRequest));
         }
       }
     }
 
     socket.onmessage = async (event) => {
       try {
-        const received_message: Message = JSON.parse(event.data);
-        if (current_session_id === page.data.session_id) {
-          handle_received_message(received_message);
+        const receivedMessage: Message = JSON.parse(event.data);
+        if (currentSessionId === page.data.session_id) {
+          handleReceivedMessage(receivedMessage);
         }
       } catch (error) {
         console.error("Error while processing the received message:", error);
@@ -114,43 +120,50 @@
 
   onMount(() => {
     initializeWebSocket();
-    scroll_to_bottom();
+    scrollToBottom();
   });
 
-  function handle_received_message(received_message: Message ) {
+  function handleReceivedMessage(received_message: Message ) {
     switch (received_message.type) {
       case ChatMessageType.MESSAGE_RECEIVED:
-        streaming_message= {
+        streamingMessage= {
             type: ChatMessageType.AI,
             value: '',
-            model_id: '',
-          };
-        move_current_chat_to_front(data.session_id);
+          } as Message;
+        moveCurrentChatToFront(data.session_id);
         break;
 
       case ChatMessageType.UPDATE_CHATNAME:
-        const new_chat: Chat = {
+        const newChat: Chat = {
           session_id: data.session_id,
           name: received_message.value,
           started_at: new Date().toISOString(),
           last_message_at: new Date().toISOString(),
           url: `/chat/${data.session_id}`,
         }
-        chat_list.unshift(new_chat);
+        chatList.unshift(newChat);
         break;
 
       case ChatMessageType.TOKEN_GENERATED:
-        if (streaming_message) {
-          streaming_message.value += received_message.value ?? '';
-          scroll_to_bottom();
+        if (streamingMessage) {
+          streamingMessage.value += received_message.value ?? '';
+          scrollToBottom();
         }
         break;
 
       case ChatMessageType.COMPLETION_GENERATED:
-        if (streaming_message) {
-          messages.push(streaming_message);
-          scroll_to_bottom();
-          streaming_message= null;
+        if (streamingMessage) {
+          messages.push(streamingMessage);
+          scrollToBottom();
+          streamingMessage= null;
+        }
+        break;
+
+      case ChatMessageType.STOPPED:
+        if (streamingMessage) {
+          messages.push(streamingMessage);
+          scrollToBottom();
+          streamingMessage= null;
         }
         break;
 
@@ -160,26 +173,32 @@
     }
   }
 
-  function send_message(event: Event) {
+  function sendMessage(event: Event) {
     event?.preventDefault();
-    if (!user_input.value.trim() || !socket || socket.readyState !== WebSocket.OPEN) return;
+    if (!userInput.value.trim() || !socket || socket.readyState !== WebSocket.OPEN) return;
     
-    const new_message =  {...user_input };;
-    messages.push(new_message);
-    scroll_to_bottom();
+    const newMessage =  {...userInput };;
+    messages.push(newMessage);
+    scrollToBottom();
 
     const payload = {
-      message: user_input.value,
-      model_id: selected_model.id,
+      message: userInput.value,
+      model_id: selectedModel.id,
       stop: false,
     };
 
     socket.send(JSON.stringify(payload));
-    user_input.value = "";
+    userInput.value = "";
   }
 
+  function handleKeydown(event: KeyboardEvent) {
+    if (event.key === 'Enter' && event.shiftKey) {
+      event.preventDefault();
+      sendMessage(event as unknown as Event);
+    }
+  }
 
-  function stop_generation() {
+  function stopGeneration() {
     if (socket && socket.readyState === WebSocket.OPEN) {
       const stopPayload = { stop: true };
       socket.send(JSON.stringify(stopPayload));
@@ -194,28 +213,37 @@
 
   $effect(() => {
     if (messages.length > 0) {
-      scroll_to_bottom();
+      scrollToBottom();
     }
   });
 
   $effect(() => {
-    if (streaming_message !== null) {
-      scroll_to_bottom();
+    if (streamingMessage !== null) {
+      scrollToBottom();
     }
   });
 </script>
 
 {#key page.params.session_id}
   <div class="flex sticky flex-grow justify-center max-h-[calc(100vh-54px)]">
-    <div bind:this={scroll_container} class="h-full w-full px-28 rounded-md mt-2 overflow-y-auto">
-      {#each display_messages as message}
+    <div bind:this={scrollContainer} class="h-full w-full px-28 rounded-md mt-2 overflow-y-auto">
+      {#each displayMessages as message}
         {#if message.value !== ""}
           <div class="flex {message.type === ChatMessageType.HUMAN ? 'justify-end' : 'justify-start'} pb-2">
             <Card.Root class={message.type === ChatMessageType.HUMAN ? 'w-11/12 bg-gray-100 dark:bg-primary text-black' : 'w-full dark:bg-secondary dark:border-gray-700'}>
               <Card.Content class="max-h-fit">
                 <SvelteMarkdown
                   source={message.value}
-                  renderers={{ link: CitationButton }}
+                  renderers={{ 
+                    link: CitationButton,
+                    heading: HeadingRenderer,
+                    list: ListRenderer,
+                    table: TableRenderer,
+                    tablehead: TableHeadRenderer,
+                    tablebody: TableBodyRenderer,
+                    tablecell: TableCellRenderer,
+                    tablerow: TableRowRenderer
+                  }}
                 />
               </Card.Content>
             </Card.Root>
@@ -230,22 +258,34 @@
           </Card.Root>
         {/if}
       {/each}
-      <div class="h-46"></div>
+      <div class="h-48"></div>
     </div>
   </div>
   <div class="sticky bottom-5 w-full px-28 pt-16 flex justify-center">
   <Card.Root class="w-full">
-    <Card.Content class="max-h-fit h-16 w-full">
-      <form class="flex w-full max-h-48 items-center space-x-2 pb-1" onsubmit={send_message}>
-        <Textarea bind:value={user_input.value} class="h-fit  max-h-36 overflow-auto bg-white dark_bg-secondary" placeholder={m.enter_prompt()} />
+    <Card.Content class="w-full h-auto max-h-64 overflow-hidden">
+      {#if !streamingMessage}
+      <form class="flex w-full max-h-48 items-center space-x-2 pb-1" onsubmit={sendMessage}>
+        <Textarea 
+              bind:value={userInput.value}
+              class="h-auto max-h-36 overflow-auto bg-white dark_bg-secondary" 
+              placeholder={m.enter_prompt()}
+              onkeydown={handleKeydown}
+            />
         <Button type="submit">
           <Send />
         </Button>
       </form>
-      <ModelSelectionDropdown {available_models} bind:model={selected_model}/>
+    {:else}
+      <form class="flex w-full max-h-48 items-center space-x-2 pb-1" onsubmit={stopGeneration}>
+        <Textarea disabled={true} class="h-auto  max-h-48 overflow-auto bg-white dark_bg-secondary" placeholder={m.enter_prompt()} />
+        <Button type="submit" onsubmit={stopGeneration}>
+          <Square />
+        </Button>
+      </form>
+    {/if}
+      <ModelSelectionDropdown {availableModels} bind:model={selectedModel}/>
     </Card.Content>
-    <Card.Footer>
-    </Card.Footer>
   </Card.Root>
   </div>
 {/key}

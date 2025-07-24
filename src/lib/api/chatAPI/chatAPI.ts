@@ -4,9 +4,8 @@ import APIClient from "../ApiClient";
 import { error } from '@sveltejs/kit';
 
 export default class ChatAPI extends APIClient {
-  private socket: WebSocket | null = null;
 
-  public async create_new_chat(token: string | undefined, chat_message_request: ChatMessageRequest) {
+  public async createNewChat(token: string | undefined, chat_message_request: ChatMessageRequest) {
     try {
       const response = await fetch(`${this.serverURL}/api/chats/new`, {
         method: 'POST',
@@ -29,7 +28,7 @@ export default class ChatAPI extends APIClient {
     }
   }
 
-  public async get_all_user_chats(token: string | undefined): Promise<Chat[]> {
+  public async getAllUserChats(token: string | undefined): Promise<Chat[]> {
     try {
       const res = await fetch(`${this.serverURL}/api/chats`, {
         headers: {
@@ -50,7 +49,7 @@ export default class ChatAPI extends APIClient {
     }
   }
 
-  public async get_chat_by_id(session_id: UUID, token: string | undefined): Promise<ChatDataResponse> {
+  public async getChatById(session_id: UUID, token: string | undefined): Promise<ChatDataResponse> {
     try {
       const res = await fetch(`${this.serverURL}/api/chats/${session_id}`, {
         headers: {
@@ -71,7 +70,7 @@ export default class ChatAPI extends APIClient {
     }
   }
 
-  public async delete_chat(session_id: UUID, token: string) {
+  public async deleteChat(session_id: UUID, token: string) {
     try {
       const res = await fetch(`${this.serverURL}/api/chats/${session_id}/delete`, {
         method: 'DELETE',
@@ -93,14 +92,15 @@ export default class ChatAPI extends APIClient {
 
   }
 
-  public async rename_chat(session_id: UUID, new_name: string, token: string) {
+  public async renameChat(session_id: UUID, new_name: string, token: string) {
     try {
-      const res = await fetch(`${this.serverURL}/api/chats/${session_id}/set_name/${new_name}`, {
+      const res = await fetch(`${this.serverURL}/api/chats/${session_id}/set_name`, {
         method: 'PATCH',
         headers: {
           "Authorization": `Bearer ${token}`,
           "Content-Type": "application/json"
         },
+        body: JSON.stringify({"name":new_name})
       });
 
       if (!res.ok) {

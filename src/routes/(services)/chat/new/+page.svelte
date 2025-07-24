@@ -11,46 +11,65 @@
   import ModelSelectionDropdown from "../ModelSelectionDropdown.svelte";
  
   let {data} = $props();
-  const available_models = $derived(data.available_models)
+  const availableModels = $derived(data.availableModels)
   // svelte-ignore state_referenced_locally
-  let selected_model = $state<Model>(available_models[0]);
-  let message_value = $state<string>("");
+  let selectedModel = $state<Model>(availableModels[0]);
+  let messageValue = $state<string>("");
 
   let message: Message = $derived({
     type: ChatMessageType.HUMAN,
-    value: message_value,
-    model_id:selected_model.id
+    value: messageValue,
+    model_id:selectedModel?.id
   });
+
+  function handleKeydown(event: KeyboardEvent) {
+    if (event.key === 'Enter' && event.shiftKey) {
+      event.preventDefault();
+      handleSubmit(event as unknown as Event);
+    }
+  }
 
   async function handleSubmit(event: Event) {
     event.preventDefault();
     if (!message.value.trim()) return;
   
-    let chat_message_request: ChatMessageRequest = {
+    let chatMessageRequest: ChatMessageRequest = {
       model_id: message.model_id,
       message: message.value,
       stop: false,
     }
 
-    const new_chat = await new ChatAPI().create_new_chat(data.token, chat_message_request); 
-    const chat_id = new_chat.session_id;
+    const newChat = await new ChatAPI().createNewChat(data.token, chatMessageRequest); 
+    const chatId = newChat.session_id;
 
     sessionStorage.setItem("initialMessage", JSON.stringify(message));
-    goto(`/chat/${chat_id}`);
+    goto(`/chat/${chatId}`);
   }
 
 </script>
 
-<div class="flex h-full items-center justify-center w-full ">
+<div class="flex flex-col h-full items-center justify-center w-full pb-20">
+  <div
+    class="flex items-center justify-center
+           pointer-events-none select-none
+           lg:text-9xl text-7xl text-gray-200 dark:text-gray-600 mb-10"
+  >
+    TabulaRAG
+  </div>
   <Card.Root class="h-44 w-5/6">
     <Card.Content class="max-h-fit">
       <form class="flex pb-2 w-full max-h-48 items-center space-x-2" onsubmit={handleSubmit}> 
-        <Textarea bind:value={message_value} class="h-24 overflow-auto" placeholder={m.enter_prompt()} />
+        <Textarea 
+              bind:value={messageValue}
+              class="h-fit  max-h-24 overflow-auto bg-white dark_bg-secondary" 
+              placeholder={m.enter_prompt()}
+              onkeydown={handleKeydown}
+            />
         <Button type="submit">
           <Send />
         </Button>
       </form>
-      <ModelSelectionDropdown {available_models} bind:model={selected_model} />
+      <ModelSelectionDropdown {availableModels} bind:model={selectedModel} />
     </Card.Content>
     <Card.Footer>
     </Card.Footer>

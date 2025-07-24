@@ -1,12 +1,12 @@
 <script lang="ts">
   import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "$lib/components/ui/dialog/index.js";
   import {Button} from "$lib/components/ui/button/index";
-  import { createEventDispatcher, getContext } from 'svelte';
+  import { getContext } from 'svelte';
   import LoaderCircle from "@lucide/svelte/icons/loader-circle";
   import BookMark from "@lucide/svelte/icons/book-marked";
   import {m} from '$lib/paraglide/messages.js';
 
-  let {href, text} =  $props();
+  let {href} =  $props();
   const token = getContext<() => string>('token');
 
   let citationDialogOpen = $state(false);

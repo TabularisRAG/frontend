@@ -1,20 +1,26 @@
 import ChatAPI from '$lib/api/chatAPI/chatAPI';
 import ModelAPI from '$lib/api/modelAPI/modelAPI';
-import { available_models } from '$lib/paraglide/messages';
-import type { Chat } from '$lib/types/chat';
 import type { Model } from '$lib/types/model';
 import type { LayoutServerLoad } from './$types';
-import { error } from '@sveltejs/kit';
 
-export const load: LayoutServerLoad = async ({ fetch, depends, cookies}) => {
+export const load: LayoutServerLoad = async ({ depends, cookies}) => {
   depends('sidebar:chatlist');
 
   const token = cookies.get('auth-session');
+  let availableModels: Model[] = [{
+    provider: 'None',
+    model_name: "No model available"
+  }] as Model[];
   try {
-    const list = await new ChatAPI().get_all_user_chats(token);
-    let available_models: Model[] = await new ModelAPI().get_available_models(token);
+    const list = await new ChatAPI().getAllUserChats(token);
+    try {
+      availableModels = await new ModelAPI().getAvailableModels(token);
+    }
+    catch (e) {
+      console.error("No models available");
+    }
 
-    const sorted_list = list
+    const sortedList = list
     .map((c) => ({
       url: `/chat/${c.session_id}`,
       name: c.name,
@@ -28,20 +34,16 @@ export const load: LayoutServerLoad = async ({ fetch, depends, cookies}) => {
       return new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime();
     });
     return {
-      chat_list: sorted_list,
+      chatList: sortedList,
       token: token,
-      available_models
+      availableModels
     };
   } catch (e) {
     console.error("Sidebar: error while loading data: ", e);
     return {
-      chat_list: [],
+      chatList: [],
       token: token,
-      available_models: [{
-        id: '',
-        provider: 'None',
-        model_name: "No model available"
-      }]
+      availableModels: availableModels 
     };
   }
 };

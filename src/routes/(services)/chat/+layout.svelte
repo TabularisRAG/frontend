@@ -12,32 +12,31 @@
   import type { Chat } from '$lib/types/chat';
   import ChatAPI from "$lib/api/chatAPI/chatAPI";
   import type { UUID } from "crypto";
-  import { invalidateAll } from "$app/navigation";
 
   let { data, children } = $props();
   let open = $state(true);
-  const chat_list = $state(data.chat_list);
-  let editing_id: string | null = $state(null);
-  let new_name = $state('');
+  let chatList = $state(data.chatList);
+  let editingId: string | null = $state(null);
+  let newName = $state('');
 
-  function move_current_chat_to_front(session_id: string) {
-      if (chat_list[0]?.session_id === session_id) {
+  function moveCurrentChatToFront(session_id: string) {
+      if (chatList[0]?.session_id === session_id) {
         return;
       }
-    const idx = chat_list.findIndex(chat => chat.session_id === session_id);
+    const idx = chatList.findIndex(chat => chat.session_id === session_id);
     if (idx === -1) return;
-    [chat_list[idx], chat_list[0]] = [chat_list[0], chat_list[idx]];
+    [chatList[idx], chatList[0]] = [chatList[0], chatList[idx]];
   }
-  setContext('chat', { chat_list, move_current_chat_to_front });
+  setContext('chat', { chatList, moveCurrentChatToFront });
 
-  async function start_rename(chat: Chat) {
-    editing_id = chat.session_id;
-    new_name = chat.name;
+  async function startRename(chat: Chat) {
+    editingId = chat.session_id;
+    newName = chat.name;
 
     await tick(); 
 
     requestAnimationFrame(() => {
-      const input = document.getElementById(`rename-${editing_id}`) as HTMLInputElement | null;
+      const input = document.getElementById(`rename-${editingId}`) as HTMLInputElement | null;
       if (input) {
         input.focus();
         input.select();
@@ -45,26 +44,26 @@
     });
 }
 
-  function cancel_rename() {
-    editing_id = null;
-    new_name = '';
+  function cancelRename() {
+    editingId = null;
+    newName = '';
   }
 
-  async function confirm_rename(session_id: UUID) {
-    const response = await new ChatAPI().rename_chat(session_id, new_name, data.token)
-    const chat = chat_list.find((c) => c.session_id === session_id);
+  async function confirmRename(session_id: UUID) {
+    const response = await new ChatAPI().renameChat(session_id, newName, data.token)
+    const chat = chatList.find((c) => c.session_id === session_id);
     if (chat) {
-      chat.name = new_name.trim();
+      chat.name = newName.trim();
     } 
     else {
       console.error('Rename failed', await response.text());
     }
-    cancel_rename();
+    cancelRename();
   }
 
-  function delete_chat(chat_id: UUID) {
-    const response = new ChatAPI().delete_chat(chat_id, data.token);
-    invalidateAll();
+  function deleteChat(chat_id: UUID) {
+    const response = new ChatAPI().deleteChat(chat_id, data.token);
+    chatList = chatList.filter(chat => chat.session_id !== chat_id);
   }
 
 </script>
@@ -86,7 +85,7 @@
               <Sidebar.MenuItem>
                 <Sidebar.MenuButton>
                   {#snippet child({ props })}
-                    <a href="/chat" {...props}>
+                    <a href="/chat/new" {...props}>
                       <Tooltip.Provider>
                         <Tooltip.Root>
                           <Tooltip.Trigger>
@@ -112,22 +111,22 @@
           <Sidebar.GroupContent>
             <Sidebar.Menu>
               {#if open}
-                {#each chat_list as chat}
-                  {#if editing_id === chat.session_id}
+                {#each chatList as chat}
+                  {#if editingId === chat.session_id}
                     <div class="flex flex-row">
                     <div class="pl-2 pr-2 py-1 h-full w-full rounded">
                       <input
                         id={"rename-" + chat.session_id}
                         class="w-full border rounded"
-                        bind:value={new_name}
-                        onkeyup={(e) => e.key === 'Enter' && confirm_rename(chat.session_id)}
-                        onkeydown={(e) => e.key === 'Escape' && cancel_rename()}
+                        bind:value={newName}
+                        onkeyup={(e) => e.key === 'Enter' && confirmRename(chat.session_id)}
+                        onkeydown={(e) => e.key === 'Escape' && cancelRename()}
                       />
                     </div> 
                     <Tooltip.Provider>
                       <Tooltip.Root>
                         <Tooltip.Trigger>
-                          <button class="flex items-center justify-center w-6 h-6 rounded hover:bg-gray-200" onclick={() => confirm_rename(chat.session_id)}>
+                          <button class="flex items-center justify-center w-6 h-6 rounded hover:bg-gray-200" onclick={() => confirmRename(chat.session_id)}>
                             <Check size={14} />
                           </button>
                         </Tooltip.Trigger>
@@ -140,7 +139,7 @@
                     <Tooltip.Provider>
                       <Tooltip.Root>
                         <Tooltip.Trigger>
-                          <button class="flex items-center justify-center w-6 h-6 rounded hover:bg-gray-200" onclick={() => cancel_rename()}>
+                          <button class="flex items-center justify-center w-6 h-6 rounded hover:bg-gray-200" onclick={() => cancelRename()}>
                             <X size={14} />
                           </button>
                         </Tooltip.Trigger>
@@ -172,11 +171,11 @@
                               </DropdownMenu.Trigger>
                               <DropdownMenu.Content side="right" align="start">
                                 <DropdownMenu.Item onSelect={() => {
-                                  requestAnimationFrame(() => start_rename(chat));
+                                  requestAnimationFrame(() => startRename(chat));
                                 }}>
                                   {m.rename()}
                                 </DropdownMenu.Item>
-                                <DropdownMenu.Item onSelect={() => delete_chat(chat.session_id)}>
+                                <DropdownMenu.Item onSelect={() => deleteChat(chat.session_id)}>
                                   {m.delete()}
                                 </DropdownMenu.Item>
                               </DropdownMenu.Content>

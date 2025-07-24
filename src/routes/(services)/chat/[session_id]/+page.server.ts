@@ -1,18 +1,17 @@
 import ChatAPI from '$lib/api/chatAPI/chatAPI';
-import type { ChatDataResponse, ChatMessageResponse } from '$lib/types/chat';
+import type { ChatMessageResponse, Message } from '$lib/types/chat';
 import type { UUID } from 'crypto';
 import type { PageServerLoad } from './$types';
-import { error } from '@sveltejs/kit';
 
-export const load: PageServerLoad = async ({ params, fetch, depends, cookies }) => {
+export const load: PageServerLoad = async ({ params, depends, cookies }) => {
   depends(`/chat/${params.session_id}`);
-  const session_id = params.session_id;
+  const sessionId = params.session_id as UUID;
   const token = cookies.get('auth-session');
 
   try {
-    const data = await new ChatAPI().get_chat_by_id(session_id, token);
+    const data = await new ChatAPI().getChatById(sessionId, token);
 
-    const messages: { type: string; value: string; modelId?: UUID}[] =
+    const messages: Message[] =
     (data.messages ?? []).map((msg: ChatMessageResponse) => ({
       type: msg.type ?? 'error',
       value: msg.value ?? '',
@@ -20,7 +19,7 @@ export const load: PageServerLoad = async ({ params, fetch, depends, cookies }) 
     }));
 
     return {
-      session_id: data.session_id,
+      session_id: sessionId,
       chat_name: data.name ?? 'no name',
       started_at: data.started_at,       
       last_message_at: data.last_message_at,
@@ -29,12 +28,12 @@ export const load: PageServerLoad = async ({ params, fetch, depends, cookies }) 
     };
   } catch (e) {
     return {
-      session_id: session_id,
+      session_id: sessionId,
       chat_name: "anonymous",
       started_at: null,       
       last_message_at: null,
       token: token,
-      messages: []
+      messages: [] as Message[]
     };
   }
 };
