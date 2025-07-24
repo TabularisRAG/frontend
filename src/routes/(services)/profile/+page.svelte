@@ -268,21 +268,21 @@
                 <CardContent class="space-y-4">
                   <form method="POST" action="?/changePassword" use:passwordEnhance>
                     <div class="grid gap-3">
-                      <Form.Field {form} name="oldpassword">
+                      <Form.Field {form} name="oldPassword">
                         <Form.Control>
                           {#snippet children({ props })}
                             <Form.Label>{m.current_password()}</Form.Label>
-                            <Input {...props} bind:value={$formData.oldpassword} type="password" />
+                            <Input {...props} bind:value={$formData.oldPassword} type="password" />
                           {/snippet}
                         </Form.Control>
                         <Form.FieldErrors />
                       </Form.Field>
   
-                      <Form.Field {form} name="newpassword">
+                      <Form.Field {form} name="newPassword">
                         <Form.Control>
                           {#snippet children({ props })}
                             <Form.Label>{m.password()}</Form.Label>
-                            <Input {...props} bind:value={$formData.newpassword} type="password" />
+                            <Input {...props} bind:value={$formData.newPassword} type="password" />
                           {/snippet}
                         </Form.Control>
                         <Form.FieldErrors />

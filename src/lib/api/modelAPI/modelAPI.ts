@@ -12,7 +12,7 @@ export default class ModelAPI extends APIClient {
                 "Authorization": "Bearer " + jwt
             },
             body: JSON.stringify({
-                provider: modelData.provider.toLocaleUpperCase(),
+                provider: modelData.provider.toUpperCase(),
                 model_name: modelData.model_name.trim(),
                 api_key: modelData.apiKey?.trim()
             })

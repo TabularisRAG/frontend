@@ -40,7 +40,7 @@
           label: p.charAt(0) + p.slice(1).toLowerCase()
         }));
       } catch (error) {
-        console.error('Fehler beim Laden der Provider:', error);
+        console.error('Error loading providers:', error);
       }
     });
   
@@ -88,7 +88,7 @@
         }, 1500);
       } catch (error) {
         const err = error as Error;
-        console.error('Fehler beim Hinzufügen des Modells:', error);
+        console.error(m.model_add_error_log(), error);
         errorMessage = err.message || m.model_add_unknown_error();
       } finally {
         isAddingModel = false;
@@ -217,7 +217,7 @@
         overflow: visible;
         box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         
-        /* Zentrieren des Dialogs */
+        /* Centering the dialog */
         position: fixed;
         top: 50%;
         left: 50%;

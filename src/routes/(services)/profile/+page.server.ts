@@ -73,7 +73,7 @@ export const actions: Actions = {
     }
 
     try {
-      await new AuthenticationAPI().changePassword(form.data.newpassword, event, form.data.oldpassword)
+      await new AuthenticationAPI().changePassword(form.data.newPassword, event, form.data.oldPassword)
       return {
         form,
         success: true,
