@@ -14,7 +14,7 @@ export const load: LayoutServerLoad = async ({ depends, cookies}) => {
   try {
     const list = await new ChatAPI().getAllUserChats(token);
     try {
-      availableModels = await new ModelAPI().getAvailableModels(token);
+      availableModels = await new ModelAPI().getModels(token);
     }
     catch (e) {
       console.error("No models available");

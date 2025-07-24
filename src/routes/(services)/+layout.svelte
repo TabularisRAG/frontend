@@ -39,17 +39,23 @@
         >TabulaRAG
         </Button
         >
+        
+        <!-- Main navigation - only show if user is logged in -->
+        {#if user}
+            <div class="hidden md:flex justify-center items-center gap-2">
+                <Button href="/documents" variant="link">{m.nav_documents()}</Button>
+                <Button href="/chat" variant="link">{m.nav_chat()}</Button>
+                <Button href="/groups" variant="link">{m.nav_groups()}</Button>
+                <Button href="/profile" variant="link">{m.nav_profile()}</Button>
+                <!--admin only-->
+                {#if user?.is_admin}
+                    <Button href="/users" variant="link">{m.nav_users()}</Button>
+                {/if}
+            </div>
+        {/if}
+        
         <div class="hidden md:flex justify-center items-center gap-2">
-            <Button href="/documents" variant="link">{m.nav_documents()}</Button>
-            <Button href="/chat" variant="link">{m.nav_chat()}</Button>
-            <Button href="/groups" variant="link">{m.nav_groups()}</Button>
-            <!--admin only-->
-            {#if user?.is_admin}
-                <Button href="/users" variant="link">{m.nav_users()}</Button>
-
-            {/if}
-        </div>
-        <div class="hidden md:flex justify-center items-center gap-2">
+            <!-- Language dropdown -->
             <DropdownMenu.Root>
                 <DropdownMenu.Trigger>
                     {#snippet child({props})}
@@ -79,6 +85,8 @@
                     </DropdownMenu.Group>
                 </DropdownMenu.Content>
             </DropdownMenu.Root>
+            
+            <!-- Theme dropdown -->
             <DropdownMenu.Root>
                 <DropdownMenu.Trigger>
                     {#snippet child({props})}
@@ -114,40 +122,18 @@
                 </DropdownMenu.Content>
             </DropdownMenu.Root>
 
-            {#if !user}
-                <DropdownMenu.Root>
-                    <DropdownMenu.Trigger>
-                        {#snippet child({props})}
-                            <Button
-                                    {...props}
-                                    variant="outline"
-                                    class="h-9 w-9 lg:h-9 lg:px-4 lg:py-2 lg:w-fit"
-                            >
-                                <UserCog/>
-                                <span class="sr-only lg:not-sr-only">{m.nav_profile()}</span>
-                            </Button>
-                        {/snippet}
-                    </DropdownMenu.Trigger>
-                    <DropdownMenu.Content align="end">
-                        <DropdownMenu.Group>
-                            {#if !user}
-                                <DropdownMenu.Item onSelect={() => goto("/profile")}>
-                                    <UserIcon class="mr-1 text-foreground"/>
-                                    {m.nav_profile()}
-                                </DropdownMenu.Item>
-                                <DropdownMenu.Item onSelect={() => goto("/settings")}>
-                                    <Settings class="mr-1 text-foreground"/>
-                                    {m.nav_settings()}
-                                </DropdownMenu.Item>
-                                <DropdownMenu.Item onSelect={() => form.submit()}>
-                                    <LogOut class="mr-1 text-foreground"/>
-                                    {m.auth_logout()}
-                                </DropdownMenu.Item>
-                            {/if}
-                        </DropdownMenu.Group>
-                    </DropdownMenu.Content>
-                </DropdownMenu.Root>
+            <!-- Logout button - only show if user is logged in -->
+            {#if user}
+                <Button
+                    variant="outline"
+                    class="h-9 lg:h-9 lg:px-4 lg:py-2"
+                    onclick={() => form.submit()}
+                >
+                    <LogOut class="w-4 h-4 lg:mr-1"/>
+                    <span class="sr-only lg:not-sr-only">{m.auth_logout()}</span>
+                </Button>
 
+                <!-- Mobile menu dropdown - only show if user is logged in -->
                 <DropdownMenu.Root>
                     <DropdownMenu.Trigger>
                         {#snippet child({props})}
@@ -171,14 +157,16 @@
                                 <MessageCircle class="mr-1 text-foreground"/>
                                 {m.nav_chat()}
                             </DropdownMenu.Item>
-                            <DropdownMenu.Item onSelect={() => goto("/users")}>
-                                <CircleUser class="mr-1 text-foreground"/>
-                                {m.nav_users()}
-                            </DropdownMenu.Item>
                             <DropdownMenu.Item onSelect={() => goto("/groups")}>
                                 <Users class="mr-1 text-foreground"/>
                                 {m.nav_groups()}
                             </DropdownMenu.Item>
+                            {#if user?.is_admin}
+                                <DropdownMenu.Item onSelect={() => goto("/users")}>
+                                    <CircleUser class="mr-1 text-foreground"/>
+                                    {m.nav_users()}
+                                </DropdownMenu.Item>
+                            {/if}
                         </DropdownMenu.Group>
                         <DropdownMenu.Separator/>
                         <DropdownMenu.Group>
@@ -222,23 +210,16 @@
                         <DropdownMenu.Separator/>
 
                         <DropdownMenu.Group>
-                            <DropdownMenu.Item onSelect={() => goto("/profile")}>
-                                <UserIcon class="mr-1 text-foreground"/>
-                                {m.nav_profile()}
-                            </DropdownMenu.Item>
-                            <DropdownMenu.Item onSelect={() => goto("/settings")}>
-                                <Settings class="mr-1 text-foreground"/>
-                                {m.nav_settings()}
-                            </DropdownMenu.Item>
                             <DropdownMenu.Item onSelect={() => form.submit()}>
                                 <LogOut class="mr-1 text-foreground"/>
+                                {m.auth_logout()}
                             </DropdownMenu.Item>
                         </DropdownMenu.Group>
                     </DropdownMenu.Content>
-
                 </DropdownMenu.Root>
             {/if}
 
+            <!-- Login button - only show if user is NOT logged in -->
             {#if !user}
                 <Button href="/login">{m.auth_login()}</Button>
             {/if}
