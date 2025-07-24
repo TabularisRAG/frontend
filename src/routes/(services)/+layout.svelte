@@ -121,38 +121,16 @@
                 </DropdownMenu.Content>
             </DropdownMenu.Root>
 
-            <!-- User profile dropdown - only show if user is logged in -->
+            <!-- Logout button - only show if user is logged in -->
             {#if user}
-                <DropdownMenu.Root>
-                    <DropdownMenu.Trigger>
-                        {#snippet child({props})}
-                            <Button
-                                    {...props}
-                                    variant="outline"
-                                    class="h-9 w-9 lg:h-9 lg:px-4 lg:py-2 lg:w-fit"
-                            >
-                                <UserCog/>
-                                <span class="sr-only lg:not-sr-only">{m.nav_profile()}</span>
-                            </Button>
-                        {/snippet}
-                    </DropdownMenu.Trigger>
-                    <DropdownMenu.Content align="end">
-                        <DropdownMenu.Group>
-                            <DropdownMenu.Item onSelect={() => goto("/profile")}>
-                                <UserIcon class="mr-1 text-foreground"/>
-                                {m.nav_profile()}
-                            </DropdownMenu.Item>
-                            <DropdownMenu.Item onSelect={() => goto("/settings")}>
-                                <Settings class="mr-1 text-foreground"/>
-                                {m.nav_settings()}
-                            </DropdownMenu.Item>
-                            <DropdownMenu.Item onSelect={() => form.submit()}>
-                                <LogOut class="mr-1 text-foreground"/>
-                                {m.auth_logout()}
-                            </DropdownMenu.Item>
-                        </DropdownMenu.Group>
-                    </DropdownMenu.Content>
-                </DropdownMenu.Root>
+                <Button
+                    variant="outline"
+                    class="h-9 lg:h-9 lg:px-4 lg:py-2"
+                    onclick={() => form.submit()}
+                >
+                    <LogOut class="w-4 h-4 lg:mr-1"/>
+                    <span class="sr-only lg:not-sr-only">{m.auth_logout()}</span>
+                </Button>
 
                 <!-- Mobile menu dropdown - only show if user is logged in -->
                 <DropdownMenu.Root>
@@ -231,14 +209,6 @@
                         <DropdownMenu.Separator/>
 
                         <DropdownMenu.Group>
-                            <DropdownMenu.Item onSelect={() => goto("/profile")}>
-                                <UserIcon class="mr-1 text-foreground"/>
-                                {m.nav_profile()}
-                            </DropdownMenu.Item>
-                            <DropdownMenu.Item onSelect={() => goto("/settings")}>
-                                <Settings class="mr-1 text-foreground"/>
-                                {m.nav_settings()}
-                            </DropdownMenu.Item>
                             <DropdownMenu.Item onSelect={() => form.submit()}>
                                 <LogOut class="mr-1 text-foreground"/>
                                 {m.auth_logout()}
