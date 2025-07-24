@@ -9,7 +9,7 @@ export const actions: Actions = {
             redirect(302, `/login?logout`)
         } catch (e) {
             console.error(e)
-            redirect(302, `/login?error`)
+            redirect(302, `/login?logout`)
         }
 
 
