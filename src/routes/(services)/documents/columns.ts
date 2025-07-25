@@ -94,6 +94,25 @@ export function columns(token: string): ColumnDef<Doc>[] {
                 return keywords.some(keyword => keyword.toLowerCase().includes(filterValue.toLowerCase()))
             }
         }, {
+            accessorKey: "assigned_groups",
+            header: ({column}) =>
+                renderComponent(FilteringSortingHeader, {
+                    column: column,
+                    title: m.doc_field_groups()
+                }),
+            cell: ({row}) => {
+                return renderComponent(KeywordBadges, {
+                    keywords: row.getValue<{
+                        id: string,
+                        name: string
+                    }[]>("assigned_groups").map(group => group.name)
+                })
+            },
+            filterFn: (row, _columnId, filterValue) => {
+                const keywords = row.getValue<string[]>("assigned_groups");
+                return keywords.some(keyword => keyword.toLowerCase().includes(filterValue.toLowerCase()))
+            }
+        }, {
             accessorKey: "uploadedAt",
             header: ({column}) =>
                 renderComponent(FilteringSortingHeader, {
