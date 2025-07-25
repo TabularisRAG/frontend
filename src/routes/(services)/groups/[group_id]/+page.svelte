@@ -12,6 +12,7 @@ import Search from "@lucide/svelte/icons/search";
 import Trash2 from "@lucide/svelte/icons/trash-2";
 import Settings from "@lucide/svelte/icons/settings";
 import Edit from "@lucide/svelte/icons/edit";
+import FileText from "@lucide/svelte/icons/file-text";
 
 import { m } from "$lib/paraglide/messages";
 
@@ -442,6 +443,12 @@ $effect(() => {
           </div>
         </div>
         <div class="flex items-center gap-2">
+          <Button href="/documents?group={groupDetails.name}"
+                  class="gap-2 flex-1 sm:flex-initial"
+                  size="sm">
+            <FileText class="size-4" />
+            {m.view_group_documents()}
+          </Button>
           {#if isCurrentUserAdmin || isCurrentUserLeader}
             <Button 
               onclick={openAddMemberDialog}
@@ -499,7 +506,7 @@ $effect(() => {
       <Card.Header class="flex-shrink-0">
         <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <Card.Title>{m.members_title()}</Card.Title>
+            <Card.Title>{m.members_title(   )}</Card.Title>
             <Card.Description>{m.all_members_in_group({ count: groupDetails.user_count })}</Card.Description>
           </div>
           <div class="flex items-center gap-2">
@@ -621,7 +628,7 @@ $effect(() => {
         <form method="POST" action="?/addMember" use:enhanceAddMemberForm>
           <div class="grid gap-4 py-4">
             <div class="space-y-2">
-              <Label for="email">{m.email()}</Label>
+              <Label for="email">{m.field_email()}</Label>
               <select 
                 id="email" 
                 name="email" 

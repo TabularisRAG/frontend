@@ -62,7 +62,8 @@
         </CardHeader>
         <CardContent>
             <div>
-                <SvelteMarkdown renderers={{
+                {#await markdown then md}
+                    <SvelteMarkdown renderers={{
                     heading: HeadingRenderer,
                     list: ListRenderer,
                     table: TableRenderer,
@@ -70,7 +71,8 @@
                     tablebody: TableBodyRenderer,
                     tablecell: TableCellRenderer,
                     tablerow: TableRowRenderer
-                }} source={markdown}/>
+                }} source={md}/>
+                {/await}
             </div>
         </CardContent>
     </Card>

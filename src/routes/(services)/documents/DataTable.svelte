@@ -24,9 +24,10 @@
     type DataTableProps<TData, TValue> = {
         columns: ColumnDef<TData, TValue>[];
         data: TData[];
+        group: string;
     };
 
-    let {data, columns}: DataTableProps<TData, TValue> = $props();
+    let {data, columns, group}: DataTableProps<TData, TValue> = $props();
     let sorting = $state<SortingState>([]);
     let columnFilters = $state<ColumnFiltersState>([])
     let columnVisibility = $state<VisibilityState>({});
@@ -94,6 +95,10 @@
         }
     });
 
+    if (group && group !== "") {
+        table.getAllColumns().find(col => col.id === "assigned_groups")?.setFilterValue(group);
+    }
+
     let isMd = $state(false);
     let isLg = $state(false);
 
@@ -117,12 +122,10 @@
 <div class="flex flex-col gap-4">
     <div class="flex flex-row justify-end">
         <div class="flex flex-row gap-4">
-            {#if table.getFilteredSelectedRowModel().rows.length > 0}
                 <Button href="/documents/access?documents={table.getFilteredSelectedRowModel().rows.map(row => row.id).join(',')}">
                     <UserLock/>
-                    {m.action_manage_access()} ({table.getFilteredSelectedRowModel().rows.length})
+                    {m.action_manage_access()} {table.getFilteredSelectedRowModel().rows.length>0 ? "("+ table.getFilteredSelectedRowModel().rows.length + ")":""}
                 </Button>
-            {/if}
             <Button href="/documents/add">
                 <CirclePlus/>
                 {m.action_add()}

@@ -8,7 +8,7 @@ export const load: PageServerLoad = async ({cookies, params}) => {
     const documentApi = new DocumentAPI();
 
     return {
-        markdown: structuredClone(await documentApi.getFullMarkdown(token, params.id)),
-        document: structuredClone(await documentApi.getDocument(token, params.id))
+        markdown: documentApi.getFullMarkdown(token, params.id),
+        document: await documentApi.getDocument(token, params.id)
     };
 };
