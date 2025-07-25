@@ -19,6 +19,7 @@
         title: string,
         filtering?: boolean,
         sorting?: boolean,
+        filterValue?: string,
         column: Column<any, any>
     } = $props();
 

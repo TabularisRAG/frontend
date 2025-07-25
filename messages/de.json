@@ -18,6 +18,7 @@
   "doc_field_year": "Jahr",
   "doc_field_size": "Größe",
   "doc_field_keywords": "Schlagwörter",
+  "doc_field_groups": "Gruppen",
   "doc_field_word_count": "Anzahl Wörter",
 
   "doc_form_create": "Dokument erstellen",
@@ -301,7 +302,7 @@
   "new_password": "Neues Passwort",
   "new_password_placeholder": "Neues Passwort eingeben",
   "confirm_password": "Neues Passwort bestätigen",
-  "confirm_password_placeholder": "Neues Passwort bestätigen", 
+  "confirm_password_placeholder": "Neues Passwort bestätigen",
   "password_reset_warning": "Wichtig: Nach dem Zurücksetzen Ihres Passworts wird Ihr Konto deaktiviert und ein Administrator muss es wieder aktivieren, bevor Sie sich anmelden können.",
   "reset_password_button": "Passwort zurücksetzen",
   "remember_password": "Passwort wieder eingefallen?",
@@ -316,5 +317,16 @@
   "password_max_length": "Passwort darf nicht länger als 100 Zeichen sein",
   "passwords_must_match": "Passwörter müssen übereinstimmen",
   "password_empty": "Kein Passwort angegeben",
-  "email": "Email"
+  "email": "Email",
+  "view_group_documents": "Gruppendokumente anschauen",
+  "source_documents": "Auswählbare Dokumente",
+  "target_documents": "Ausgewählte Dokumente",
+  "source_groups": "Auswählbare Gruppen",
+  "target_groups": "Ausgewählte Gruppen",
+  "give_access": "Zugriff gewähren",
+  "remove_access": "Zugriff widerrufen",
+  "access_success": "Zugriff erfolgreich gewährt.",
+  "denial_success": "Zugriff erfolgreich widerrufen.",
+  "select_group": "Wähle eine Gruppe...",
+  "all": "Gesamtes Unternehmen"
 }
