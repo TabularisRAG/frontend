@@ -131,13 +131,6 @@ export class DocumentAPI extends APIClient {
     }
 
     public async unassignDocumentsToGroups(token: string, documentIds: string[], groupId: string, all: boolean) {
-
-        let body = {
-            document_ids: documentIds,
-            group_id: groupId,
-            unassign_from_everyone: all
-        }
-        console.log(body)
         const response = await fetch(this.serverURL + "/api/documents/unassign/multiple", {
             method: "POST",
             headers: {
