@@ -15,6 +15,7 @@
     import {cn} from "$lib/utils";
     import {Label} from "$lib/components/ui/label";
     import {Checkbox} from "$lib/components/ui/checkbox";
+    import {DocumentAPI} from "$lib/api/DocumentAPI";
 
     let {data} = $props()
 
@@ -23,6 +24,7 @@
     let value = $state("");
     let triggerRef = $state<HTMLButtonElement>(null!);
     const selectedValue = $derived(data.groups.find((g) => g.id === value)?.name);
+    let initialDenialGroupSource = $state(data.documents);
 
     let all = $state(false);
 
@@ -40,24 +42,31 @@
     })
 
     let denialDocumentsCore = new TransferList.Core<Doc>({
-        initialSource: data.documents.filter(doc => all? doc.shared_for_whole_company : doc.assigned_groups.some(group => group.id === selectedGroup?.id)),
+        initialSource: initialDenialGroupSource,
         filterPredicate: (doc, search) => doc.title.toLowerCase().includes(search.toLowerCase()),
     })
 
     let accessGroupsCore = new TransferList.Core<UserGroupDTO>({
-        initialSource: data.groups.filter(group => !accessDocumentsCore.source.some(doc => doc.assigned_groups.some(docGroup => group.id === docGroup.id))),
-        initialTarget: data.groups.filter(group => accessDocumentsCore.target.some(doc => doc.assigned_groups.some(docGroup => group.id === docGroup.id))),
+        initialSource: data.groups,
         filterPredicate: (group, search) => group.name.toLowerCase().includes(search.toLowerCase()),
     })
 
-    function giveAccess() {
-        console.log(accessDocumentsCore.target, accessGroupsCore.target, all)
-        toast.success(m.access_success())
+    async function giveAccess() {
+        let noError = await new DocumentAPI().assignDocumentsToGroups(data.token, accessDocumentsCore.target.map(doc => doc.id), accessGroupsCore.target.map(group => group.id), all )
+        if(noError) {
+            toast.success(m.access_success())
+        } else {
+            toast.error(m.message_error())
+        }
     }
 
-    function removeAccess() {
-        console.log(selectedGroup, denialDocumentsCore.target, all)
-        toast.success(m.denial_success())
+    async function removeAccess() {
+        let noError = await new DocumentAPI().unassignDocumentsToGroups(data.token, denialDocumentsCore.target.map(doc => doc.id), selectedGroup?.id ?? "", all )
+        if(noError) {
+            toast.success(m.denial_success())
+        } else {
+            toast.error(m.message_error())
+        }
     }
 
 
@@ -164,6 +173,7 @@
                                                         value={group.name}
                                                         onSelect={() => {
                                                         value = group.id;
+                                                        selectedGroup = group;
                                                         closeAndFocusTrigger();
                                                       }}
                                                 >

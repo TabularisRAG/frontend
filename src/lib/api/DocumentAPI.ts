@@ -115,27 +115,43 @@ export class DocumentAPI extends APIClient {
     }
 
     public async assignDocumentsToGroups(token: string, documentIds: string[], groupIds?: string[], all?: boolean) {
-        const response = await fetch(this.serverURL + "/api/documents/assign", {
+        const response = await fetch(this.serverURL + "/api/documents/assign/multiple", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
             },
             body: JSON.stringify({
-                //TODO: finish request
+                document_ids: documentIds,
+                group_ids: groupIds,
+                assign_to_everyone: all
             })
         })
+        return response.ok
     }
 
-    public async unassignDocumentsToGroups(token: string, documentIds: string[], groupId?: string, all?: boolean) {
-        const response = await fetch(this.serverURL + "/api/documents/unassign", {
+    public async unassignDocumentsToGroups(token: string, documentIds: string[], groupId: string, all: boolean) {
+
+        let body = {
+            document_ids: documentIds,
+            group_id: groupId,
+            unassign_from_everyone: all
+        }
+        console.log(body)
+        const response = await fetch(this.serverURL + "/api/documents/unassign/multiple", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
             },
             body: JSON.stringify({
-                //TODO: finish request
+                document_ids: documentIds,
+                group_id: groupId,
+                unassign_from_everyone: all,
+                unassign_from_myself: false
             })
         })
+        return response.ok
     }
 
 
