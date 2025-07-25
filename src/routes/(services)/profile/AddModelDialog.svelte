@@ -2,7 +2,7 @@
 <script lang="ts">
     import { onMount } from 'svelte';
     import ModelAPI from '$lib/api/modelAPI/modelAPI.js';
-    import { X, Plus } from 'lucide-svelte';
+    import { X, Plus } from '@lucide/svelte';
     import { m } from '$lib/paraglide/messages';
   
     const modelAPI = new ModelAPI();

@@ -1,4 +1,4 @@
-import type { Actions } from '@sveltejs/kit';
+import {type Actions, redirect} from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
 import { fail, message, superValidate } from 'sveltekit-superforms';
@@ -28,6 +28,7 @@ export const actions: Actions = {
         if (!form.valid) {
             return fail(400, { form });
         }
+        redirect(300,"/documents")
         return message(form, 'Form Posted Successfully!');
     }
 };
