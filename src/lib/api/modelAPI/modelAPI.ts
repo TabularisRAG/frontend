@@ -3,7 +3,7 @@ import APIClient from "../ApiClient";
 
 export default class ModelAPI extends APIClient {
 
-  public async getModels(token: string | undefined) {
+  public async getModels(token: string) {
     try {
       const response = await fetch(`${this.serverURL}/api/chats/llm-models`, {
         headers: {

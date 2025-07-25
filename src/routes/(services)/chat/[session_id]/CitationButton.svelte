@@ -31,8 +31,9 @@
     try {
       const chunk = await new DocumentAPI().getDocumentChunk(token, id);
       citationContent = chunk.chunk_text;
-    } catch {
+    } catch (e) {
       citationError = "Citation could not be loaded..." 
+      console.error(e);
     } finally {
       citationLoading = false;
     }

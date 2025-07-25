@@ -5,7 +5,7 @@ import { error } from '@sveltejs/kit';
 
 export default class ChatAPI extends APIClient {
 
-  public async createNewChat(token: string | undefined, chat_message_request: ChatMessageRequest) {
+  public async createNewChat(token: string, chat_message_request: ChatMessageRequest) {
     try {
       const response = await fetch(`${this.serverURL}/api/chats/new`, {
         method: 'POST',
@@ -28,7 +28,7 @@ export default class ChatAPI extends APIClient {
     }
   }
 
-  public async getAllUserChats(token: string | undefined): Promise<Chat[]> {
+  public async getAllUserChats(token: string): Promise<Chat[]> {
     try {
       const res = await fetch(`${this.serverURL}/api/chats`, {
         headers: {
@@ -49,7 +49,7 @@ export default class ChatAPI extends APIClient {
     }
   }
 
-  public async getChatById(session_id: UUID, token: string | undefined): Promise<ChatDataResponse> {
+  public async getChatById(session_id: UUID, token: string): Promise<ChatDataResponse> {
     try {
       const res = await fetch(`${this.serverURL}/api/chats/${session_id}`, {
         headers: {

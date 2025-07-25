@@ -51,13 +51,15 @@
   }
 
   async function confirmRename(session_id: UUID) {
-    const response = await new ChatAPI().renameChat(session_id, newName, data.token)
-    const chat = chatList.find((c) => c.session_id === session_id);
-    if (chat) {
-      chat.name = newName.trim();
-    } 
-    else {
-      console.error('Rename failed', await response.text());
+    try {
+      const response = await new ChatAPI().renameChat(session_id, newName, data.token)
+      const chat = chatList.find((c) => c.session_id === session_id);
+      if (chat) {
+        chat.name = newName.trim();
+      } 
+    }
+    catch (e) {
+      console.error('Rename failed: ' + e);
     }
     cancelRename();
   }
