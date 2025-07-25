@@ -82,7 +82,7 @@ export const actions: Actions = {
 
         try {
             const userAPI = new UserAPI();
-            const allUsers = await userAPI.getAllUsers();
+            const allUsers = await userAPI.getAllUsers(jwt);
             const targetUser = allUsers.find(u => u.email === form.data.email);
             
             if (!targetUser) {
