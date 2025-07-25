@@ -176,7 +176,7 @@
     event?.preventDefault();
     if (!userInput.value.trim() || !socket || socket.readyState !== WebSocket.OPEN) return;
     
-    const newMessage =  {...userInput };;
+    const newMessage =  {...userInput };
     messages.push(newMessage);
     scrollToBottom();
 
