@@ -89,7 +89,7 @@ export class DocumentAPI extends APIClient {
     }
 
     public async deleteDocument(token: string, id: string) {
-        const response = await fetch(this.serverURL + "/api/documents/" + id, {
+        const response = await fetch(this.serverURL + "/api/documents/" + id + "/delete", {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json",
