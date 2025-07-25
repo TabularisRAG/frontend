@@ -22,6 +22,7 @@ export class AuthenticationAPI extends APIClient {
             body: params
         });
         const json = await response.json();
+
         const { session, user } = json as { session: Session, user: User };
         if (!session || !user) {
             throw new Error(`Login failed - no session or user returned`);

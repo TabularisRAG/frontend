@@ -89,4 +89,20 @@ export class DocumentAPI extends APIClient {
             }
         })
     }
+
+    public async getDocumentChunk(token: string, id: string) {
+    try {
+      const res = await fetch(`${this.serverURL}/api/documents/chunks/${id}`, {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
+      });
+      if (!res.ok) throw new Error('Error loading citation');
+      const json = await res.json();
+      return json;
+    } catch (err) {
+      throw err 
+    } 
+  }
 }

@@ -3,6 +3,27 @@ import APIClient from "../ApiClient";
 
 export default class ModelAPI extends APIClient {
 
+  public async getModels(token: string) {
+    try {
+      const response = await fetch(`${this.serverURL}/api/chats/llm-models`, {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Failed to get models:', error);
+      throw error;
+    }
+  }
+
  public async createModel(jwt: string, modelData: ModelData) {
     try {
         const response = await fetch(this.serverURL + "/api/chats/create-llm-models", {

@@ -44,12 +44,12 @@
 		"zod": "^4.0.10"
 	},
 	"dependencies": {
-		"@humanspeak/svelte-markdown": "^0.8.8",
-		"@inlang/paraglide-js": "^2.2.0",
-		"@internationalized/date": "^3.8.2",
+		"@humanspeak/svelte-markdown": "^0.8.7",
+		"@inlang/paraglide-js": "^2.0.0",
 		"@node-rs/argon2": "^2.0.2",
 		"@oslojs/crypto": "^1.0.1",
 		"@oslojs/encoding": "^1.1.0",
+		"svelte-loading-animation": "^0.0.1",
 		"lucide-svelte": "^0.525.0",
 		"mode-watcher": "^1.1.0"
 	}
