@@ -1,3 +1,3 @@
 export default abstract class APIClient {
-    protected serverURL = "http://backend:8000"
+    protected serverURL = import.meta.env.API_URL || "http://localhost:8000"
 }
