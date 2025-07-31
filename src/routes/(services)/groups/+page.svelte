@@ -26,12 +26,8 @@
     import type { UserGroupDTO } from "$lib/api/usergroupAPI/response/GetAllUserGroupsResponse";
     import UserGroupAPI from "$lib/api/usergroupAPI/usergroupAPI";
 
-    const api = new UserGroupAPI()
-    console.log("client :" + api.serverURL)
-
 
     let {data}: PageProps = $props();
-    api.getUserGroups(data.jwt).then(res => console.log(res))
 
     let isCreateDialogOpen = $state(false);
     let groupToLeave : UserGroupDTO | null = $state(null);
