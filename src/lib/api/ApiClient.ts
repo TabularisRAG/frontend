@@ -1,6 +1,6 @@
 export default abstract class APIClient {
 
-    protected serverURL = this.getServerURL()
+    public serverURL = this.getServerURL()
   
     private getServerURL(): string {
         // For server-side (Node.js environment in Docker)

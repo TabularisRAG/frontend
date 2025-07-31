@@ -24,6 +24,10 @@
     import type { ActionResult } from "@sveltejs/kit";
     import {  deserialize } from "$app/forms";
     import type { UserGroupDTO } from "$lib/api/usergroupAPI/response/GetAllUserGroupsResponse";
+    import UserGroupAPI from "$lib/api/usergroupAPI/usergroupAPI";
+
+    const api = new UserGroupAPI()
+    console.log("client :" + api.serverURL)
 
     let {data}: PageProps = $props();
 

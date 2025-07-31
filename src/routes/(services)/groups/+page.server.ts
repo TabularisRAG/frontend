@@ -14,6 +14,8 @@ export const load: PageServerLoad = async ({ fetch, depends }) => {
   const {user, jwt} = getCurrentUserAndSessionOrRedirect()
 
   try {
+    const api = new UserGroupAPI()
+    console.log("server :" + api.serverURL)
     const response: GetAllUserGroupsResponse = await new UserGroupAPI().getUserGroups(jwt);
     return {
       usergroups: response.groups,
