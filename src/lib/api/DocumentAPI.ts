@@ -1,5 +1,5 @@
 import APIClient from "$lib/api/ApiClient";
-import {Doc, NewDocument} from "$lib/entities/doc";
+import {type Doc, type NewDocument} from "$lib/entities/doc";
 
 export class DocumentAPI extends APIClient {
 
@@ -13,16 +13,20 @@ export class DocumentAPI extends APIClient {
                 }
             });
             const docs = await response.json() as Array<any>;
-            return docs.map((doc: any) => new Doc(
-                doc.title,
-                doc.year,
-                doc.keywords,
-                doc.author,
-                doc.id,
-                new Date(doc.uploaded_at),
-                doc.size_byte,
-                doc.word_count
-            ))
+
+            return docs.map((doc: any) => ({
+                title: doc.title,
+                year: doc.year,
+                keywords: doc.keywords,
+                author: doc.author,
+                id: doc.id,
+                uploadedAt: new Date(doc.uploaded_at),
+                sizeInBytes: doc.size_byte,
+                wordCount: doc.word_count,
+                assigned_groups: doc.assigned_groups ? doc.assigned_groups : [],
+                shared_for_whole_company: doc.shared_for_whole_company ? doc.shared_for_whole_company : false,
+                owners: doc.owners ? doc.owners : []
+            } as Doc))
         } catch (e) {
             console.error(e)
             return Promise.reject(e)
@@ -39,16 +43,20 @@ export class DocumentAPI extends APIClient {
             }
         });
         const doc = await response.json();
-        return new Doc(
-            doc.title,
-            doc.year,
-            doc.keywords,
-            doc.author,
-            doc.id,
-            new Date(doc.uploaded_at),
-            doc.size_byte,
-            doc.word_count
-        );
+        return {
+            title: doc.title,
+            year: doc.year,
+            keywords: doc.keywords,
+            author: doc.author,
+            id: doc.id,
+            uploadedAt: new Date(doc.uploaded_at),
+            sizeInBytes: doc.size_byte,
+            wordCount: doc.word_count,
+            assigned_groups: doc.assigned_groups ? doc.assigned_groups : [],
+            shared_for_whole_company: doc.shared_for_whole_company ? doc.shared_for_whole_company : false,
+            owners: doc.owners ? doc.owners : []
+        } as Doc;
+
     }
 
     public async getFullMarkdown(token: string, id: string): Promise<string> {
@@ -81,7 +89,7 @@ export class DocumentAPI extends APIClient {
     }
 
     public async deleteDocument(token: string, id: string) {
-        const response = await fetch(this.serverURL + "/api/documents/" + id, {
+        const response = await fetch(this.serverURL + "/api/documents/" + id + "/delete", {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json",
@@ -89,4 +97,55 @@ export class DocumentAPI extends APIClient {
             }
         })
     }
+
+    public async getDocumentChunk(token: string, id: string) {
+        try {
+            const res = await fetch(`${this.serverURL}/api/documents/chunks/${id}`, {
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                }
+            });
+            if (!res.ok) throw new Error('Error loading citation');
+            const json = await res.json();
+            return json;
+        } catch (err) {
+            throw err
+        }
+    }
+
+    public async assignDocumentsToGroups(token: string, documentIds: string[], groupIds?: string[], all?: boolean) {
+        const response = await fetch(this.serverURL + "/api/documents/assign/multiple", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                document_ids: documentIds,
+                group_ids: groupIds,
+                assign_to_everyone: all
+            })
+        })
+        return response.ok
+    }
+
+    public async unassignDocumentsToGroups(token: string, documentIds: string[], groupId: string, all: boolean) {
+        const response = await fetch(this.serverURL + "/api/documents/unassign/multiple", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                document_ids: documentIds,
+                group_id: groupId,
+                unassign_from_everyone: all,
+                unassign_from_myself: false
+            })
+        })
+        return response.ok
+    }
+
+
 }

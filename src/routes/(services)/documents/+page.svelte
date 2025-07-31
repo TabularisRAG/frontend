@@ -5,7 +5,9 @@
     let {data} = $props();
 
     let cols = columns(data.token);
+
 </script>
 <div class="m-8">
-    <DataTable columns={cols} data={data.documents}/>
+
+    <DataTable columns={cols} data={data.documents} group={data.group}/>
 </div>
