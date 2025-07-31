@@ -31,7 +31,7 @@
 
 
     let {data}: PageProps = $props();
-    console.log(await api.getUserGroups(data.jwt))
+    api.getUserGroups(data.jwt).then(res => console.log(res))
 
     let isCreateDialogOpen = $state(false);
     let groupToLeave : UserGroupDTO | null = $state(null);
