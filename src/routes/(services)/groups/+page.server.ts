@@ -23,7 +23,7 @@ export const load: PageServerLoad = async ({ fetch, depends }) => {
       form: await superValidate(zod4(createGroupSchema))
     };
   } catch (e) {    
-    return { 
+    return {
       usergroups: [], 
       success: false,
       number_of_docs: 0,
