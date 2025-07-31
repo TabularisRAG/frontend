@@ -29,7 +29,9 @@
     const api = new UserGroupAPI()
     console.log("client :" + api.serverURL)
 
+
     let {data}: PageProps = $props();
+    console.log(await api.getUserGroups(data.jwt))
 
     let isCreateDialogOpen = $state(false);
     let groupToLeave : UserGroupDTO | null = $state(null);

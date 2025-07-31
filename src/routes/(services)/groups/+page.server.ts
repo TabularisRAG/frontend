@@ -18,6 +18,7 @@ export const load: PageServerLoad = async ({ fetch, depends }) => {
     console.log("server :" + api.serverURL)
     const response: GetAllUserGroupsResponse = await new UserGroupAPI().getUserGroups(jwt);
     return {
+      jwt: jwt,
       usergroups: response.groups,
       number_of_docs: response.number_of_unique_documents,
       success: true,
@@ -25,7 +26,8 @@ export const load: PageServerLoad = async ({ fetch, depends }) => {
       form: await superValidate(zod4(createGroupSchema))
     };
   } catch (e) {    
-    return { 
+    return {
+      jwt: jwt, 
       usergroups: [], 
       success: false,
       number_of_docs: 0,
